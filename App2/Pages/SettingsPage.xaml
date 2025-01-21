@@ -39,13 +39,14 @@
 
             </controls:SettingsCard>
 
+
+            <!--TODO : change list view to item repeater--> 
             <ListView x:Name="ListView" 
                       HorizontalAlignment="Left" 
                       ItemsSource="{x:Bind StorageFolders}"
                       DisplayMemberPath="Path"
-                      Margin="0,16,0,0">
-
-
+                      Margin="0,16,0,0"
+                      SelectionMode="None">
             </ListView>
         </StackPanel>
     </Grid>
