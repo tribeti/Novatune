@@ -8,11 +8,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:storage="using:Windows.Storage"
+    xmlns:viewModels="using:App2.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.DataContext>
+        <viewModels:FolderViewModel />
+    </Page.DataContext>
+
     <Grid Margin="36 40 36 0">
         <StackPanel>
+            <!--#region: title and setting card-->
             <TextBlock Text="Settings" 
                        FontSize="36" 
                        Margin="0 0 0 52" 
@@ -24,12 +30,13 @@
                        Style="{StaticResource SubtitleTextBlockStyle}" Grid.Column="0"/>
 
             <controls:SettingsCard Header="Media folder locations">
+
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE8B7;" />
                 </controls:SettingsCard.HeaderIcon>
 
                 <Button x:Name="PickFolderButton"
-                        Click="PickFolderButton_Click"
+                        Command="{Binding AddFolderCommand}"
                         Style="{StaticResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <FontIcon Glyph="&#xE710;" 
@@ -39,17 +46,22 @@
                 </Button>
 
             </controls:SettingsCard>
+            <!--#endregion-->
 
             <ScrollViewer MaxHeight="300"
                           IsVerticalScrollChainingEnabled="False"
                           Padding="4,0,16,0">
+
+                <!--todo add <AppBarSeparator />
+                    change setting card to expander
+                -->
+
                 <ItemsRepeater x:Name="FoldersItemsRepeater"
-                           HorizontalAlignment="Left" 
-                           ItemsSource="{x:Bind StorageFolders}"
-                           Margin="0,16,0,0">
+                               HorizontalAlignment="Left" 
+                               ItemsSource="{Binding Folders}"
+                               Margin="0,16,0,0">
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="storage:StorageFolder">
-
                             <Grid Margin="0,0,0,16"
                                   >
                                 <Grid.ColumnDefinitions>
@@ -63,9 +75,9 @@
                                        TextTrimming="CharacterEllipsis"/>
 
                                 <Button Content="Remove" 
-                                    Click="RemoveFolderButton_Click"
+                                    Command="{Binding DataContext.RemoveFolderCommand, ElementName=Page}"
                                     Grid.Column="1"
-                                    Tag="{x:Bind Path}"/>
+                                    CommandParameter="{x:Bind}"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>

@@ -16,6 +16,8 @@ using Windows.Storage.FileProperties;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using App2.Pages;
+using App2.ViewModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,7 +32,11 @@ namespace App2
         public MainWindow()
         {
             this.InitializeComponent();
+
+            ViewStorage = Ioc.Default.GetService<FolderViewModel>();
         }
+
+        public FolderViewModel? ViewStorage { get;}
 
         public void NavBar_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {

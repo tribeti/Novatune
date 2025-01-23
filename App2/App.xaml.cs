@@ -1,8 +1,7 @@
-﻿using System;
-using App2.Pages;
+﻿using App2.ViewModels;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -23,6 +22,10 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
+        Ioc.Default.ConfigureServices(new ServiceCollection()
+            .AddSingleton<FolderViewModel>()
+            .BuildServiceProvider());
     }
 
     /// <summary>
