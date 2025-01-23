@@ -15,15 +15,8 @@ using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace App2.Pages
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class SettingsPage : Page
     {
         public ObservableCollection<StorageFolder> StorageFolders { get; } = new ObservableCollection<StorageFolder>();
@@ -41,7 +34,6 @@ namespace App2.Pages
         {
             try
             {
-                // Get the saved folder tokens
                 var tokenList = localSettings.Values[FolderTokensKey] as string;
                 if (!string.IsNullOrEmpty(tokenList))
                 {
@@ -50,109 +42,138 @@ namespace App2.Pages
                     {
                         try
                         {
-                            if (StorageApplicationPermissions.FutureAccessList.ContainsItem(token))
+                            if (!string.IsNullOrWhiteSpace(token) &&
+                                StorageApplicationPermissions.FutureAccessList.ContainsItem(token))
                             {
                                 var folder = await StorageApplicationPermissions.FutureAccessList.GetFolderAsync(token);
-                                StorageFolders.Add(folder);
+
+                                if (!StorageFolders.Any(f => f.Path == folder.Path))
+                                {
+                                    StorageFolders.Add(folder);
+                                }
                             }
                         }
-                        catch (Exception) { } // Skip if folder is no longer accessible
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error loading folder: {ex.Message}");
+                        }
                     }
                 }
             }
-            catch (Exception) { } // Handle any potential errors during loading
+            catch (Exception ex)
+            {
+                // Log or handle specific exceptions if needed
+                System.Diagnostics.Debug.WriteLine($"Error in LoadSavedFolders: {ex.Message}");
+            }
         }
 
         private void SaveFolderTokens()
         {
             try
             {
-                var tokens = new List<string>();
-                foreach (var item in StorageApplicationPermissions.FutureAccessList.Entries)
-                {
-                    tokens.Add(item.Token);
-                }
+                var tokens = StorageApplicationPermissions.FutureAccessList.Entries
+                    .Select(entry => entry.Token)
+                    .ToList();
 
-                // Save the tokens as a comma-separated string
                 var tokenString = string.Join(",", tokens);
                 localSettings.Values[FolderTokensKey] = tokenString;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in SaveFolderTokens: {ex.Message}");
+            }
         }
 
         private async void PickFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            var senderButton = sender as Button;
-            senderButton.IsEnabled = false;
-            
-            FolderPicker openPicker = new Windows.Storage.Pickers.FolderPicker();
-            var window = App.MainWindow;
-            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
-            WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
-
-            openPicker.SuggestedStartLocation = PickerLocationId.MusicLibrary;
-            openPicker.FileTypeFilter.Add("*");
-            StorageFolder folder = await openPicker.PickSingleFolderAsync();
-            
-            if (folder != null)
+            try
             {
-                bool folderExists = false;
-                foreach (var existingFolder in StorageFolders)
+                PickFolderButton.IsEnabled = false;
+
+                FolderPicker openPicker = new Windows.Storage.Pickers.FolderPicker();
+                var window = App.MainWindow;
+                var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+
+                openPicker.SuggestedStartLocation = PickerLocationId.MusicLibrary;
+                openPicker.FileTypeFilter.Add("*");
+
+                StorageFolder folder = await openPicker.PickSingleFolderAsync();
+
+                if (folder != null)
                 {
-                    if (existingFolder.Path == folder.Path)
+                    if (!StorageFolders.Any(f => f.Path == folder.Path))
                     {
-                        folderExists = true;
-                        break;
+                        string token = StorageApplicationPermissions.FutureAccessList.Add(folder, folder.Path);
+                        StorageFolders.Add(folder);
+
+                        SaveFolderTokens();
+                    }
+                    else
+                    {
+                        var dialog = new ContentDialog
+                        {
+                            Title = "Duplicate Folder",
+                            Content = "This folder is already in your library.",
+                            CloseButtonText = "OK"
+                        };
+
+                        dialog.XamlRoot = this.XamlRoot;
+                        await dialog.ShowAsync();
                     }
                 }
-
-                if (!folderExists)
-                {
-                    StorageApplicationPermissions.FutureAccessList.AddOrReplace("Folder_" + Guid.NewGuid().ToString(), folder);
-                    StorageFolders.Add(folder);
-                    SaveFolderTokens(); // Save whenever we add a new folder
-                }
             }
-
-            senderButton.IsEnabled = true;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in PickFolderButton_Click: {ex.Message}");
+            }
+            finally
+            {
+                PickFolderButton.IsEnabled = true;
+            }
         }
+
 
         private void RemoveFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var folderPath = button.Tag as string;
-
-            // Find and remove the folder
-            StorageFolder folderToRemove = null;
-            foreach (var folder in StorageFolders)
+            try
             {
-                if (folder.Path == folderPath)
+                var button = sender as Button;
+                var folderPath = button?.Tag as string;
+
+                if (string.IsNullOrWhiteSpace(folderPath))
+                    return;
+
+                var folderToRemove = StorageFolders.FirstOrDefault(f => f.Path == folderPath);
+                if (folderToRemove != null)
                 {
-                    folderToRemove = folder;
-                    break;
+                    StorageFolders.Remove(folderToRemove);
+
+                    var tokenToRemove = StorageApplicationPermissions.FutureAccessList.Entries
+                        .FirstOrDefault(entry =>
+                        {
+                            try
+                            {
+                                var folder = StorageApplicationPermissions.FutureAccessList.GetFolderAsync(entry.Token).GetAwaiter().GetResult();
+                                return folder.Path == folderPath;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        });
+
+                    if (tokenToRemove != null)
+                    {
+                        StorageApplicationPermissions.FutureAccessList.Remove(tokenToRemove.Token);
+                    }
+
+                    SaveFolderTokens();
                 }
             }
-
-            if (folderToRemove != null)
+            catch (Exception ex)
             {
-                StorageFolders.Remove(folderToRemove);
-
-                // Remove from FutureAccessList and save
-                foreach (var entry in StorageApplicationPermissions.FutureAccessList.Entries)
-                {
-                    try
-                    {
-                        var folder = StorageApplicationPermissions.FutureAccessList.GetFolderAsync(entry.Token).GetAwaiter().GetResult();
-                        if (folder.Path == folderPath)
-                        {
-                            StorageApplicationPermissions.FutureAccessList.Remove(entry.Token);
-                            break;
-                        }
-                    }
-                    catch { }
-                }
-
-                SaveFolderTokens();
+                System.Diagnostics.Debug.WriteLine($"Error in RemoveFolderButton_Click: {ex.Message}");
             }
         }
     }

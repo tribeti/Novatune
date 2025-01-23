@@ -28,7 +28,8 @@
                     <FontIcon Glyph="&#xE8B7;" />
                 </controls:SettingsCard.HeaderIcon>
 
-                <Button Click="PickFolderButton_Click"
+                <Button x:Name="PickFolderButton"
+                        Click="PickFolderButton_Click"
                         Style="{StaticResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal">
                         <FontIcon Glyph="&#xE710;" 
@@ -39,15 +40,37 @@
 
             </controls:SettingsCard>
 
+            <ScrollViewer MaxHeight="300"
+                          IsVerticalScrollChainingEnabled="False"
+                          Padding="4,0,16,0">
+                <ItemsRepeater x:Name="FoldersItemsRepeater"
+                           HorizontalAlignment="Left" 
+                           ItemsSource="{x:Bind StorageFolders}"
+                           Margin="0,16,0,0">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="storage:StorageFolder">
 
-            <!--TODO : change list view to item repeater--> 
-            <ListView x:Name="ListView" 
-                      HorizontalAlignment="Left" 
-                      ItemsSource="{x:Bind StorageFolders}"
-                      DisplayMemberPath="Path"
-                      Margin="0,16,0,0"
-                      SelectionMode="None">
-            </ListView>
+                            <Grid Margin="0,0,0,16"
+                                  >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{x:Bind Path}" 
+                                       VerticalAlignment="Center" 
+                                       Grid.Column="0"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                                <Button Content="Remove" 
+                                    Click="RemoveFolderButton_Click"
+                                    Grid.Column="1"
+                                    Tag="{x:Bind Path}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
         </StackPanel>
     </Grid>
 </Page>
