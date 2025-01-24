@@ -240,6 +240,10 @@ namespace App2 {
 
 
 
-note : 
- if you want to use community toolkit , go to .proj file and change into <TargetFramework>net8.0-windows10.0.22621</TargetFramework>
- link : https://devblogs.microsoft.com/ifdef-windows/announcing-windows-community-toolkit-v8-1/#dependencies
+    note : 
+        if you want to use community toolkit , go to .proj file and change into <TargetFramework>net8.0-windows10.0.22621</TargetFramework>
+        link : https://devblogs.microsoft.com/ifdef-windows/announcing-windows-community-toolkit-v8-1/#dependencies
+
+    xaml material
+        https://stackoverflow.com/questions/26479995/how-to-include-two-resources-in-page-resources
+        https://learn.microsoft.com/en-us/windows/apps/develop/platform/xaml/xaml-resource-dictionary

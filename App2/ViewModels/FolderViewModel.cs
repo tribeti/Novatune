@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace App2.ViewModels
 
         public ObservableCollection<StorageFolder> Folders { get; } = new ObservableCollection<StorageFolder>();
 
-        public ObservableCollection<IStorageItem> AllContents { get; } = new ObservableCollection<IStorageItem>();
+        public ObservableCollection<IStorageItem> Contents { get; } = new ObservableCollection<IStorageItem>();
 
         [ObservableProperty]
         private StorageFolder selectedFolder;
@@ -25,20 +26,39 @@ namespace App2.ViewModels
         public FolderViewModel()
         {
             _localSettings = ApplicationData.Current.LocalSettings;
-            LoadAllFoldersAndContentsAsync();
+            LoadSavedFoldersAsync();
         }
 
-        /// <summary>
-        /// loads all folders and their contents from the FutureAccessList.
-        /// </summary>
         [RelayCommand]
-        private async Task LoadAllFoldersAndContentsAsync()
+        public void SelectFolder(StorageFolder folder)
+        {
+            SelectedFolder = folder;
+        }
+
+        partial void OnSelectedFolderChanged(StorageFolder value)
+        {
+            if (value != null)
+            {
+                LoadFolderContentsAsync(value);
+            }
+        }
+
+        private async Task LoadFolderContentsAsync(StorageFolder folder)
+        {
+            Contents.Clear();
+            var items = await folder.GetItemsAsync();
+            foreach (var item in items)
+            {
+                Contents.Add(item);
+            }
+        }
+        
+        private async Task LoadSavedFoldersAsync()
         {
             var tokenList = _localSettings.Values[FolderTokensKey] as string;
             if (!string.IsNullOrEmpty(tokenList))
             {
                 var tokens = tokenList.Split(',');
-
                 foreach (var token in tokens)
                 {
                     if (StorageApplicationPermissions.FutureAccessList.ContainsItem(token))
@@ -47,13 +67,6 @@ namespace App2.ViewModels
                         if (!Folders.Any(f => f.Path == folder.Path))
                         {
                             Folders.Add(folder);
-
-                            // Tải nội dung của thư mục và thêm vào AllContents
-                            var items = await folder.GetItemsAsync();
-                            foreach (var item in items)
-                            {
-                                AllContents.Add(item);
-                            }
                         }
                     }
                 }

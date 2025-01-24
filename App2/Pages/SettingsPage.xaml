@@ -16,9 +16,9 @@
         <viewModels:FolderViewModel />
     </Page.DataContext>
 
-    <Grid Margin="36 40 36 0">
-        <StackPanel>
-            <!--#region: title and setting card-->
+    <ScrollViewer Margin="36 40 36 0">
+        <StackPanel Spacing="4">
+            <!--#region: title-->
             <TextBlock Text="Settings" 
                        FontSize="36" 
                        Margin="0 0 0 52" 
@@ -29,60 +29,38 @@
                        Padding="4 0 0 8"
                        Style="{StaticResource SubtitleTextBlockStyle}" Grid.Column="0"/>
 
-            <controls:SettingsCard Header="Media folder locations">
-
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE8B7;" />
-                </controls:SettingsCard.HeaderIcon>
-
-                <Button x:Name="PickFolderButton"
-                        Command="{Binding AddFolderCommand}"
-                        Style="{StaticResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal">
-                        <FontIcon Glyph="&#xE710;" 
-                                  Margin="0,0,8,0"/>
-                        <TextBlock Text="Add a folder"/>
-                    </StackPanel>
-                </Button>
-
-            </controls:SettingsCard>
             <!--#endregion-->
 
-            <ScrollViewer MaxHeight="300"
-                          IsVerticalScrollChainingEnabled="False"
-                          Padding="4,0,16,0">
 
-                <!--todo add <AppBarSeparator />
-                    change setting card to expander
-                -->
+            <controls:SettingsExpander Header="Media folder locations"
+                                       Description="List of media folders you have selected."
+                                       ItemsSource="{Binding Folders}">
 
-                <ItemsRepeater x:Name="FoldersItemsRepeater"
-                               HorizontalAlignment="Left" 
-                               ItemsSource="{Binding Folders}"
-                               Margin="0,16,0,0">
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="storage:StorageFolder">
-                            <Grid Margin="0,0,0,16"
-                                  >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                <Button Content="Add a folder"
+                        Style="{StaticResource AccentButtonStyle}" 
+                        Command="{Binding AddFolderCommand}"/>
 
-                                <TextBlock Text="{x:Bind Path}" 
-                                       VerticalAlignment="Center" 
-                                       Grid.Column="0"
-                                       TextTrimming="CharacterEllipsis"/>
+                <controls:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xE8B7;" />
+                </controls:SettingsExpander.HeaderIcon>
 
-                                <Button Content="Remove" 
-                                    Command="{Binding DataContext.RemoveFolderCommand, ElementName=Page}"
-                                    Grid.Column="1"
-                                    CommandParameter="{x:Bind}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </ScrollViewer>
+
+                <controls:SettingsExpander.ItemTemplate>
+                    <DataTemplate x:DataType="storage:StorageFolder">
+                        <controls:SettingsCard Description="{x:Bind Name}"
+                                               Header="{x:Bind Path}">
+                            <Button
+                                Command="{Binding RemoveFolderCommand, Source={Binding DataContext}}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Grid.Column="1"
+                                CommandParameter="{x:Bind}">
+                                <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                            </Button>
+                        </controls:SettingsCard>
+                    </DataTemplate>
+                </controls:SettingsExpander.ItemTemplate>
+
+            </controls:SettingsExpander>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </Page>

@@ -19,8 +19,11 @@
             <NavigationViewItem Icon="Home" Content="Home" Tag="HomePage" />
             <!--<NavigationViewItem Icon="Audio" Content="Menu Item2" Tag="SamplePage2" />
             <NavigationViewItem Icon="Refresh" Content="Menu Item3" Tag="SamplePage3" />-->
-            <NavigationViewItemSeparator/>
         </NavigationView.MenuItems>
+
+        <NavigationView.FooterMenuItems>
+            <NavigationViewItemSeparator/>
+        </NavigationView.FooterMenuItems>
 
         <Frame x:Name="ContentFrame"/>
     </NavigationView>

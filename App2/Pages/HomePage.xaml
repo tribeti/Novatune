@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="App2.Pages.HomePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,11 +15,41 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ListView ItemsSource="{Binding AllContents}" Grid.Row="1" Margin="0,10,0,0">
+        <ScrollViewer>
+            <GridView ItemsSource="{Binding Folders}" 
+                      Margin="0,10,0,0"
+                      IsItemClickEnabled="True"
+                      SelectedItem="{Binding SelectedFolder, Mode=TwoWay}"
+                      MaxHeight="500">
+                <GridView.ItemTemplate>
+                    <DataTemplate x:DataType="storage:StorageFolder">
+                        <ContentControl Template="{StaticResource CardTemplate}">
+                            <StackPanel>
+                                <!-- Tên thư mục -->
+                                <TextBlock Text="{x:Bind Name}" 
+                                           FontSize="18" 
+                                           FontWeight="Bold" 
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </ContentControl>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+        </ScrollViewer>
+
+        <ListView ItemsSource="{Binding Contents}" 
+                  Grid.Row="1" 
+                  Margin="0,10,0,0">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="storage:IStorageItem">
                     <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Name}" 
+                                   FontSize="16" 
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Path}" 
+                                   FontSize="14" 
+                                   Foreground="Gray" 
+                                   TextWrapping="Wrap" />
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
