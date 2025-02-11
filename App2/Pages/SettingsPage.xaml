@@ -10,7 +10,7 @@
     xmlns:storage="using:Windows.Storage"
     xmlns:viewModels="using:App2.ViewModels"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="Transparent">
 
     <Page.DataContext>
         <viewModels:FolderViewModel />
@@ -59,7 +59,6 @@
                         </controls:SettingsCard>
                     </DataTemplate>
                 </controls:SettingsExpander.ItemTemplate>
-
             </controls:SettingsExpander>
         </StackPanel>
     </ScrollViewer>

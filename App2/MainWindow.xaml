@@ -9,6 +9,10 @@
     mc:Ignorable="d"
     Title="App2">
 
+    <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop/>
+    </Window.SystemBackdrop>
+
     <NavigationView x:Name="NavBar" 
                     IsSettingsVisible="True"
                     PaneTitle="APP"
@@ -25,6 +29,12 @@
             <NavigationViewItemSeparator/>
         </NavigationView.FooterMenuItems>
 
-        <Frame x:Name="ContentFrame"/>
+        <Frame x:Name="ContentFrame">
+            <Frame.ContentTransitions>
+                <TransitionCollection>
+                    <NavigationThemeTransition  />
+                </TransitionCollection>
+            </Frame.ContentTransitions>
+        </Frame>
     </NavigationView>
 </Window>

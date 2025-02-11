@@ -5,13 +5,21 @@
     xmlns:local="using:App2.Resources">
 
     <!--card template-->
-    <ControlTemplate x:Key="CardTemplate">
-        <Border Background="Pink" 
-                CornerRadius="10" 
-                Padding="16" 
-                Margin="10"
+    <ControlTemplate x:Key="CardTemplate" TargetType="ContentControl">
+        <Border Background="Transparent"
+                CornerRadius="8"
+                Padding="12"
+                Margin="8"
+                Width="200"
                 Height="200">
-            <ContentPresenter />
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Spacing="5">
+                <TextBlock Text="{Binding Name}" 
+                           FontSize="14" 
+                           Foreground="White"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
         </Border>
     </ControlTemplate>
 
