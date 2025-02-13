@@ -11,42 +11,57 @@
         <vm:FolderViewModel />
     </Page.DataContext>
 
+    <Page.Resources>
+        <!--ItemsSource="{Binding Folders}"-->
+
+        <!-- Template hiển thị nội dung của Folder -->
+        <DataTemplate x:Key="CardContentTemplate">
+            <!--<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                <TextBlock Text="{Binding Name}" FontSize="14" Foreground="Black"/>
+                <TextBlock Text="{Binding Path}" FontSize="12" Foreground="Gray" TextWrapping="Wrap"/>
+            </StackPanel>-->
+        </DataTemplate>
+    </Page.Resources>
+
     <Grid Margin="20" CacheMode="BitmapCache">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+        <ItemsView 
+                   Grid.Row="0"
+                   ItemsSource="{Binding Folders}"
+                   ScrollViewer.HorizontalScrollMode="Enabled"
+                   ScrollViewer.VerticalScrollMode="Disabled"
+                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                   ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                   SelectionMode="Multiple"
+                   SelectionChanged="Folders_SelectionChanged">
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                      VerticalScrollBarVisibility="Disabled"
-                      HorizontalScrollMode="Enabled"
-                      VerticalScrollMode="Disabled"
-                      IsHorizontalRailEnabled="True"
-                      IsVerticalRailEnabled="False"
-                      IsHorizontalScrollChainingEnabled="True"
-                      HorizontalAlignment="Stretch">
+            <ItemsView.Layout>
+                <StackLayout Orientation="Horizontal" Spacing="10"/>
+            </ItemsView.Layout>
 
-            <ListView ItemsSource="{Binding Folders}" 
-                      IsItemClickEnabled="True"
-                      SelectedItem="{Binding SelectedFolder, Mode=TwoWay}"
-                      ScrollViewer.HorizontalScrollMode="Enabled"
-                      ScrollViewer.VerticalScrollMode="Disabled"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                      SelectionMode="Single"
-                      IsSwipeEnabled="False">
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="storage:StorageFolder">
-                        <ContentControl Template="{StaticResource CardTemplate}"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </ScrollViewer>
+            <ItemsView.ItemTemplate>
+                <DataTemplate>
+                    <ItemContainer>
+                        <Grid Background="Cyan" 
+                              CornerRadius="4" 
+                              Padding="10"
+                              Height="150"
+                              Width="150">
+                            <TextBlock Text="{Binding Name}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Margin="5"/>
+                        </Grid>
+                    </ItemContainer>
+                </DataTemplate>
+            </ItemsView.ItemTemplate>
+        </ItemsView>
 
         <ListView ItemsSource="{Binding Contents}" 
                   Grid.Row="1" 

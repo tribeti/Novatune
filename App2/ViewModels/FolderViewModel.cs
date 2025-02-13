@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.ObjectModel;
@@ -17,39 +18,32 @@ namespace App2.ViewModels
         private readonly ApplicationDataContainer _localSettings;
 
         public ObservableCollection<StorageFolder> Folders { get; } = new ObservableCollection<StorageFolder>();
-
+        public ObservableCollection<StorageFolder> SelectedFolders { get; } = new ObservableCollection<StorageFolder>();
         public ObservableCollection<IStorageItem> Contents { get; } = new ObservableCollection<IStorageItem>();
-
-        [ObservableProperty]
-        private StorageFolder selectedFolder;
-
+        
         public FolderViewModel()
         {
             _localSettings = ApplicationData.Current.LocalSettings;
             LoadSavedFoldersAsync();
         }
 
+        /// <summary>
+        /// Xử lý khi danh sách thư mục được chọn thay đổi
+        /// </summary>
         [RelayCommand]
-        public void SelectFolder(StorageFolder folder)
-        {
-            SelectedFolder = folder;
-        }
-
-        partial void OnSelectedFolderChanged(StorageFolder value)
-        {
-            if (value != null)
-            {
-                LoadFolderContentsAsync(value);
-            }
-        }
-
-        private async Task LoadFolderContentsAsync(StorageFolder folder)
+        public async Task UpdateContentsAsync()
         {
             Contents.Clear();
-            var items = await folder.GetItemsAsync();
-            foreach (var item in items)
+            foreach (var folder in SelectedFolders)
             {
-                Contents.Add(item);
+                var items = await folder.GetItemsAsync();
+                foreach (var item in items)
+                {
+                    if (!Contents.Any(c => c.Path == item.Path))
+                    {
+                        Contents.Add(item);
+                    }
+                }
             }
         }
         
