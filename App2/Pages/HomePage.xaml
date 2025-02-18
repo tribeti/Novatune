@@ -12,14 +12,12 @@
     </Page.DataContext>
 
     <Page.Resources>
-        <!--ItemsSource="{Binding Folders}"-->
-
         <!-- Template hiển thị nội dung của Folder -->
         <DataTemplate x:Key="CardContentTemplate">
-            <!--<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
                 <TextBlock Text="{Binding Name}" FontSize="14" Foreground="Black"/>
                 <TextBlock Text="{Binding Path}" FontSize="12" Foreground="Gray" TextWrapping="Wrap"/>
-            </StackPanel>-->
+            </StackPanel>
         </DataTemplate>
     </Page.Resources>
 
@@ -28,40 +26,42 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ItemsView 
-                   Grid.Row="0"
-                   ItemsSource="{Binding Folders}"
-                   ScrollViewer.HorizontalScrollMode="Enabled"
-                   ScrollViewer.VerticalScrollMode="Disabled"
-                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                   ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                   SelectionMode="Multiple"
-                   SelectionChanged="Folders_SelectionChanged">
 
-            <ItemsView.Layout>
-                <StackLayout Orientation="Horizontal" Spacing="10"/>
-            </ItemsView.Layout>
 
-            <ItemsView.ItemTemplate>
-                <DataTemplate>
-                    <ItemContainer>
-                        <Grid Background="Cyan" 
-                              CornerRadius="4" 
-                              Padding="10"
-                              Height="150"
-                              Width="150">
-                            <TextBlock Text="{Binding Name}"
-                                       FontSize="14"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       Margin="5"/>
-                        </Grid>
-                    </ItemContainer>
-                </DataTemplate>
-            </ItemsView.ItemTemplate>
-        </ItemsView>
+        <ScrollViewer Grid.Row="0" 
+                      HorizontalScrollMode="Enabled"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollMode="Disabled"
+                      VerticalScrollBarVisibility="Hidden">
+            <ItemsView 
+                ItemsSource="{Binding Folders}"
+                SelectionMode="Multiple"
+                SelectionChanged="Folders_SelectionChanged">
+                <ItemsView.Layout>
+                    <StackLayout Orientation="Horizontal" Spacing="10"/>
+                </ItemsView.Layout>
+
+                <ItemsView.ItemTemplate>
+                    <DataTemplate>
+                        <ItemContainer>
+                            <Grid Background="Cyan" 
+                                  CornerRadius="4" 
+                                  Padding="10"
+                                  Height="150"
+                                  Width="150">
+                                <TextBlock Text="{Binding Name}"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           Margin="5"/>
+                            </Grid>
+                        </ItemContainer>
+                    </DataTemplate>
+                </ItemsView.ItemTemplate>
+            </ItemsView>
+        </ScrollViewer>
 
         <ListView ItemsSource="{Binding Contents}" 
                   Grid.Row="1" 
