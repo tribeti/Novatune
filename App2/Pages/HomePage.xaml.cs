@@ -1,5 +1,4 @@
 ﻿using System;
-using Windows.Graphics.Printing.PrintSupport;
 using App2.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using System.Linq;
@@ -20,16 +19,10 @@ namespace App2.Pages
 
         private async void Folders_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs e)
         {
-            if (ViewModel == null) return;
-
-            ViewModel.SelectedFolders.Clear();
-
-            foreach (var item in sender.SelectedItems.OfType<StorageFolder>())
+            if (FoldersListView.SelectedItem is StorageFolder folder)
             {
-                ViewModel.SelectedFolders.Add(item);
+                Frame.Navigate(typeof(FolderDetailPage), folder);
             }
-
-            await ViewModel.UpdateContentsAsync();
         }
     }
 }

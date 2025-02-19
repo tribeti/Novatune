@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="App2.Pages.FolderDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App2.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:storage="using:Windows.Storage"
+    xmlns:viewModels="using:App2.ViewModels"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.DataContext>
+        <viewModels:FolderViewModel />
+    </Page.DataContext>
+
+
+    <Grid Padding="20">
+        <StackPanel>
+            <Button Content="Back" Click="BackButton_Click" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+            <TextBlock Text="Chi tiết folder" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
+            
+            <TextBlock Text="{x:Bind SelectedFolder.Name}" FontSize="24" Margin="0,0,0,20"/>
+            <!-- ListView hiển thị danh sách các mục bên trong folder -->
+            <ListView ItemsSource="{x:Bind FolderItems}">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="storage:IStorageItem">
+                        <TextBlock Text="{x:Bind Name}" FontSize="20"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+    </Grid>
+</Page>
