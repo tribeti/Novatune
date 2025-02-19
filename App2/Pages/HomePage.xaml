@@ -21,21 +21,21 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Margin="20" CacheMode="BitmapCache">
+    <Grid Margin="20 50 20 20" CacheMode="BitmapCache">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
 
-        <ScrollViewer Grid.Row="0" 
+        <ScrollViewer Grid.Row="0"
                       HorizontalScrollMode="Enabled"
                       HorizontalScrollBarVisibility="Hidden"
                       VerticalScrollMode="Disabled"
                       VerticalScrollBarVisibility="Hidden">
             <ItemsView 
                 ItemsSource="{Binding Folders}"
-                SelectionMode="Multiple"
+                SelectionMode="Single"
                 SelectionChanged="Folders_SelectionChanged">
                 <ItemsView.Layout>
                     <StackLayout Orientation="Horizontal" Spacing="10"/>
