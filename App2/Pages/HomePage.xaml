@@ -34,7 +34,7 @@
                 <ItemsView.ItemTemplate>
                     <DataTemplate>
                         <ItemContainer>
-                            <Grid Background="Cyan" 
+                            <Grid Background="Transparent" 
                                   CornerRadius="4" 
                                   Padding="10"
                                   Height="150"

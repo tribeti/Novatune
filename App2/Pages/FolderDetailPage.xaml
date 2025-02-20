@@ -22,14 +22,28 @@
             <TextBlock Text="Chi tiết folder" FontSize="32" FontWeight="Bold" Margin="0,0,0,20"/>
             
             <TextBlock Text="{x:Bind SelectedFolder.Name}" FontSize="24" Margin="0,0,0,20"/>
-            <!-- ListView hiển thị danh sách các mục bên trong folder -->
-            <ListView ItemsSource="{x:Bind FolderItems}">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="storage:IStorageItem">
-                        <TextBlock Text="{x:Bind Name}" FontSize="20"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+
         </StackPanel>
+
+        <ListView ItemsSource="{x:Bind FolderItems}"
+                  Margin="0 200 0 0"
+                  ShowsScrollingPlaceholders ="True">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <ListViewItemPresenter SelectionCheckMarkVisualEnabled="False"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="storage:IStorageItem">
+                    <TextBlock Text="{x:Bind Name}" FontSize="20"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Page>
