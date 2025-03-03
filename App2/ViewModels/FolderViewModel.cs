@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -27,9 +25,6 @@ namespace App2.ViewModels
             LoadSavedFoldersAsync();
         }
 
-        /// <summary>
-        /// Xử lý khi danh sách thư mục được chọn thay đổi
-        /// </summary>
         [RelayCommand]
         public async Task UpdateContentsAsync()
         {
@@ -67,9 +62,6 @@ namespace App2.ViewModels
             }
         }
 
-        /// <summary>
-        ///    Adds a folder to the list of folders to display.
-        /// </summary>
         [RelayCommand]
         public async Task AddFolderAsync()
         {
@@ -89,9 +81,6 @@ namespace App2.ViewModels
             }
         }
 
-        /// <summary>
-        ///     Removes a folder from the list of folders to display.
-        /// </summary>
         [RelayCommand]
         public void RemoveFolder(StorageFolder folder)
         {
@@ -107,9 +96,6 @@ namespace App2.ViewModels
             Folders.Remove(folder);
         }
 
-        /// <summary>
-        /// saves the folder tokens to the local settings.
-        /// </summary>
         private void SaveFolderTokens()
         {
             var tokens = StorageApplicationPermissions.FutureAccessList.Entries

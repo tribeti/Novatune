@@ -247,3 +247,6 @@ namespace App2 {
     xaml material
         https://stackoverflow.com/questions/26479995/how-to-include-two-resources-in-page-resources
         https://learn.microsoft.com/en-us/windows/apps/develop/platform/xaml/xaml-resource-dictionary
+
+    docs :
+        https://learn.microsoft.com/en-us/windows/apps/get-started/best-practices

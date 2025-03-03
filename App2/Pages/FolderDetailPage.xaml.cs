@@ -41,28 +41,31 @@ namespace App2.Pages
             if (e.Parameter is StorageFolder folder)
             {
                 SelectedFolder = folder;
-                await LoadFolderItems(folder);
+                await GetFilesInFolderAsync(folder);
             }
         }
 
-        private async Task LoadFolderItems(StorageFolder folder)
+        private async Task GetFilesInFolderAsync(StorageFolder folder)
         {
-            FolderItems.Clear();
-            var queryOptions = new QueryOptions(CommonFileQuery.DefaultQuery, new List<string>());
-            queryOptions.FolderDepth = FolderDepth.Deep;
-            var query = folder.CreateItemQueryWithOptions(queryOptions);
-            var items = await query.GetItemsAsync();
-
             var multimediaExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 ".mp3", ".mp4", ".acc", ".aac", ".flac"
             };
 
-            var filteredItems = items.Where(item => item is StorageFile file && multimediaExtensions.Contains(file.FileType));
+            FolderItems.Clear();
 
-            foreach (var item in filteredItems)
+            var queryOptions = new QueryOptions(CommonFileQuery.DefaultQuery, multimediaExtensions.ToList());
+            queryOptions.FolderDepth = FolderDepth.Deep;
+
+            var query = folder.CreateItemQueryWithOptions(queryOptions);
+            var items = await query.GetItemsAsync();
+
+            foreach (var item in items)
             {
-                FolderItems.Add(item);
+                if (item is StorageFile file && multimediaExtensions.Contains(file.FileType))
+                {
+                    FolderItems.Add(item);
+                }
             }
         }
 
