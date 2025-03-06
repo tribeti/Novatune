@@ -41,11 +41,6 @@
         </Style>
     </Page.Resources>
 
-    <Page.DataContext>
-        <viewModels:FolderViewModel />
-    </Page.DataContext>
-
-
     <Grid
         x:Name="RootGrid"
         Padding="24"
@@ -105,7 +100,7 @@
                 Background="Transparent"
                 IsItemClickEnabled="True"
                 ItemClick="FileListView_ItemClick"
-                ItemsSource="{x:Bind FolderItems}"
+                ItemsSource="{x:Bind MediaPlayerVM.MediaItems}"
                 SelectionMode="Single"
                 ShowsScrollingPlaceholders="True">
                 <ListView.ItemContainerStyle>
@@ -167,7 +162,7 @@
                 x:Name="NowPlayingSection"
                 Grid.Row="1"
                 Margin="0,16,0,0"
-                Visibility="Collapsed">
+                Visibility="Visible">
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -187,7 +182,7 @@
                     Grid.Row="1"
                     Margin="0,0,0,16"
                     FontSize="16"
-                    Text="" />
+                    Text="{x:Bind MediaPlayerVM.NowPlayingTitle, Mode=OneWay}" />
 
                 <!--  Controls  -->
                 <StackPanel

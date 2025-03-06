@@ -9,7 +9,14 @@
     Background="Transparent"
     mc:Ignorable="d">
 
-    <Grid>
-
+    <Grid Margin="0,30,0,00">
+        <WebView2
+            x:Name="MyWebView2"
+            Grid.Row="1"
+            MinWidth="200"
+            MinHeight="200"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Source="https://www.youtube.com/" />
     </Grid>
 </Page>

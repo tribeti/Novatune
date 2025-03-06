@@ -1,6 +1,7 @@
 ﻿using App2.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -26,6 +27,7 @@ public partial class App : Application
         Ioc.Default.ConfigureServices(new ServiceCollection()
             .AddSingleton<FolderViewModel>()
             .BuildServiceProvider());
+
     }
 
     /// <summary>
