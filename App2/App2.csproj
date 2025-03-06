@@ -24,6 +24,7 @@
 	<ItemGroup>
 		<None Remove="Pages\FolderDetailPage.xaml" />
 		<None Remove="Pages\HomePage.xaml" />
+		<None Remove="Pages\OnlinePage.xaml" />
 		<None Remove="Resources\HomePageResourceDictionary.xaml" />
 	</ItemGroup>
 
@@ -61,6 +62,11 @@
 		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
 		<PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
 		<PackageReference Include="WinUIEx" Version="2.5.1" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Update="Pages\OnlinePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="Pages\SettingsPage.xaml">

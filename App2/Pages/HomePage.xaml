@@ -13,16 +13,25 @@
     <Grid Margin="20,50,20,20" CacheMode="BitmapCache">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            FontSize="28"
+            FontWeight="SemiBold"
+            Text="{Binding Title}" />
+
 
         <ScrollViewer
-            Grid.Row="0"
+            Grid.Row="2"
             HorizontalScrollBarVisibility="Hidden"
             HorizontalScrollMode="Enabled"
             VerticalScrollBarVisibility="Hidden"
             VerticalScrollMode="Disabled">
+
             <ItemsView
                 x:Name="FoldersListView"
                 ItemsSource="{Binding Folders}"
@@ -33,21 +42,37 @@
                 </ItemsView.Layout>
 
                 <ItemsView.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="storage:StorageFolder">
                         <ItemContainer>
                             <Grid
                                 Width="150"
                                 Height="150"
                                 Padding="10"
-                                Background="Transparent"
-                                CornerRadius="4">
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                CornerRadius="8">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <FontIcon
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="32"
+                                    Glyph="&#xE8B7;" />
+
                                 <TextBlock
+                                    Grid.Row="1"
                                     Margin="5"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     FontSize="14"
-                                    FontWeight="Bold"
-                                    Text="{Binding Name}"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind Name}"
+                                    TextTrimming="CharacterEllipsis"
                                     TextWrapping="Wrap" />
                             </Grid>
                         </ItemContainer>

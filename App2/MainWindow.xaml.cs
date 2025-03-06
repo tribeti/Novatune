@@ -59,6 +59,9 @@ namespace App2
                     case "HomePage":
                         ContentFrame.Navigate(typeof(HomePage), null, new DrillInNavigationTransitionInfo());
                         break;
+                    case "OnlinePage":
+                        ContentFrame.Navigate(typeof(OnlinePage), null, new DrillInNavigationTransitionInfo());
+                        break;
                     default:
                         break;
                 }

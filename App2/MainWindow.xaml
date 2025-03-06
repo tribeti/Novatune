@@ -26,6 +26,10 @@
                 Content="Home"
                 Icon="Home"
                 Tag="HomePage" />
+            <NavigationViewItem
+                Content="Online"
+                Icon="Globe"
+                Tag="OnlinePage" />
             <!--<NavigationViewItem Icon="Audio" Content="Menu Item2" Tag="SamplePage2" />
             <NavigationViewItem Icon="Refresh" Content="Menu Item3" Tag="SamplePage3" />-->
         </NavigationView.MenuItems>
