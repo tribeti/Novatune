@@ -12,6 +12,7 @@ using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Search;
 using System.Linq;
+using LibVLCSharp.Platforms.Windows;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
