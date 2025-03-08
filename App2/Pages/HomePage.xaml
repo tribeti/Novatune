@@ -2,6 +2,7 @@
     x:Class="App2.Pages.HomePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:lvs="using:LibVLCSharp.Platforms.Windows"
     xmlns:storage="using:Windows.Storage"
     xmlns:vm="using:App2.ViewModels"
     Background="Transparent">
@@ -80,5 +81,18 @@
                 </ItemsView.ItemTemplate>
             </ItemsView>
         </ScrollViewer>
+
+        <Grid
+            x:Name="MediaPlayerGrid"
+            Grid.Row="3"
+            MinHeight="240"
+            Margin="0,16,0,0"
+            Visibility="Collapsed">
+
+            <lvs:VideoView
+                x:Name="VideoView"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+        </Grid>
     </Grid>
 </Page>

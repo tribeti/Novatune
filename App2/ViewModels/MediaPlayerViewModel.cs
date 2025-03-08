@@ -1,7 +1,6 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LibVLCSharp.Shared;
-using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,56 +8,48 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Search;
 using System.Linq;
+using Microsoft.UI.Dispatching;
 
 namespace App2.ViewModels
 {
     public partial class MediaPlayerViewModel : ObservableObject
     {
-        // Collection for media files
         public ObservableCollection<IStorageItem> MediaItems { get; } = new ObservableCollection<IStorageItem>();
 
-        // LibVLC objects
         private LibVLC _libVLC;
         private MediaPlayer _mediaPlayer;
         private Media _currentMedia;
-        
-        // Current file and UI properties
+
         [ObservableProperty]
         private StorageFile _currentFile;
-        
+
         [ObservableProperty]
-        private string _nowPlayingTitle;
-        
+        private string _nowPlayingTitle = "Không có file nào đang phát";
+
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(PlayPauseIcon))]
         private bool _isPlaying;
-        
+
         [ObservableProperty]
         private bool _isMediaPlayerVisible;
-        
-        [ObservableProperty]
-        private bool _isNowPlayingSectionVisible;
 
-        // Event handler for UI thread updates
+        public string PlayPauseIcon => IsPlaying ? "\uE769" : "\uE768";
+
         public event Action PlaybackStateChanged;
 
         public MediaPlayer Player => _mediaPlayer;
 
         public MediaPlayerViewModel()
         {
-            // Initialize LibVLC
             Core.Initialize();
             InitializeLibVLC();
         }
 
         private void InitializeLibVLC()
         {
-            // Create LibVLC instance with desired options
             _libVLC = new LibVLC();
-
-            // Create media player
             _mediaPlayer = new MediaPlayer(_libVLC);
 
-            // Handle player events
             _mediaPlayer.EndReached += MediaPlayer_EndReached;
             _mediaPlayer.Playing += MediaPlayer_Playing;
             _mediaPlayer.Paused += MediaPlayer_Paused;
@@ -68,29 +59,36 @@ namespace App2.ViewModels
         private void MediaPlayer_Stopped(object sender, EventArgs e)
         {
             IsPlaying = false;
-            PlaybackStateChanged?.Invoke();
+            NotifyPlaybackStateChanged();
         }
 
         private void MediaPlayer_Paused(object sender, EventArgs e)
         {
             IsPlaying = false;
-            PlaybackStateChanged?.Invoke();
+            NotifyPlaybackStateChanged();
         }
 
         private void MediaPlayer_Playing(object sender, EventArgs e)
         {
             IsPlaying = true;
-            PlaybackStateChanged?.Invoke();
+            NotifyPlaybackStateChanged();
         }
 
         private void MediaPlayer_EndReached(object sender, EventArgs e)
         {
             IsPlaying = false;
+            NotifyPlaybackStateChanged();
+        }
+
+        private void NotifyPlaybackStateChanged()
+        {
             PlaybackStateChanged?.Invoke();
         }
 
         public async Task LoadMediaItemsAsync(StorageFolder folder)
         {
+            if (folder == null) return;
+
             var multimediaExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 ".mp3", ".mp4", ".aac", ".flac", ".wav", ".mkv", ".avi", ".mov", ".ogg"
@@ -98,52 +96,51 @@ namespace App2.ViewModels
 
             MediaItems.Clear();
 
-            var queryOptions = new QueryOptions(CommonFileQuery.DefaultQuery, multimediaExtensions.ToList());
-            queryOptions.FolderDepth = FolderDepth.Deep;
-
-            var query = folder.CreateItemQueryWithOptions(queryOptions);
-            var items = await query.GetItemsAsync();
-
-            foreach (var item in items)
+            try
             {
-                if (item is StorageFile file && multimediaExtensions.Contains(file.FileType))
+                var queryOptions = new QueryOptions(CommonFileQuery.DefaultQuery, multimediaExtensions.ToList());
+                queryOptions.FolderDepth = FolderDepth.Deep;
+
+                var query = folder.CreateItemQueryWithOptions(queryOptions);
+                var items = await query.GetItemsAsync();
+
+                foreach (var item in items)
                 {
-                    MediaItems.Add(item);
+                    if (item is StorageFile file && multimediaExtensions.Contains(file.FileType))
+                    {
+                        MediaItems.Add(item);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading media items: {ex.Message}");
             }
         }
 
         [RelayCommand]
         public async Task PlayMediaFileAsync(StorageFile file)
         {
+            if (file == null) return;
+
             try
             {
-                // Store the current file
                 CurrentFile = file;
-
-                // Update the UI
                 NowPlayingTitle = file.Name;
-                IsNowPlayingSectionVisible = true;
-
-                // Determine if this is an audio or video file
                 IsMediaPlayerVisible = IsVideoFile(file.FileType);
 
-                // Stop any current playback
                 StopPlayback();
 
-                // Create a new media from the file
-                string filePath = file.Path;
-
-                // Creating media from path
-                _currentMedia = new Media(_libVLC, filePath, FromType.FromPath);
-
-                // Start playback
+                _currentMedia = new Media(_libVLC, file.Path, FromType.FromPath);
                 _mediaPlayer.Media = _currentMedia;
                 _mediaPlayer.Play();
                 IsPlaying = true;
+
+                NotifyPlaybackStateChanged();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error playing media file: {ex.Message}");
                 throw;
             }
         }
@@ -171,19 +168,19 @@ namespace App2.ViewModels
                 {
                     _mediaPlayer.Play();
                 }
+
+                NotifyPlaybackStateChanged();
             }
         }
 
         [RelayCommand]
         public void StopPlayback()
         {
-            // Stop current playback
             if (_mediaPlayer != null && _mediaPlayer.IsPlaying)
             {
                 _mediaPlayer.Stop();
             }
 
-            // Clean up current media
             if (_currentMedia != null)
             {
                 _currentMedia.Dispose();
@@ -191,14 +188,13 @@ namespace App2.ViewModels
             }
 
             IsPlaying = false;
+            NotifyPlaybackStateChanged();
         }
 
         public void Cleanup()
         {
-            // Stop playback
             StopPlayback();
 
-            // Dispose of LibVLC resources
             if (_mediaPlayer != null)
             {
                 _mediaPlayer.EndReached -= MediaPlayer_EndReached;

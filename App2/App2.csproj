@@ -23,6 +23,7 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
+		<None Remove="Controls\MediaControlsView.xaml" />
 		<None Remove="Pages\FolderDetailPage.xaml" />
 		<None Remove="Pages\HomePage.xaml" />
 		<None Remove="Pages\OnlinePage.xaml" />
@@ -90,6 +91,11 @@
 		<Page Update="Resources\HomePageResourceDictionary.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Update="Controls\MediaControlsView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 
 	<!--

@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:animatedVisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
+    xmlns:controls="using:App2.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ex="using:WinUIEx"
     xmlns:local="using:App2"
@@ -14,37 +15,47 @@
     <Window.SystemBackdrop>
         <DesktopAcrylicBackdrop />
     </Window.SystemBackdrop>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <NavigationView
+            x:Name="NavBar"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="True"
+            PaneTitle="APP"
+            SelectionChanged="NavBar_OnSelectionChanged">
 
-    <NavigationView
-        x:Name="NavBar"
-        IsBackButtonVisible="Collapsed"
-        IsSettingsVisible="True"
-        PaneTitle="APP"
-        SelectionChanged="NavBar_OnSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Home" Tag="HomePage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Online" Tag="OnlinePage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE774;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
 
-        <NavigationView.MenuItems>
-            <NavigationViewItem Content="Home" Tag="HomePage">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE80F;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Online" Tag="OnlinePage">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE774;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItemSeparator />
+            </NavigationView.FooterMenuItems>
 
-        <NavigationView.FooterMenuItems>
-            <NavigationViewItemSeparator />
-        </NavigationView.FooterMenuItems>
+            <Frame x:Name="ContentFrame">
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition />
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
+        </NavigationView>
 
-        <Frame x:Name="ContentFrame">
-            <Frame.ContentTransitions>
-                <TransitionCollection>
-                    <NavigationThemeTransition />
-                </TransitionCollection>
-            </Frame.ContentTransitions>
-        </Frame>
-    </NavigationView>
+        <controls:MediaControlsView
+            x:Name="GlobalMediaControls"
+            Grid.Row="1"
+            Height="80" />
+    </Grid>
 </ex:WindowEx>

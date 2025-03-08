@@ -29,16 +29,6 @@
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Padding" Value="12,8" />
         </Style>
-
-        <Style x:Key="MediaControlButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{ThemeResource ControlAltFillColorSecondaryBrush}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="12,8" />
-            <Setter Property="Margin" Value="4,0" />
-            <Setter Property="MinWidth" Value="40" />
-            <Setter Property="MinHeight" Value="40" />
-        </Style>
     </Page.Resources>
 
     <Grid
@@ -50,7 +40,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,20">
@@ -87,146 +76,68 @@
                 Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
         </StackPanel>
 
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <!--  Media Files List  -->
+        <ListView
+            x:Name="FileListView"
+            Grid.Row="2"
+            Background="Transparent"
+            IsItemClickEnabled="True"
+            ItemClick="FileListView_ItemClick"
+            ItemsSource="{x:Bind MediaPlayerVM.MediaItems}"
+            SelectionMode="Single"
+            ShowsScrollingPlaceholders="True">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0,4" />
+                </Style>
+            </ListView.ItemContainerStyle>
 
-            <!--  Media Files List  -->
-            <ListView
-                x:Name="FileListView"
-                Grid.Row="0"
-                Background="Transparent"
-                IsItemClickEnabled="True"
-                ItemClick="FileListView_ItemClick"
-                ItemsSource="{x:Bind MediaPlayerVM.MediaItems}"
-                SelectionMode="Single"
-                ShowsScrollingPlaceholders="True">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0,4" />
-                    </Style>
-                </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="storage:IStorageItem">
+                    <Grid Style="{StaticResource FileItemStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="storage:IStorageItem">
-                        <Grid Style="{StaticResource FileItemStyle}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-                            <FontIcon
-                                Grid.Column="0"
-                                Margin="0,0,16,0"
-                                VerticalAlignment="Center"
-                                FontFamily="Segoe Fluent Icons"
-                                Glyph="&#xE8B7;" />
-
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock
-                                    FontSize="16"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind Name}"
-                                    TextTrimming="CharacterEllipsis" />
-
-                                <TextBlock
-                                    x:Name="FileTypeText"
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Opacity="0.6"
-                                    Text="{x:Bind Path}" />
-                            </StackPanel>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-
-                <ListView.ItemContainerTransitions>
-                    <TransitionCollection>
-                        <EntranceThemeTransition />
-                    </TransitionCollection>
-                </ListView.ItemContainerTransitions>
-
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <ItemsStackPanel />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-            </ListView>
-
-            <!--  Now Playing Section (Hidden by default)  -->
-            <Grid
-                x:Name="NowPlayingSection"
-                Grid.Row="1"
-                Margin="0,16,0,0"
-                Visibility="Visible">
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <TextBlock
-                    Grid.Row="0"
-                    Margin="0,0,0,8"
-                    FontSize="18"
-                    FontWeight="SemiBold"
-                    Text="Đang phát" />
-
-                <TextBlock
-                    x:Name="NowPlayingTitle"
-                    Grid.Row="1"
-                    Margin="0,0,0,16"
-                    FontSize="16"
-                    Text="{x:Bind MediaPlayerVM.NowPlayingTitle, Mode=OneWay}" />
-
-                <!--  Controls  -->
-                <StackPanel
-                    Grid.Row="2"
-                    Margin="0,8,0,16"
-                    HorizontalAlignment="Center"
-                    Orientation="Horizontal">
-
-                    <Button
-                        x:Name="PlayPauseButton"
-                        Click="PlayPauseButton_Click"
-                        Style="{StaticResource MediaControlButtonStyle}">
                         <FontIcon
-                            x:Name="PlayPauseIcon"
+                            Grid.Column="0"
+                            Margin="0,0,16,0"
+                            VerticalAlignment="Center"
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="16"
-                            Glyph="&#xE769;" />
-                    </Button>
+                            Glyph="&#xE8B7;" />
 
-                    <Button
-                        x:Name="StopButton"
-                        Click="StopButton_Click"
-                        Style="{StaticResource MediaControlButtonStyle}">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="16"
-                            Glyph="&#xE71A;" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Grid>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Text="{x:Bind Name}"
+                                TextTrimming="CharacterEllipsis" />
 
-        <!--  VLC Player View  -->
-        <Grid
-            x:Name="MediaPlayerGrid"
-            Grid.Row="3"
-            MinHeight="240"
-            Margin="0,16,0,0"
-            Visibility="Collapsed">
+                            <TextBlock
+                                x:Name="FileTypeText"
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Opacity="0.6"
+                                Text="{x:Bind Path}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
 
-            <lvs:VideoView
-                x:Name="VideoView"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch" />
-        </Grid>
+            <ListView.ItemContainerTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition />
+                </TransitionCollection>
+            </ListView.ItemContainerTransitions>
+
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
     </Grid>
 </Page>

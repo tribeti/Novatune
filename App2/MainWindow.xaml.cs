@@ -1,13 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Linq;
-using System.Threading.Tasks;
-using Windows.Media;
-
-// media namespace
-using Windows.Media.Core;
-using Windows.Media.Playback;
-
 using App2.Pages;
 using App2.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -17,17 +10,11 @@ using Microsoft.UI.Windowing;
 using WinUIEx;
 using Microsoft.UI.Composition.SystemBackdrops;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace App2
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    /// Window
     public sealed partial class MainWindow : WinUIEx.WindowEx
     {
+        public MediaPlayerViewModel GlobalMediaPlayerVM { get; private set; }
         public MainWindow()
         {
             this.InitializeComponent();
@@ -37,11 +24,22 @@ namespace App2
 
             this.PersistenceId = "MainWindow";
 
+            this.Closed += MainWindow_Closed;
             ViewStorage = Ioc.Default.GetService<FolderViewModel>();
 
             ExtendsContentIntoTitleBar = true;
             this.AppWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Standard;
+
+
+
+            GlobalMediaPlayerVM = new MediaPlayerViewModel();
+
+            GlobalMediaControls.Initialize(GlobalMediaPlayerVM);
+
+            ContentFrame.Navigate(typeof(HomePage), null, new DrillInNavigationTransitionInfo());
+            NavBar.SelectedItem = NavBar.MenuItems.FirstOrDefault();
         }
+
 
         public FolderViewModel? ViewStorage { get;}
 
@@ -67,6 +65,11 @@ namespace App2
                         break;
                 }
             }
+        }
+        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        {
+            GlobalMediaPlayerVM?.Cleanup();
+            GlobalMediaControls?.Cleanup();
         }
     }
 }
