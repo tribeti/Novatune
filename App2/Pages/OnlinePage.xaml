@@ -13,8 +13,8 @@
         <WebView2
             x:Name="MyWebView2"
             Grid.Row="1"
-            MinWidth="200"
-            MinHeight="200"
+            Width="800"
+            Height="600"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Source="https://www.youtube.com/" />
