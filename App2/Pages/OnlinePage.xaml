@@ -9,7 +9,7 @@
     Background="Transparent"
     mc:Ignorable="d">
 
-    <Grid Margin="0,30,0,00">
+    <Grid Margin="0,30,0,0">
         <WebView2
             x:Name="MyWebView2"
             Grid.Row="1"

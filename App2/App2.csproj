@@ -58,6 +58,8 @@
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250208002-preview1" />
 		<PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="9.0.2" />
+		<PackageReference Include="SpotifyAPI.Web" Version="7.2.1" />
+		<PackageReference Include="SpotifyAPI.Web.Auth" Version="7.2.1" />
 		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
 		<PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
 		<PackageReference Include="WinUIEx" Version="2.5.1" />
