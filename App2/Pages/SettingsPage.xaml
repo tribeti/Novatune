@@ -64,6 +64,18 @@
                     </DataTemplate>
                 </controls:SettingsExpander.ItemTemplate>
             </controls:SettingsExpander>
+
+            <TextBlock
+                Margin="0,24,0,0"
+                Padding="4,0,0,8"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Trình phát Media" />
+
+            <ToggleSwitch
+                x:Name="AutoHideToggleSwitch"
+                AutomationProperties.Name="Tự động ẩn thanh điều khiển"
+                Header="Tự động ẩn thanh điều khiển media"
+                Toggled="AutoHideToggleSwitch_Toggled" />
         </StackPanel>
     </ScrollViewer>
 </Page>
