@@ -18,9 +18,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <!--  For NavigationView and ContentFrame  -->
             <RowDefinition Height="Auto" />
-            <!--  For GlobalMediaControls  -->
         </Grid.RowDefinitions>
 
         <NavigationView

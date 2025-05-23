@@ -34,7 +34,7 @@ namespace App2.ViewModels
         private bool _isPlaying;
 
         [ObservableProperty]
-        private bool _isMediaPlayerElementVisible; // For video display elements
+        private bool _isMediaPlayerElementVisible;
 
         [ObservableProperty]
         private TimeSpan _currentPosition;
@@ -42,12 +42,8 @@ namespace App2.ViewModels
         [ObservableProperty]
         private TimeSpan _totalDuration;
 
-        public string PlayPauseGlyph => IsPlaying ? "\uE769" : "\uE768"; // Segoe Fluent Icons: Pause : Play
-
-        public event Action PlaybackStateChanged; // For MediaControlsView to react
-
-        // Expose MediaPlayer instance if VideoView or other LibVLCSharp controls need it directly
-        // However, it's often better to encapsulate LibVLCSharp details within the ViewModel.
+        public string PlayPauseGlyph => IsPlaying ? "\uE769" : "\uE768";
+        public event Action PlaybackStateChanged;
         public LibVLCSharp.Shared.MediaPlayer PlayerInstance => _mediaPlayer;
 
 
@@ -59,14 +55,13 @@ namespace App2.ViewModels
             {
                 try
                 {
-                    Core.Initialize(); // LibVLCSharp.Shared.Core
+                    Core.Initialize();
                     _isLibVLCSharpCoreInitialized = true;
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Fatal Error initializing LibVLCSharp.Shared.Core: {ex.Message}");
-                    // Optionally, set a ViewModel state indicating an error, or rethrow
-                    throw; // Or handle more gracefully depending on application requirements
+                    throw;
                 }
             }
             InitializeLibVLCAndPlayer();
@@ -74,10 +69,9 @@ namespace App2.ViewModels
 
         private void InitializeLibVLCAndPlayer()
         {
-            _libVLC = new LibVLC(); // Consider "--no-video" or other options if only audio
+            _libVLC = new LibVLC(); 
             _mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(_libVLC);
 
-            // Subscribe to MediaPlayer events
             _mediaPlayer.EndReached += MediaPlayer_EndReached;
             _mediaPlayer.Playing += MediaPlayer_Playing;
             _mediaPlayer.Paused += MediaPlayer_Paused;
@@ -95,7 +89,6 @@ namespace App2.ViewModels
                 NowPlayingTitle = "Lỗi trình phát";
                 IsPlaying = false;
                 CurrentPosition = TimeSpan.Zero;
-                // Consider more specific error handling or user notification
                 PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             });
@@ -118,8 +111,6 @@ namespace App2.ViewModels
             {
                 IsPlaying = false;
                 CurrentPosition = TimeSpan.Zero;
-                // TotalDuration might remain to show length of last played item, or reset:
-                // TotalDuration = TimeSpan.Zero; 
                 PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             });
@@ -131,7 +122,6 @@ namespace App2.ViewModels
             {
                 IsPlaying = false;
                 PlaybackStateChanged?.Invoke();
-                // Commands usually don't change state on pause/play, but IsPlaying does
             });
         }
 
@@ -144,24 +134,21 @@ namespace App2.ViewModels
             });
         }
 
-        private async void MediaPlayer_EndReached(object sender, EventArgs e) // Note: async void for event handler
+        private async void MediaPlayer_EndReached(object sender, EventArgs e)
         {
-            // This needs to run on dispatcher queue for UI interaction (like auto-playing next)
             _dispatcherQueue.TryEnqueue(async () =>
             {
                 IsPlaying = false;
-                CurrentPosition = TotalDuration; // Or TimeSpan.Zero;
+                CurrentPosition = TotalDuration;
                 PlaybackStateChanged?.Invoke();
 
-                if (CanSkipNext()) // Check if SkipNext command can execute
+                if (CanSkipNext())
                 {
-                    await SkipNextAsync(); // Await the async command
+                    await SkipNextAsync();
                 }
                 else
                 {
-                    // No next track, so stop or loop, etc.
-                    // For now, just ensure state is fully stopped.
-                    StopPlaybackInternal(); // Call internal stop without UI notification if EndReached handles it
+                    StopPlaybackInternal();
                 }
                 UpdateCommandStates();
             });
@@ -176,8 +163,6 @@ namespace App2.ViewModels
                 ".mp3", ".wav", ".aac", ".flac", ".wma", ".ogg", // Audio
                 ".mp4", ".mkv", ".avi", ".mov", ".wmv"           // Video
             };
-
-            // Clear previous items and state
             MediaItems.Clear();
             CurrentFile = null;
             NowPlayingTitle = "Không có file nào đang phát";
@@ -193,15 +178,11 @@ namespace App2.ViewModels
                 {
                     FolderDepth = FolderDepth.Deep
                 };
-                // queryOptions.SortOrder.Clear(); // OrderByName already implies sorting by name
-                // queryOptions.SortOrder.Add(new SortEntry { PropertyName = "System.ItemName", AscendingOrder = true });
-
                 var queryResult = folder.CreateItemQueryWithOptions(queryOptions);
                 var items = await queryResult.GetItemsAsync();
 
                 foreach (var item in items)
                 {
-                    // Check if it's a file and has one of the supported extensions
                     if (item is StorageFile file && multimediaExtensions.Contains(file.FileType.ToLowerInvariant()))
                     {
                         MediaItems.Add(file);
@@ -211,11 +192,11 @@ namespace App2.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading media items from {folder.Path}: {ex.Message}");
-                // Optionally, notify the user or set an error state
+
             }
             finally
             {
-                PlaybackStateChanged?.Invoke(); // Notify UI that items might have loaded (or failed)
+                PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             }
         }
@@ -225,7 +206,7 @@ namespace App2.ViewModels
         {
             if (file == null) return;
 
-            StopPlaybackInternal(); // Stop current playback and release media
+            StopPlaybackInternal();
 
             try
             {
@@ -234,20 +215,15 @@ namespace App2.ViewModels
                 IsMediaPlayerElementVisible = IsVideoFileExtension(file.FileType);
 
                 _currentMediaTrack = new Media(_libVLC, file.Path, FromType.FromPath);
-                // Optional: Parse media for metadata, helps with accurate duration quickly.
-                // await _currentMediaTrack.Parse(MediaParseOptions.ParseNetwork); // Or ParseLocal, or default.
-
                 _mediaPlayer.Media = _currentMediaTrack;
                 bool success = _mediaPlayer.Play();
                 if (!success)
                 {
                     System.Diagnostics.Debug.WriteLine($"MediaPlayer.Play() failed for {file.Path}");
-                    // Handle error: reset state, notify user
                     CurrentFile = null;
                     NowPlayingTitle = "Lỗi khi phát file";
                     IsPlaying = false;
                 }
-                // IsPlaying state will be updated by the MediaPlayer_Playing event if successful
             }
             catch (Exception ex)
             {
@@ -258,7 +234,7 @@ namespace App2.ViewModels
             }
             finally
             {
-                PlaybackStateChanged?.Invoke(); // Update UI state
+                PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             }
         }
@@ -283,24 +259,23 @@ namespace App2.ViewModels
             {
                 _mediaPlayer.Pause();
             }
-            else // Paused, Stopped, Ended, Error, etc.
+            else
             {
-                _mediaPlayer.Play(); // Attempt to play
+                _mediaPlayer.Play();
             }
-            // IsPlaying state updated by events
         }
         private bool CanTogglePlayPause() => _mediaPlayer != null && _mediaPlayer.Media != null && CurrentFile != null;
 
-        private void StopPlaybackInternal() // Internal helper, does not invoke PlaybackStateChanged directly
+        private void StopPlaybackInternal()
         {
             if (_mediaPlayer != null)
             {
-                if (_mediaPlayer.IsPlaying || _mediaPlayer.State == VLCState.Paused) // Check if it's actually playing or paused
+                if (_mediaPlayer.IsPlaying || _mediaPlayer.State == VLCState.Paused)
                 {
-                    _mediaPlayer.Stop(); // This will trigger MediaPlayer_Stopped event
+                    _mediaPlayer.Stop();
                 }
             }
-            _currentMediaTrack?.Dispose(); // Dispose of the media object
+            _currentMediaTrack?.Dispose();
             _currentMediaTrack = null;
         }
 
@@ -308,12 +283,8 @@ namespace App2.ViewModels
         [RelayCommand(CanExecute = nameof(CanStopPlayback))]
         public void StopPlayback()
         {
-            StopPlaybackInternal(); // Use internal helper
-            // MediaPlayer_Stopped event will handle UI updates like IsPlaying and CurrentPosition.
-            // Explicitly ensure title reflects no playback if needed here or in event handler
-            // NowPlayingTitle = "Không có file nào đang phát";
-            // CurrentFile = null; // Optionally clear current file on explicit stop
-            PlaybackStateChanged?.Invoke(); // Ensure UI updates immediately after explicit stop
+            StopPlaybackInternal();
+            PlaybackStateChanged?.Invoke();
             UpdateCommandStates();
         }
         private bool CanStopPlayback() => _mediaPlayer != null && _mediaPlayer.Media != null && CurrentFile != null;
@@ -333,7 +304,6 @@ namespace App2.ViewModels
         private int GetCurrentFileIndex()
         {
             if (CurrentFile == null || !MediaItems.Any()) return -1;
-            // Find by path as StorageFile instances might differ
             return MediaItems.ToList().FindIndex(item => item is StorageFile sf && sf.Path.Equals(CurrentFile.Path, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -370,22 +340,20 @@ namespace App2.ViewModels
 
         private void UpdateCommandStates()
         {
-            // Notify CanExecute changed for all relevant commands
-            // This ensures UI buttons enable/disable correctly based on state
             _dispatcherQueue.TryEnqueue(() =>
             {
                 PlayMediaFileCommand.NotifyCanExecuteChanged();
                 TogglePlayPauseCommand.NotifyCanExecuteChanged();
                 StopPlaybackCommand.NotifyCanExecuteChanged();
-                SeekCommand.NotifyCanExecuteChanged(); // Assuming Seek takes a parameter, its CanExecute might not need this often
+                SeekCommand.NotifyCanExecuteChanged();
                 SkipPreviousCommand.NotifyCanExecuteChanged();
                 SkipNextCommand.NotifyCanExecuteChanged();
             });
         }
 
-        public void Cleanup() // Call when ViewModel is no longer needed
+        public void Cleanup()
         {
-            StopPlaybackInternal(); // Ensure media is stopped and released
+            StopPlaybackInternal();
 
             if (_mediaPlayer != null)
             {
@@ -400,13 +368,13 @@ namespace App2.ViewModels
                 _mediaPlayer = null;
             }
 
-            _currentMediaTrack?.Dispose(); // Already handled by StopPlaybackInternal but good to be sure
+            _currentMediaTrack?.Dispose();
             _currentMediaTrack = null;
 
             _libVLC?.Dispose();
             _libVLC = null;
 
-            MediaItems.Clear(); // Clear the collection
+            MediaItems.Clear();
             System.Diagnostics.Debug.WriteLine("MediaPlayerViewModel Cleaned up.");
         }
     }

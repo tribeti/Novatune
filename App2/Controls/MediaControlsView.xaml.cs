@@ -14,24 +14,22 @@ namespace App2.Controls
         private bool _isUserDraggingSlider = false;
 
         private DispatcherTimer _autoHideTimer;
-        private DispatcherTimer _updateTimer; // Timer for real-time updates
+        private DispatcherTimer _updateTimer;
         private bool _isPointerOverRootLayout = false;
-        private bool _isAutoHideFeatureEnabled = true; // Default value
+        private bool _isAutoHideFeatureEnabled = true;
         public const string AutoHideSettingKey = "MediaControlsAutoHideEnabled";
 
         public MediaControlsView()
         {
             this.InitializeComponent();
-            TimeSlider.IsEnabled = false; // Initially disabled
+            TimeSlider.IsEnabled = false;
             LoadAutoHideSetting();
-
-            // Initialize update timer for real-time position updates
             _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             _updateTimer.Tick += UpdateTimer_Tick;
 
             if (_isAutoHideFeatureEnabled)
             {
-                _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) }; // Configurable hide delay
+                _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
                 _autoHideTimer.Tick += AutoHideTimer_Tick;
                 DispatcherQueue.TryEnqueue(() => VisualStateManager.GoToState(this, "HiddenState", false));
             }
@@ -50,7 +48,6 @@ namespace App2.Controls
             }
             else
             {
-                // If setting doesn't exist, save the default value
                 localSettings.Values[AutoHideSettingKey] = _isAutoHideFeatureEnabled;
             }
         }
@@ -59,11 +56,11 @@ namespace App2.Controls
         {
             if (_isAutoHideFeatureEnabled == isEnabled)
             {
-                return; // No change
+                return;
             }
 
             _isAutoHideFeatureEnabled = isEnabled;
-            // The setting itself is saved by SettingsPage
+
 
             if (_isAutoHideFeatureEnabled)
             {
@@ -72,20 +69,18 @@ namespace App2.Controls
                     _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
                     _autoHideTimer.Tick += AutoHideTimer_Tick;
                 }
-                // If pointer is not over, attempt to hide (timer will handle delay if needed)
                 if (!_isPointerOverRootLayout)
                 {
-                    // If something is playing, start timer, otherwise hide immediately
                     if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.IsPlaying)
                         _autoHideTimer.Start();
                     else
                         HideControls();
                 }
             }
-            else // Auto-hide disabled
+            else
             {
                 _autoHideTimer?.Stop();
-                ShowControls(); // Make sure controls are visible
+                ShowControls();
             }
         }
 
@@ -100,7 +95,7 @@ namespace App2.Controls
                 return;
             }
 
-            _mediaPlayerViewModel.PlaybackStateChanged -= MediaPlayerViewModel_PlaybackStateChanged; // Ensure no multiple subscriptions
+            _mediaPlayerViewModel.PlaybackStateChanged -= MediaPlayerViewModel_PlaybackStateChanged;
             _mediaPlayerViewModel.PlaybackStateChanged += MediaPlayerViewModel_PlaybackStateChanged;
 
             TimeSlider.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(TimeSlider_PointerPressed), true);
@@ -109,16 +104,6 @@ namespace App2.Controls
             UpdateControlsAppearance();
             ApplyInitialAutoHideState();
         }
-
-        // Optional: If PlaybackStateChanged is not granular enough for CurrentPosition/TotalDuration
-        // private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        // {
-        //    if (e.PropertyName == nameof(MediaPlayerViewModel.CurrentPosition) ||
-        //        e.PropertyName == nameof(MediaPlayerViewModel.TotalDuration))
-        //    {
-        //        DispatcherQueue.TryEnqueue(() => UpdateSliderAndTimeTexts());
-        //    }
-        // }
 
         private void ApplyInitialAutoHideState()
         {
@@ -141,7 +126,7 @@ namespace App2.Controls
             }
             else
             {
-                ShowControls(); // Always show if auto-hide is off
+                ShowControls();
             }
         }
 
@@ -167,7 +152,7 @@ namespace App2.Controls
                         ShowControls();
                         if (!_isPointerOverRootLayout)
                         {
-                            _autoHideTimer?.Start(); // Start timer to hide if pointer is not over
+                            _autoHideTimer?.Start();
                         }
                     }
                     else if (_mediaPlayerViewModel != null && !_mediaPlayerViewModel.IsPlaying && !_isPointerOverRootLayout)
@@ -345,8 +330,6 @@ namespace App2.Controls
             if (_mediaPlayerViewModel != null)
             {
                 _mediaPlayerViewModel.PlaybackStateChanged -= MediaPlayerViewModel_PlaybackStateChanged;
-                // Unsubscribe from PropertyChanged if subscribed
-                // _mediaPlayerViewModel.PropertyChanged -= ViewModel_PropertyChanged;
                 _mediaPlayerViewModel = null;
             }
 

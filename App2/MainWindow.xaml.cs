@@ -52,7 +52,7 @@ namespace App2
             RootNavigationView.SelectedItem = RootNavigationView.MenuItems.FirstOrDefault();
 
             ContentFrame.Navigated += ContentFrame_Navigated;
-            RootNavigationView.Loaded += RootNavigationView_Loaded; // Navigate on load
+            RootNavigationView.Loaded += RootNavigationView_Loaded;
             RootNavigationView.BackRequested += RootNavigationView_BackRequested;
         }
 
@@ -67,7 +67,6 @@ namespace App2
             }
             else if (RootNavigationView.MenuItems.Count > 0 && RootNavigationView.MenuItems[0] is NavigationViewItem firstItem)
             {
-                // Fallback to first item if HomePage tag not found
                 RootNavigationView.SelectedItem = firstItem;
                 if (firstItem.Tag is string tag && !string.IsNullOrEmpty(tag))
                 {
@@ -77,13 +76,10 @@ namespace App2
             }
         }
 
-         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+        private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
         {
-            // Update NavigationView's IsBackEnabled state
             RootNavigationView.IsBackEnabled = ContentFrame.CanGoBack;
-
-            // Show/Hide GlobalMediaControls based on the navigated page
-            if (this.GlobalMediaControls != null) // Always check for null
+            if (this.GlobalMediaControls != null)
             {
                 if (e.SourcePageType == typeof(SettingsPage))
                 {
@@ -95,7 +91,6 @@ namespace App2
                 }
             }
 
-            // Update selected item in NavigationView
             if (e.SourcePageType == typeof(SettingsPage))
             {
                 RootNavigationView.SelectedItem = RootNavigationView.SettingsItem;
@@ -105,14 +100,14 @@ namespace App2
                 var navigatedItem = RootNavigationView.MenuItems
                     .OfType<NavigationViewItem>()
                     .FirstOrDefault(item => item.Tag is string tag && Type.GetType(tag) == e.SourcePageType);
-                
+
                 if (navigatedItem != null)
                 {
                     RootNavigationView.SelectedItem = navigatedItem;
                 }
             }
         }
-        
+
         private void RootNavigationView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             if (ContentFrame.CanGoBack)
