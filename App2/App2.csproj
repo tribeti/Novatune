@@ -11,16 +11,20 @@
 		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<EnableMsixTooling>true</EnableMsixTooling>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
 
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<SelfContained>true</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
 		<!--Enable Native AOT (error)-->
 
 		<!--https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8-->
 
-		<!--<PublishAot>true</PublishAot>
-		<IsAotCompatible>true</IsAotCompatible>-->
-
-
-		<Nullable>enable</Nullable>
+		<!--<PublishAot>true</PublishAot>-->
+		
+		<NoWarn>$(NoWarn);CS8305;WMC1501</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Controls\MediaControlsView.xaml" />

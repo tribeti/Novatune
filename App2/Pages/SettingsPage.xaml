@@ -64,12 +64,6 @@
                     </DataTemplate>
                 </controls:SettingsExpander.ItemTemplate>
             </controls:SettingsExpander>
-
-            <ToggleSwitch
-                x:Name="AutoHideToggleSwitch"
-                AutomationProperties.Name="Tự động ẩn thanh điều khiển"
-                Header="Tự động ẩn thanh điều khiển media"
-                Toggled="AutoHideToggleSwitch_Toggled" />
         </StackPanel>
     </ScrollViewer>
 </Page>

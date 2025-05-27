@@ -9,18 +9,13 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
 
-    <Grid
-        x:Name="RootLayoutForAutoHide"
-        Background="Transparent"
-        PointerEntered="RootLayoutForAutoHide_PointerEntered"
-        PointerExited="RootLayoutForAutoHide_PointerExited">
+    <Grid x:Name="RootGrid" Background="Transparent">
         <Grid
-            x:Name="RootGrid"
+            Height="120"
+            VerticalAlignment="Bottom"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-            BorderThickness="0,1,0,0"
-            Opacity="0"
-            Visibility="Visible">
+            BorderThickness="0,1,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -100,7 +95,7 @@
                         Height="40"
                         Click="SeekBackwardButton_Click"
                         CornerRadius="20"
-                        ToolTipService.ToolTip="Seek backward 10s">
+                        ToolTipService.ToolTip="Seek backward 5s">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="14"
@@ -125,11 +120,11 @@
                         Height="40"
                         Click="SeekForwardButton_Click"
                         CornerRadius="20"
-                        ToolTipService.ToolTip="Seek forward 10s">
+                        ToolTipService.ToolTip="Seek forward 5s">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="14"
-                            Glyph="&#xE101;" />
+                            Glyph="&#xEB9D;" />
                     </Button>
                     <Button
                         x:Name="NextButton"
@@ -141,7 +136,7 @@
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="14"
-                            Glyph="&#xEB9D;" />
+                            Glyph="&#xE101;" />
                     </Button>
                     <Button
                         x:Name="StopButton"
@@ -149,7 +144,7 @@
                         Height="40"
                         Click="StopButton_Click"
                         CornerRadius="20"
-                        ToolTipService.ToolTip="Stop">
+                        ToolTipService.ToolTip="Reset">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="14"
@@ -158,35 +153,5 @@
                 </StackPanel>
             </Grid>
         </Grid>
-
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup x:Name="VisibilityStates">
-                <VisualState x:Name="VisibleState">
-                    <Storyboard>
-                        <DoubleAnimation
-                            Storyboard.TargetName="RootGrid"
-                            Storyboard.TargetProperty="Opacity"
-                            To="1.0"
-                            Duration="0:0:0.2" />
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Visibility">
-                            <DiscreteObjectKeyFrame KeyTime="0">
-                                <DiscreteObjectKeyFrame.Value>
-                                    <Visibility>Visible</Visibility>
-                                </DiscreteObjectKeyFrame.Value>
-                            </DiscreteObjectKeyFrame>
-                        </ObjectAnimationUsingKeyFrames>
-                    </Storyboard>
-                </VisualState>
-                <VisualState x:Name="HiddenState">
-                    <Storyboard>
-                        <DoubleAnimation
-                            Storyboard.TargetName="RootGrid"
-                            Storyboard.TargetProperty="Opacity"
-                            To="0.0"
-                            Duration="0:0:0.3" />
-                    </Storyboard>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
     </Grid>
 </UserControl>

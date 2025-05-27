@@ -4,7 +4,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.IO;
-using Windows.Storage;
 
 namespace App2.Controls
 {
@@ -12,76 +11,15 @@ namespace App2.Controls
     {
         private MediaPlayerViewModel _mediaPlayerViewModel;
         private bool _isUserDraggingSlider = false;
-
-        private DispatcherTimer _autoHideTimer;
         private DispatcherTimer _updateTimer;
-        private bool _isPointerOverRootLayout = false;
-        private bool _isAutoHideFeatureEnabled = true;
-        public const string AutoHideSettingKey = "MediaControlsAutoHideEnabled";
 
         public MediaControlsView()
         {
             this.InitializeComponent();
             TimeSlider.IsEnabled = false;
-            LoadAutoHideSetting();
+
             _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             _updateTimer.Tick += UpdateTimer_Tick;
-
-            if (_isAutoHideFeatureEnabled)
-            {
-                _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-                _autoHideTimer.Tick += AutoHideTimer_Tick;
-                DispatcherQueue.TryEnqueue(() => VisualStateManager.GoToState(this, "HiddenState", false));
-            }
-            else
-            {
-                DispatcherQueue.TryEnqueue(() => VisualStateManager.GoToState(this, "VisibleState", false));
-            }
-        }
-
-        private void LoadAutoHideSetting()
-        {
-            var localSettings = ApplicationData.Current.LocalSettings;
-            if (localSettings.Values.TryGetValue(AutoHideSettingKey, out object settingValue) && settingValue is bool value)
-            {
-                _isAutoHideFeatureEnabled = value;
-            }
-            else
-            {
-                localSettings.Values[AutoHideSettingKey] = _isAutoHideFeatureEnabled;
-            }
-        }
-
-        public void UpdateAutoHideFeatureState(bool isEnabled)
-        {
-            if (_isAutoHideFeatureEnabled == isEnabled)
-            {
-                return;
-            }
-
-            _isAutoHideFeatureEnabled = isEnabled;
-
-
-            if (_isAutoHideFeatureEnabled)
-            {
-                if (_autoHideTimer == null)
-                {
-                    _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-                    _autoHideTimer.Tick += AutoHideTimer_Tick;
-                }
-                if (!_isPointerOverRootLayout)
-                {
-                    if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.IsPlaying)
-                        _autoHideTimer.Start();
-                    else
-                        HideControls();
-                }
-            }
-            else
-            {
-                _autoHideTimer?.Stop();
-                ShowControls();
-            }
         }
 
         public void Initialize(MediaPlayerViewModel viewModel)
@@ -102,32 +40,6 @@ namespace App2.Controls
             TimeSlider.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(TimeSlider_PointerReleased), true);
 
             UpdateControlsAppearance();
-            ApplyInitialAutoHideState();
-        }
-
-        private void ApplyInitialAutoHideState()
-        {
-            if (_isAutoHideFeatureEnabled)
-            {
-                bool shouldHide = !_isPointerOverRootLayout &&
-                                  (_mediaPlayerViewModel == null || !_mediaPlayerViewModel.IsPlaying || _mediaPlayerViewModel.CurrentFile == null);
-                if (shouldHide)
-                {
-                    HideControls();
-                }
-                else
-                {
-                    ShowControls();
-                    if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.IsPlaying && !_isPointerOverRootLayout)
-                    {
-                        _autoHideTimer?.Start();
-                    }
-                }
-            }
-            else
-            {
-                ShowControls();
-            }
         }
 
         private void MediaPlayerViewModel_PlaybackStateChanged()
@@ -143,26 +55,6 @@ namespace App2.Controls
                 else
                 {
                     _updateTimer.Stop();
-                }
-
-                if (_isAutoHideFeatureEnabled)
-                {
-                    if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.IsPlaying)
-                    {
-                        ShowControls();
-                        if (!_isPointerOverRootLayout)
-                        {
-                            _autoHideTimer?.Start();
-                        }
-                    }
-                    else if (_mediaPlayerViewModel != null && !_mediaPlayerViewModel.IsPlaying && !_isPointerOverRootLayout)
-                    {
-                        HideControls();
-                    }
-                }
-                else
-                {
-                    ShowControls();
                 }
             });
         }
@@ -187,7 +79,6 @@ namespace App2.Controls
             }
 
             MediaTitleText.Text = Path.GetFileNameWithoutExtension(_mediaPlayerViewModel.CurrentFile.Name);
-            string directoryPath = Path.GetDirectoryName(_mediaPlayerViewModel.CurrentFile.Path);
             PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768"; // Pause : Play
 
             UpdateSliderAndTimeTexts(true);
@@ -234,51 +125,6 @@ namespace App2.Controls
         private string FormatTimeSpan(TimeSpan timeSpan)
         {
             return timeSpan.TotalHours >= 1 ? timeSpan.ToString(@"h\:mm\:ss") : timeSpan.ToString(@"m\:ss");
-        }
-
-        private void RootLayoutForAutoHide_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            _isPointerOverRootLayout = true;
-            if (_isAutoHideFeatureEnabled)
-            {
-                _autoHideTimer?.Stop();
-                ShowControls();
-            }
-        }
-
-        private void RootLayoutForAutoHide_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            _isPointerOverRootLayout = false;
-            if (_isAutoHideFeatureEnabled)
-            {
-                if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.CurrentFile != null)
-                {
-                    _autoHideTimer?.Start();
-                }
-                else
-                {
-                    HideControls();
-                }
-            }
-        }
-
-        private void AutoHideTimer_Tick(object sender, object e)
-        {
-            _autoHideTimer?.Stop();
-            if (_isAutoHideFeatureEnabled && !_isPointerOverRootLayout)
-            {
-                HideControls();
-            }
-        }
-
-        private void ShowControls()
-        {
-            DispatcherQueue.TryEnqueue(() => VisualStateManager.GoToState(this, "VisibleState", true));
-        }
-
-        private void HideControls()
-        {
-            DispatcherQueue.TryEnqueue(() => VisualStateManager.GoToState(this, "HiddenState", true));
         }
 
         private void TimeSlider_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -332,9 +178,6 @@ namespace App2.Controls
                 _mediaPlayerViewModel.PlaybackStateChanged -= MediaPlayerViewModel_PlaybackStateChanged;
                 _mediaPlayerViewModel = null;
             }
-
-            _autoHideTimer?.Stop();
-            _autoHideTimer = null;
 
             _updateTimer?.Stop();
             _updateTimer = null;

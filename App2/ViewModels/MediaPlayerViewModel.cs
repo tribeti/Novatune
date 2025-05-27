@@ -161,7 +161,7 @@ namespace App2.ViewModels
             var multimediaExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 ".mp3", ".wav", ".aac", ".flac", ".wma", ".ogg", // Audio
-                ".mp4", ".mkv", ".avi", ".mov", ".wmv"           // Video
+                //".mp4", ".mkv", ".avi", ".mov", ".wmv"           // Video (tam bo qua)
             };
             MediaItems.Clear();
             CurrentFile = null;
