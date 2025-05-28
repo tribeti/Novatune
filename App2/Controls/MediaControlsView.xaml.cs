@@ -69,7 +69,7 @@ namespace App2.Controls
 
         private void UpdateControlsAppearance()
         {
-            if (_mediaPlayerViewModel == null || _mediaPlayerViewModel.CurrentFile == null)
+            if (_mediaPlayerViewModel == null || _mediaPlayerViewModel.CurrentAudio == null)
             {
                 MediaTitleText.Text = "Không có file nào đang phát";
                 PlayPauseIcon.Glyph = "\uE768";
@@ -78,7 +78,7 @@ namespace App2.Controls
                 return;
             }
 
-            MediaTitleText.Text = Path.GetFileNameWithoutExtension(_mediaPlayerViewModel.CurrentFile.Name);
+            MediaTitleText.Text = Path.GetFileNameWithoutExtension(_mediaPlayerViewModel.CurrentAudio.DisplayTitle);
             PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768"; // Pause : Play
 
             UpdateSliderAndTimeTexts(true);

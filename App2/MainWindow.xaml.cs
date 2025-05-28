@@ -137,38 +137,11 @@ namespace App2
             }
         }
 
-        private void NavigateToPage(Type targetPageType, object parameter = null)
-        {
-            if (ContentFrame.CurrentSourcePageType != targetPageType)
-            {
-                ContentFrame.Navigate(targetPageType, parameter);
-            }
-        }
-
         private void NavigateToPage(Type targetPageType, object parameter = null, NavigationTransitionInfo transitionInfo = null)
         {
             if (ContentFrame.CurrentSourcePageType != targetPageType)
             {
                 ContentFrame.Navigate(targetPageType, parameter, transitionInfo ?? new EntranceNavigationTransitionInfo());
-            }
-        }
-
-        private async Task OpenFolderAndNavigateAsync()
-        {
-            FolderPicker folderPicker = new FolderPicker
-            {
-                SuggestedStartLocation = PickerLocationId.MusicLibrary,
-                ViewMode = PickerViewMode.Thumbnail
-            };
-            folderPicker.FileTypeFilter.Add("*");
-
-            IntPtr hwnd = WindowNative.GetWindowHandle(this);
-            InitializeWithWindow.Initialize(folderPicker, hwnd);
-
-            StorageFolder folder = await folderPicker.PickSingleFolderAsync();
-            if (folder != null)
-            {
-                NavigateToPage(typeof(FolderDetailPage), folder, new DrillInNavigationTransitionInfo());
             }
         }
 

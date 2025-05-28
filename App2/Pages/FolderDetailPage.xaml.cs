@@ -1,4 +1,5 @@
-﻿using App2.ViewModels;
+﻿using App2.Models;
+using App2.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -33,14 +34,17 @@ namespace App2.Pages
                 SelectedFolder = folder;
                 if (MediaPlayerVM != null)
                 {
-                    await MediaPlayerVM.LoadMediaItemsAsync(SelectedFolder);
+                    await MediaPlayerVM.LoadAudioFilesAsync(SelectedFolder);
                 }
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("Warning: No StorageFolder parameter received in FolderDetailPage.");
                 SelectedFolder = null;
-                MediaPlayerVM?.MediaItems.Clear();
+                if (MediaPlayerVM != null)
+                {
+                    await MediaPlayerVM.LoadAudioFilesAsync(null);
+                }
             }
         }
 
@@ -54,33 +58,44 @@ namespace App2.Pages
 
         private async void FileListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is StorageFile file && MediaPlayerVM != null)
+            if (e.ClickedItem is LocalAudioModel audioModel && MediaPlayerVM != null)
             {
-                if (MediaPlayerVM.PlayMediaFileCommand.CanExecute(file))
+                if (MediaPlayerVM.PlayAudioCommand.CanExecute(audioModel))
                 {
                     try
                     {
-                        await MediaPlayerVM.PlayMediaFileCommand.ExecuteAsync(file);
+                        await MediaPlayerVM.PlayAudioCommand.ExecuteAsync(audioModel);
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error initiating media playback: {ex.Message}");
-                        DisplayPlaybackErrorDialog(file.Name, ex.Message);
+                        System.Diagnostics.Debug.WriteLine($"Lỗi khi bắt đầu phát media: {ex.Message}");
+                        DisplayPlaybackErrorDialog(audioModel.DisplayTitle, ex.Message);
                     }
                 }
             }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"ClickedItem không phải là LocalAudioModel hoặc MediaPlayerVM là null. ClickedItem type: {e.ClickedItem?.GetType().FullName}");
+            }
         }
 
-        private async void DisplayPlaybackErrorDialog(string fileName, string errorMessage)
+        private async void DisplayPlaybackErrorDialog(string audioTitle, string errorMessage)
         {
             ContentDialog errorDialog = new ContentDialog
             {
                 XamlRoot = this.XamlRoot,
                 Title = "Lỗi phát media",
-                Content = $"Không thể phát file: {fileName}\nChi tiết: {errorMessage}",
+                Content = $"Không thể phát: {audioTitle}\nChi tiết: {errorMessage}",
                 CloseButtonText = "Đóng"
             };
-            await errorDialog.ShowAsync();
+            try
+            {
+                await errorDialog.ShowAsync();
+            }
+            catch (Exception dialogEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi hiển thị dialog: {dialogEx.Message}");
+            }
         }
     }
 }

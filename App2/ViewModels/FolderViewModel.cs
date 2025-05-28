@@ -1,8 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using App2.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
@@ -14,36 +18,228 @@ namespace App2.ViewModels
     {
         private const string FolderTokensKey = "SavedFolderTokens";
         private readonly ApplicationDataContainer _localSettings;
+        private CancellationTokenSource _searchCancellationTokenSource;
+        private readonly DispatcherQueue _dispatcherQueue;
 
         public ObservableCollection<StorageFolder> Folders { get; } = new ObservableCollection<StorageFolder>();
         public ObservableCollection<StorageFolder> SelectedFolders { get; } = new ObservableCollection<StorageFolder>();
-        public ObservableCollection<IStorageItem> Contents { get; } = new ObservableCollection<IStorageItem>();
-        
+        public ObservableCollection<LocalAudioModel> Contents { get; } = new ObservableCollection<LocalAudioModel>();
+
+        [ObservableProperty]
+        private bool _isSearching;
+
+        [ObservableProperty]
+        private string _searchStatus;
+
+        [ObservableProperty]
+        private int _filesFoundCount;
+
+        private readonly HashSet<string> _audioExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".mp3", ".wav", ".aac", ".flac", ".wma", ".ogg", ".m4a"
+        };
+
         public FolderViewModel()
         {
             _localSettings = ApplicationData.Current.LocalSettings;
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread(); // Lấy DispatcherQueue cho luồng UI
+            SelectedFolders.CollectionChanged += async (s, e) => await TriggerContentsUpdateAsync();
             LoadSavedFoldersAsync();
         }
 
-        [RelayCommand]
-        public async Task UpdateContentsAsync()
+        [RelayCommand(CanExecute = nameof(CanStartSearch))]
+        public async Task StartSearchAsync()
         {
+            await TriggerContentsUpdateAsync();
+        }
+        private bool CanStartSearch() => !IsSearching && SelectedFolders.Any();
+
+        [RelayCommand(CanExecute = nameof(CanCancelSearch))]
+        public void CancelSearch()
+        {
+            _searchCancellationTokenSource?.Cancel();
+            IsSearching = false;
+            SearchStatus = "Tìm kiếm đã hủy.";
+            StartSearchCommand.NotifyCanExecuteChanged();
+            CancelSearchCommand.NotifyCanExecuteChanged();
+        }
+        private bool CanCancelSearch() => IsSearching;
+
+        private async Task TriggerContentsUpdateAsync()
+        {
+            _searchCancellationTokenSource?.Cancel(); // Hủy tìm kiếm trước đó nếu có
+            _searchCancellationTokenSource = new CancellationTokenSource();
+            var token = _searchCancellationTokenSource.Token;
+
+            IsSearching = true;
+            SearchStatus = "Đang tìm kiếm...";
+            FilesFoundCount = 0;
             Contents.Clear();
-            foreach (var folder in SelectedFolders)
+            StartSearchCommand.NotifyCanExecuteChanged();
+            CancelSearchCommand.NotifyCanExecuteChanged();
+
+            if (!SelectedFolders.Any())
             {
-                var items = await folder.GetItemsAsync();
-                foreach (var item in items)
+                SearchStatus = "Vui lòng chọn thư mục.";
+                IsSearching = false;
+                StartSearchCommand.NotifyCanExecuteChanged();
+                CancelSearchCommand.NotifyCanExecuteChanged();
+                return;
+            }
+
+            // Tạo một bản sao của danh sách thư mục đã chọn để tránh lỗi nếu collection thay đổi trong khi duyệt
+            var foldersToSearch = SelectedFolders.ToList();
+
+            try
+            {
+                // Chạy tác vụ tìm kiếm trên một luồng nền
+                await Task.Run(async () =>
                 {
-                    if (!Contents.Any(c => c.Path == item.Path))
+                    var tempFoundModels = new List<LocalAudioModel>();
+                    const int batchSize = 50; // Số lượng file xử lý trước khi cập nhật UI
+
+                    foreach (var folder in foldersToSearch)
                     {
-                        Contents.Add(item);
+                        if (token.IsCancellationRequested) break;
+                        await SearchInFolderRecursiveAsync(folder, tempFoundModels, token, batchSize);
                     }
+
+                    // Thêm những file còn lại trong batch cuối cùng (nếu có)
+                    if (tempFoundModels.Any() && !token.IsCancellationRequested)
+                    {
+                        AddModelsToContentsOnUiThread(tempFoundModels);
+                        tempFoundModels.Clear();
+                    }
+
+                }, token);
+
+                if (token.IsCancellationRequested)
+                {
+                    SearchStatus = $"Tìm kiếm đã hủy. Đã tìm thấy {FilesFoundCount} file.";
+                }
+                else
+                {
+                    SearchStatus = $"Hoàn tất. Tìm thấy {FilesFoundCount} file.";
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                SearchStatus = $"Tìm kiếm đã hủy. Đã tìm thấy {FilesFoundCount} file.";
+            }
+            catch (Exception ex)
+            {
+                SearchStatus = $"Lỗi: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error during search: {ex.ToString()}");
+            }
+            finally
+            {
+                IsSearching = false;
+                _searchCancellationTokenSource?.Dispose();
+                _searchCancellationTokenSource = null;
+                StartSearchCommand.NotifyCanExecuteChanged();
+                CancelSearchCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        private async Task SearchInFolderRecursiveAsync(StorageFolder currentFolder, List<LocalAudioModel> batchList, CancellationToken token, int batchSize)
+        {
+            if (token.IsCancellationRequested) return;
+
+            IReadOnlyList<IStorageItem> items = null;
+            try
+            {
+                // Lấy danh sách file và thư mục con một cách an toàn hơn
+                items = await currentFolder.GetItemsAsync();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Access denied to folder: {currentFolder.Path}. Skipping. Error: {ex.Message}");
+                _dispatcherQueue.TryEnqueue(() => SearchStatus = $"Bỏ qua thư mục không có quyền: {currentFolder.Name}");
+                return; // Bỏ qua thư mục này
+            }
+            catch (Exception ex) // Các lỗi khác khi truy cập thư mục
+            {
+                System.Diagnostics.Debug.WriteLine($"Error accessing folder: {currentFolder.Path}. Skipping. Error: {ex.Message}");
+                _dispatcherQueue.TryEnqueue(() => SearchStatus = $"Lỗi truy cập thư mục: {currentFolder.Name}");
+                return; // Bỏ qua thư mục này
+            }
+
+
+            if (items == null) return;
+
+            foreach (var item in items)
+            {
+                if (token.IsCancellationRequested) return;
+
+                if (item is StorageFile file)
+                {
+                    if (_audioExtensions.Contains(file.FileType.ToLowerInvariant()))
+                    {
+                        try
+                        {
+                            var audioModel = await LocalAudioModel.FromStorageFileAsync(file);
+                            if (audioModel != null)
+                            {
+                                lock (batchList)
+                                    batchList.Add(audioModel);
+                                _dispatcherQueue.TryEnqueue(() => FilesFoundCount++);
+
+                                if (batchList.Count >= batchSize)
+                                {
+                                    AddModelsToContentsOnUiThread(new List<LocalAudioModel>(batchList)); // Tạo bản sao để truyền
+                                    batchList.Clear();
+                                }
+                            }
+                        }
+                        catch (Exception ex) // Lỗi khi tạo LocalAudioModel
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error creating LocalAudioModel for {file.Name}: {ex.Message}");
+                        }
+                    }
+                }
+                else if (item is StorageFolder subFolder)
+                {
+                    await SearchInFolderRecursiveAsync(subFolder, batchList, token, batchSize);
                 }
             }
         }
+
+        private void AddModelsToContentsOnUiThread(List<LocalAudioModel> modelsToAdd)
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                foreach (var model in modelsToAdd)
+                {
+                    if (!_searchCancellationTokenSource.IsCancellationRequested) // Kiểm tra lại trước khi thêm
+                    {
+                        Contents.Add(model);
+                    }
+                    else break;
+                }
+                SearchStatus = $"Đang xử lý... {FilesFoundCount} file được tìm thấy.";
+            });
+        }
+
+        //[RelayCommand]
+        //public async Task UpdateContentsAsync()
+        //{
+        //    Contents.Clear();
+        //    foreach (var folder in SelectedFolders)
+        //    {
+        //        var items = await folder.GetItemsAsync();
+        //        foreach (var item in items)
+        //        {
+        //            if (!Contents.Any(c => c.FilePath == item.Path))
+        //            {
+        //                Contents.Add(item);
+        //            }
+        //        }
+        //    }
+        //}
         
         private async Task LoadSavedFoldersAsync()
         {
+            Folders.Clear();
             var tokenList = _localSettings.Values[FolderTokensKey] as string;
             if (!string.IsNullOrEmpty(tokenList))
             {
@@ -59,6 +255,7 @@ namespace App2.ViewModels
                         }
                     }
                 }
+                SaveFolderTokens();
             }
         }
 
