@@ -42,7 +42,7 @@ namespace App2.ViewModels
         public FolderViewModel()
         {
             _localSettings = ApplicationData.Current.LocalSettings;
-            _dispatcherQueue = DispatcherQueue.GetForCurrentThread(); // Lấy DispatcherQueue cho luồng UI
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
             SelectedFolders.CollectionChanged += async (s, e) => await TriggerContentsUpdateAsync();
             LoadSavedFoldersAsync();
         }
@@ -67,7 +67,7 @@ namespace App2.ViewModels
 
         private async Task TriggerContentsUpdateAsync()
         {
-            _searchCancellationTokenSource?.Cancel(); // Hủy tìm kiếm trước đó nếu có
+            _searchCancellationTokenSource?.Cancel();
             _searchCancellationTokenSource = new CancellationTokenSource();
             var token = _searchCancellationTokenSource.Token;
 
@@ -86,17 +86,14 @@ namespace App2.ViewModels
                 CancelSearchCommand.NotifyCanExecuteChanged();
                 return;
             }
-
-            // Tạo một bản sao của danh sách thư mục đã chọn để tránh lỗi nếu collection thay đổi trong khi duyệt
             var foldersToSearch = SelectedFolders.ToList();
 
             try
             {
-                // Chạy tác vụ tìm kiếm trên một luồng nền
                 await Task.Run(async () =>
                 {
                     var tempFoundModels = new List<LocalAudioModel>();
-                    const int batchSize = 50; // Số lượng file xử lý trước khi cập nhật UI
+                    const int batchSize = 50;
 
                     foreach (var folder in foldersToSearch)
                     {
@@ -104,7 +101,6 @@ namespace App2.ViewModels
                         await SearchInFolderRecursiveAsync(folder, tempFoundModels, token, batchSize);
                     }
 
-                    // Thêm những file còn lại trong batch cuối cùng (nếu có)
                     if (tempFoundModels.Any() && !token.IsCancellationRequested)
                     {
                         AddModelsToContentsOnUiThread(tempFoundModels);
@@ -148,22 +144,20 @@ namespace App2.ViewModels
             IReadOnlyList<IStorageItem> items = null;
             try
             {
-                // Lấy danh sách file và thư mục con một cách an toàn hơn
                 items = await currentFolder.GetItemsAsync();
             }
             catch (UnauthorizedAccessException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Access denied to folder: {currentFolder.Path}. Skipping. Error: {ex.Message}");
                 _dispatcherQueue.TryEnqueue(() => SearchStatus = $"Bỏ qua thư mục không có quyền: {currentFolder.Name}");
-                return; // Bỏ qua thư mục này
+                return;
             }
-            catch (Exception ex) // Các lỗi khác khi truy cập thư mục
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error accessing folder: {currentFolder.Path}. Skipping. Error: {ex.Message}");
                 _dispatcherQueue.TryEnqueue(() => SearchStatus = $"Lỗi truy cập thư mục: {currentFolder.Name}");
-                return; // Bỏ qua thư mục này
+                return;
             }
-
 
             if (items == null) return;
 
@@ -186,12 +180,12 @@ namespace App2.ViewModels
 
                                 if (batchList.Count >= batchSize)
                                 {
-                                    AddModelsToContentsOnUiThread(new List<LocalAudioModel>(batchList)); // Tạo bản sao để truyền
+                                    AddModelsToContentsOnUiThread(new List<LocalAudioModel>(batchList));
                                     batchList.Clear();
                                 }
                             }
                         }
-                        catch (Exception ex) // Lỗi khi tạo LocalAudioModel
+                        catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"Error creating LocalAudioModel for {file.Name}: {ex.Message}");
                         }
@@ -210,7 +204,7 @@ namespace App2.ViewModels
             {
                 foreach (var model in modelsToAdd)
                 {
-                    if (!_searchCancellationTokenSource.IsCancellationRequested) // Kiểm tra lại trước khi thêm
+                    if (!_searchCancellationTokenSource.IsCancellationRequested)
                     {
                         Contents.Add(model);
                     }
@@ -219,23 +213,6 @@ namespace App2.ViewModels
                 SearchStatus = $"Đang xử lý... {FilesFoundCount} file được tìm thấy.";
             });
         }
-
-        //[RelayCommand]
-        //public async Task UpdateContentsAsync()
-        //{
-        //    Contents.Clear();
-        //    foreach (var folder in SelectedFolders)
-        //    {
-        //        var items = await folder.GetItemsAsync();
-        //        foreach (var item in items)
-        //        {
-        //            if (!Contents.Any(c => c.FilePath == item.Path))
-        //            {
-        //                Contents.Add(item);
-        //            }
-        //        }
-        //    }
-        //}
         
         private async Task LoadSavedFoldersAsync()
         {

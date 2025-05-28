@@ -6,17 +6,99 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:App2.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:App2.Models"
     Background="Transparent"
     mc:Ignorable="d">
 
-    <Grid Margin="0,30,0,0">
-        <WebView2
-            x:Name="MyWebView2"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  Search Section  -->
+        <StackPanel
+            Grid.Row="0"
+            Margin="20"
+            Orientation="Horizontal"
+            Spacing="10">
+            <TextBox
+                x:Name="SearchTextBox"
+                Width="300"
+                KeyDown="SearchTextBox_KeyDown"
+                PlaceholderText="Nhập tên bài hát hoặc từ khóa..."
+                Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Button Command="{x:Bind ViewModel.SearchCommand}" Content="Tìm kiếm" />
+        </StackPanel>
+
+        <!--  Loading Indicator  -->
+        <ProgressRing
             Grid.Row="1"
-            Width="Auto"
-            Height="Auto"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Source="https://www.youtube.com/" />
+            Width="50"
+            Height="50"
+            IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+
+        <!--  Videos ListView  -->
+        <ListView
+            x:Name="VideosListView"
+            Grid.Row="1"
+            Margin="20,0,20,20"
+            ItemsSource="{x:Bind ViewModel.Videos, Mode=OneWay}"
+            SelectionMode="Single">
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:OnlineModel">
+                    <Grid
+                        Margin="0,5"
+                        Padding="10"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  Thumbnail  -->
+                        <Border
+                            Grid.Column="0"
+                            Width="120"
+                            Height="68"
+                            CornerRadius="4">
+                            <Image Source="{x:Bind ThumbnailUrl}" Stretch="UniformToFill" />
+                        </Border>
+
+                        <!--  Video Info  -->
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="15,0,0,0"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                MaxLines="2"
+                                Text="{x:Bind Title}"
+                                TextWrapping="Wrap" />
+
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Author}" />
+                        </StackPanel>
+
+                        <!--  Duration  -->
+                        <TextBlock
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Duration}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Page>
