@@ -1,48 +1,38 @@
-﻿using Microsoft.UI.Xaml.Input;
+﻿using App2.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using App2.Models;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using YoutubeExplode.Videos;
+using YoutubeExplode.Playlists;
+using YoutubeExplode.Videos.Streams;
 
 namespace App2.ViewModels
 {
-    public class OnlineViewModel : INotifyPropertyChanged
+    public partial class OnlineViewModel : ObservableObject
     {
         private readonly YoutubeClient _youtubeClient;
+        private readonly MediaPlayerViewModel _mediaPlayerViewModel;
+
+        [ObservableProperty]
         private string _searchQuery;
+
+        [ObservableProperty]
         private bool _isLoading;
 
-        public OnlineViewModel()
+        public ObservableCollection<OnlineModel> Videos { get; } = new ObservableCollection<OnlineModel>();
+
+        public OnlineViewModel(MediaPlayerViewModel mediaPlayerVM)
         {
             _youtubeClient = new YoutubeClient();
-            Videos = new ObservableCollection<OnlineModel>();
-            SearchCommand = new RelayCommand(async () => await SearchVideosAsync());
+            _mediaPlayerViewModel = mediaPlayerVM ?? throw new ArgumentNullException(nameof(mediaPlayerVM));
         }
 
-        public ObservableCollection<OnlineModel> Videos { get; }
-
-        public string SearchQuery
-        {
-            get => _searchQuery;
-            set => SetProperty(ref _searchQuery, value);
-        }
-
-        public bool IsLoading
-        {
-            get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
-        }
-
-        public ICommand SearchCommand { get; }
-
-        private async Task SearchVideosAsync()
+        [RelayCommand]
+        private async Task SearchAsync()
         {
             if (string.IsNullOrWhiteSpace(SearchQuery))
                 return;
@@ -52,27 +42,25 @@ namespace App2.ViewModels
 
             try
             {
-                // Tìm kiếm video trên YouTube
                 var searchResults = _youtubeClient.Search.GetVideosAsync(SearchQuery);
                 await foreach (var video in searchResults)
                 {
-                    var videoModel = new OnlineModel
+                    var onlineModel = new OnlineModel
                     {
                         Title = video.Title,
                         Author = video.Author.ChannelTitle,
-                        Duration = FormatDuration(video.Duration),
+                        DurationTimeSpan = video.Duration,
+                        StreamUrl = "",
                         ThumbnailUrl = video.Thumbnails.GetWithHighestResolution()?.Url ?? "",
-                        VideoId = video.Id,
-                        Url = video.Url
+                        VideoId = video.Id.Value
                     };
 
-                    Videos.Add(videoModel);
+                    Videos.Add(onlineModel);
                 }
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi
-                System.Diagnostics.Debug.WriteLine($"Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Lỗi tìm kiếm YouTube: {ex.Message}");
             }
             finally
             {
@@ -80,54 +68,60 @@ namespace App2.ViewModels
             }
         }
 
-        private string FormatDuration(TimeSpan? duration)
+        [RelayCommand]
+        private async Task PlayVideoAsync(OnlineModel selectedVideo)
         {
-            if (!duration.HasValue)
-                return "Unknown";
+            if (selectedVideo != null && _mediaPlayerViewModel != null)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(selectedVideo.StreamUrl))
+                    {
+                        selectedVideo.StreamUrl = await GetStreamUrlAsync(selectedVideo.VideoId);
+                    }
 
-            var time = duration.Value;
-            if (time.Hours > 0)
-                return $"{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}";
-            else
-                return $"{time.Minutes:D2}:{time.Seconds:D2}";
+                    if (!string.IsNullOrEmpty(selectedVideo.StreamUrl))
+                    {
+                        if (_mediaPlayerViewModel.PlayOnlineAudioCommand.CanExecute(selectedVideo))
+                        {
+                            await _mediaPlayerViewModel.PlayOnlineAudioCommand.ExecuteAsync(selectedVideo);
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Không thể lấy stream URL cho: {selectedVideo.Title}");
+                    }
+                }
+                catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Lỗi 403 (Forbidden) khi lấy stream URL cho {selectedVideo.Title}: {httpEx.Message}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Lỗi khi lấy stream URL hoặc phát video {selectedVideo.Title}: {ex.Message}");
+                }
+                finally
+                {
+                    IsLoading = false;
+                }
+            }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "")
+        private async Task<string> GetStreamUrlAsync(string videoId)
         {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
+            try
+            {
+                var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(videoId);
+                var audioStreamInfo = streamManifest
+                    .GetAudioOnlyStreams()
+                    .TryGetWithHighestBitrate();
 
-            backingStore = value;
-            OnPropertyChanged(propertyName);
-            return true;
+                return audioStreamInfo?.Url ?? "";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi lấy stream URL: {ex.Message}");
+                return "";
+            }
         }
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    // Simple RelayCommand implementation
-    public class RelayCommand : ICommand
-    {
-        private readonly Func<Task> _execute;
-        private readonly Func<bool> _canExecute;
-
-        public RelayCommand(Func<Task> execute, Func<bool> canExecute = null)
-        {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute;
-        }
-
-        public event EventHandler CanExecuteChanged;
-
-        public bool CanExecute(object parameter) => _canExecute?.Invoke() ?? true;
-
-        public async void Execute(object parameter) => await _execute();
-
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }

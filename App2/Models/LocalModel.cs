@@ -8,7 +8,7 @@ using Windows.Storage.FileProperties;
 
 namespace App2.Models
 {
-    public class LocalAudioModel : INotifyPropertyChanged
+    public class LocalModel : INotifyPropertyChanged
     {
         private string _songTitle;
         private string _artist;
@@ -128,9 +128,9 @@ namespace App2.Models
         public string DisplayAlbum => !string.IsNullOrWhiteSpace(Album) ? Album : "Unknown Album";
         public string FileSizeString => FormatFileSize(FileSize);
 
-        private LocalAudioModel() { }
+        private LocalModel() { }
 
-        public static async Task<LocalAudioModel> FromStorageFileAsync(StorageFile file)
+        public static async Task<LocalModel> FromStorageFileAsync(StorageFile file)
         {
             try
             {
@@ -138,7 +138,7 @@ namespace App2.Models
                 var basicProperties = await file.GetBasicPropertiesAsync();
                 var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
 
-                var model = new LocalAudioModel
+                var model = new LocalModel
                 {
                     SongTitle = string.IsNullOrWhiteSpace(musicProperties.Title) ? file.DisplayName : musicProperties.Title,
                     Artist = musicProperties.Artist ?? string.Empty,

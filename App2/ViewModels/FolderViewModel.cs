@@ -23,7 +23,7 @@ namespace App2.ViewModels
 
         public ObservableCollection<StorageFolder> Folders { get; } = new ObservableCollection<StorageFolder>();
         public ObservableCollection<StorageFolder> SelectedFolders { get; } = new ObservableCollection<StorageFolder>();
-        public ObservableCollection<LocalAudioModel> Contents { get; } = new ObservableCollection<LocalAudioModel>();
+        public ObservableCollection<LocalModel> Contents { get; } = new ObservableCollection<LocalModel>();
 
         [ObservableProperty]
         private bool _isSearching;
@@ -92,7 +92,7 @@ namespace App2.ViewModels
             {
                 await Task.Run(async () =>
                 {
-                    var tempFoundModels = new List<LocalAudioModel>();
+                    var tempFoundModels = new List<LocalModel>();
                     const int batchSize = 50;
 
                     foreach (var folder in foldersToSearch)
@@ -137,7 +137,7 @@ namespace App2.ViewModels
             }
         }
 
-        private async Task SearchInFolderRecursiveAsync(StorageFolder currentFolder, List<LocalAudioModel> batchList, CancellationToken token, int batchSize)
+        private async Task SearchInFolderRecursiveAsync(StorageFolder currentFolder, List<LocalModel> batchList, CancellationToken token, int batchSize)
         {
             if (token.IsCancellationRequested) return;
 
@@ -171,7 +171,7 @@ namespace App2.ViewModels
                     {
                         try
                         {
-                            var audioModel = await LocalAudioModel.FromStorageFileAsync(file);
+                            var audioModel = await LocalModel.FromStorageFileAsync(file);
                             if (audioModel != null)
                             {
                                 lock (batchList)
@@ -180,7 +180,7 @@ namespace App2.ViewModels
 
                                 if (batchList.Count >= batchSize)
                                 {
-                                    AddModelsToContentsOnUiThread(new List<LocalAudioModel>(batchList));
+                                    AddModelsToContentsOnUiThread(new List<LocalModel>(batchList));
                                     batchList.Clear();
                                 }
                             }
@@ -198,7 +198,7 @@ namespace App2.ViewModels
             }
         }
 
-        private void AddModelsToContentsOnUiThread(List<LocalAudioModel> modelsToAdd)
+        private void AddModelsToContentsOnUiThread(List<LocalModel> modelsToAdd)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {

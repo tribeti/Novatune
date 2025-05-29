@@ -9,10 +9,10 @@ namespace App2.Models
     {
         private string _title;
         private string _author;
-        private string _duration;
+        private TimeSpan? _durationTimeSpan;
         private string _thumbnailUrl;
         private string _videoId;
-        private string _url;
+        private string _streamUrl;
 
         public string Title
         {
@@ -26,11 +26,18 @@ namespace App2.Models
             set => SetProperty(ref _author, value);
         }
 
-        public string Duration
+        public TimeSpan? DurationTimeSpan
         {
-            get => _duration;
-            set => SetProperty(ref _duration, value);
+            get => _durationTimeSpan;
+            set
+            {
+                if (SetProperty(ref _durationTimeSpan, value))
+                {
+                    OnPropertyChanged(nameof(DurationDisplay));
+                }
+            }
         }
+        public string DurationDisplay => DurationTimeSpan.HasValue ? FormatDurationStatic(DurationTimeSpan.Value) : "N/A";
 
         public string ThumbnailUrl
         {
@@ -44,11 +51,14 @@ namespace App2.Models
             set => SetProperty(ref _videoId, value);
         }
 
-        public string Url
+        public string StreamUrl
         {
-            get => _url;
-            set => SetProperty(ref _url, value);
+            get => _streamUrl;
+            set => SetProperty(ref _streamUrl, value);
         }
+
+        public string DisplayTitle => !string.IsNullOrWhiteSpace(Title) ? Title : "Không rõ tiêu đề";
+        public string DisplayArtist => !string.IsNullOrWhiteSpace(Author) ? Author : "Không rõ nghệ sĩ";
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -65,6 +75,15 @@ namespace App2.Models
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private static string FormatDurationStatic(TimeSpan duration)
+        {
+            if (duration.TotalHours >= 1)
+            {
+                return duration.ToString(@"h\:mm\:ss");
+            }
+            return duration.ToString(@"m\:ss");
         }
     }
 }

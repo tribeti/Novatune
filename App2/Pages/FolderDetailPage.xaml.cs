@@ -58,7 +58,7 @@ namespace App2.Pages
 
         private async void FileListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is LocalAudioModel audioModel && MediaPlayerVM != null)
+            if (e.ClickedItem is LocalModel audioModel && MediaPlayerVM != null)
             {
                 if (MediaPlayerVM.PlayAudioCommand.CanExecute(audioModel))
                 {

@@ -71,7 +71,7 @@
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectionMode="None">
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:LocalAudioModel">
+                <DataTemplate x:DataType="models:LocalModel">
                     <Grid Style="{StaticResource FileItemStyle}">
                         <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                             <TextBlock

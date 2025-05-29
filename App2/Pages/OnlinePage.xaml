@@ -32,19 +32,13 @@
             <Button Command="{x:Bind ViewModel.SearchCommand}" Content="Tìm kiếm" />
         </StackPanel>
 
-        <!--  Loading Indicator  -->
-        <ProgressRing
-            Grid.Row="1"
-            Width="50"
-            Height="50"
-            IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
-
         <!--  Videos ListView  -->
         <ListView
             x:Name="VideosListView"
             Grid.Row="1"
             Margin="20,0,20,20"
+            IsItemClickEnabled="True"
+            ItemClick="VideosListView_ItemClick"
             ItemsSource="{x:Bind ViewModel.Videos, Mode=OneWay}"
             SelectionMode="Single">
 
@@ -95,7 +89,7 @@
                             VerticalAlignment="Center"
                             FontSize="12"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind Duration}" />
+                            Text="{x:Bind DurationDisplay}" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

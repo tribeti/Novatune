@@ -10,6 +10,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Search;
+using YoutubeExplode;
+using YoutubeExplode.Common;
+using YoutubeExplode.Videos.Streams;
 
 namespace App2.ViewModels
 {
@@ -33,17 +36,22 @@ namespace App2.ViewModels
         private Media _currentMediaTrack;
         private readonly DispatcherQueue _dispatcherQueue;
         private static bool _isLibVLCSharpCoreInitialized = false;
-        private List<LocalAudioModel> _shuffledPlaylist;
+        private List<LocalModel> _shuffledPlaylist;
         private Random _random = new Random();
+        private YoutubeClient _youtubeClient;
 
-        // Collections
-        public ObservableCollection<LocalAudioModel> AudioFiles { get; } = new ObservableCollection<LocalAudioModel>();
-        public ObservableCollection<LocalAudioModel> FilteredAudioFiles { get; } = new ObservableCollection<LocalAudioModel>();
-        public ObservableCollection<LocalAudioModel> FavoriteAudioFiles { get; } = new ObservableCollection<LocalAudioModel>();
+        public ObservableCollection<LocalModel> AudioFiles { get; } = new ObservableCollection<LocalModel>();
+        public ObservableCollection<LocalModel> FilteredAudioFiles { get; } = new ObservableCollection<LocalModel>();
+        public ObservableCollection<LocalModel> FavoriteAudioFiles { get; } = new ObservableCollection<LocalModel>();
 
-        // Current Playing
+        public ObservableCollection<OnlineModel> OnlineAudioTracks { get; } = new ObservableCollection<OnlineModel>();
+
+
         [ObservableProperty]
-        private LocalAudioModel _currentAudio;
+        private LocalModel _currentAudio;
+
+        [ObservableProperty]
+        private OnlineModel _currentOnlineAudio;
 
         [ObservableProperty]
         private string _nowPlayingTitle = "Không có file nào đang phát";
@@ -54,7 +62,6 @@ namespace App2.ViewModels
         [ObservableProperty]
         private string _nowPlayingAlbum = "";
 
-        // Playback State
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PlayPauseGlyph))]
         private bool _isPlaying;
@@ -74,7 +81,6 @@ namespace App2.ViewModels
         [ObservableProperty]
         private string _totalDurationString = "0:00";
 
-        // Playlist Controls
         [ObservableProperty]
         private RepeatMode _repeatMode = RepeatMode.None;
 
@@ -84,11 +90,9 @@ namespace App2.ViewModels
         [ObservableProperty]
         private int _volume = 300;
 
-        // Search and Filter
         [ObservableProperty]
         private string _searchText = "";
 
-        // UI Properties
         public string PlayPauseGlyph => IsPlaying ? "\uE769" : "\uE768";
         public string RepeatGlyph => RepeatMode switch
         {
@@ -99,13 +103,13 @@ namespace App2.ViewModels
         };
         public string ShuffleGlyph => ShuffleMode == ShuffleMode.On ? "\uE8B1" : "\uE8B1";
 
-        // Events
         public event Action PlaybackStateChanged;
         public LibVLCSharp.Shared.MediaPlayer PlayerInstance => _mediaPlayer;
 
         public MediaPlayerViewModel()
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread() ?? throw new InvalidOperationException("Cannot get DispatcherQueue for current thread.");
+            _youtubeClient = new YoutubeClient();
 
             if (!_isLibVLCSharpCoreInitialized)
             {
@@ -135,7 +139,7 @@ namespace App2.ViewModels
             _mediaPlayer.TimeChanged += MediaPlayer_TimeChanged;
             _mediaPlayer.LengthChanged += MediaPlayer_LengthChanged;
             _mediaPlayer.EncounteredError += MediaPlayer_EncounteredError;
-            _mediaPlayer.Volume = Volume;
+            _mediaPlayer.Volume = Math.Clamp(Volume, 0, 100);
         }
 
         private void MediaPlayer_EncounteredError(object sender, EventArgs e)
@@ -147,10 +151,7 @@ namespace App2.ViewModels
                 NowPlayingAlbum = "";
                 IsPlaying = false;
                 CurrentPosition = TimeSpan.Zero;
-                if (CurrentAudio != null)
-                {
-                    CurrentAudio.IsPlaying = false;
-                }
+                if (CurrentAudio != null) CurrentAudio.IsPlaying = false;
                 PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             });
@@ -181,10 +182,7 @@ namespace App2.ViewModels
                 IsPlaying = false;
                 CurrentPosition = TimeSpan.Zero;
                 CurrentPositionString = "0:00";
-                if (CurrentAudio != null)
-                {
-                    CurrentAudio.IsPlaying = false;
-                }
+                if (CurrentAudio != null && CurrentOnlineAudio == null) CurrentAudio.IsPlaying = false;
                 PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             });
@@ -195,10 +193,7 @@ namespace App2.ViewModels
             _dispatcherQueue.TryEnqueue(() =>
             {
                 IsPlaying = false;
-                if (CurrentAudio != null)
-                {
-                    CurrentAudio.IsPlaying = false;
-                }
+                if (CurrentAudio != null && CurrentOnlineAudio == null) CurrentAudio.IsPlaying = false;
                 PlaybackStateChanged?.Invoke();
             });
         }
@@ -208,10 +203,7 @@ namespace App2.ViewModels
             _dispatcherQueue.TryEnqueue(() =>
             {
                 IsPlaying = true;
-                if (CurrentAudio != null)
-                {
-                    CurrentAudio.IsPlaying = true;
-                }
+                if (CurrentAudio != null && CurrentOnlineAudio == null) CurrentAudio.IsPlaying = true;
                 PlaybackStateChanged?.Invoke();
             });
         }
@@ -223,42 +215,151 @@ namespace App2.ViewModels
                 IsPlaying = false;
                 CurrentPosition = TotalDuration;
                 CurrentPositionString = TotalDurationString;
-                if (CurrentAudio != null)
-                {
-                    CurrentAudio.IsPlaying = false;
-                }
+
+                bool wasPlayingLocal = CurrentAudio != null && CurrentOnlineAudio == null;
+                bool wasPlayingOnline = CurrentOnlineAudio != null;
+
+                if (wasPlayingLocal && CurrentAudio != null) CurrentAudio.IsPlaying = false;
+
                 PlaybackStateChanged?.Invoke();
+                bool playedNext = false;
 
                 if (RepeatMode == RepeatMode.One)
                 {
-                    await PlayAudioAsync(CurrentAudio);
-                }
-                else if (CanSkipNext())
-                {
-                    await SkipNextAsync();
-                }
-                else if (RepeatMode == RepeatMode.All)
-                {
-                    // Restart from beginning
-                    var firstAudio = GetPlaylist().FirstOrDefault();
-                    if (firstAudio != null)
+                    if (wasPlayingOnline && CurrentOnlineAudio != null && !string.IsNullOrEmpty(CurrentOnlineAudio.VideoId))
                     {
-                        await PlayAudioAsync(firstAudio);
+                        try
+                        {
+                            var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(CurrentOnlineAudio.VideoId);
+                            var audioStreamInfo = streamManifest.GetAudioOnlyStreams().TryGetWithHighestBitrate();
+                            if (audioStreamInfo != null)
+                            {
+                                CurrentOnlineAudio.StreamUrl = audioStreamInfo.Url;
+                                await PlayOnlineAudioAsync(CurrentOnlineAudio);
+                                playedNext = true;
+                            }
+                        }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Error re-fetching stream for repeat: {ex.Message}"); }
+                    }
+                    else if (wasPlayingLocal && CurrentAudio != null)
+                    {
+                        await PlayAudioAsync(CurrentAudio);
+                        playedNext = true;
                     }
                 }
-                else
+
+                if (!playedNext)
+                {
+                    if (wasPlayingOnline)
+                    {
+                        int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
+                        if (currentIndexInOnlinePlaylist >= 0 && currentIndexInOnlinePlaylist < OnlineAudioTracks.Count - 1)
+                        {
+                            await PlayOnlineAudioAsync(OnlineAudioTracks[currentIndexInOnlinePlaylist + 1]);
+                            playedNext = true;
+                        }
+                        else if (RepeatMode == RepeatMode.All && OnlineAudioTracks.Any())
+                        {
+                            await PlayOnlineAudioAsync(OnlineAudioTracks.First());
+                            playedNext = true;
+                        }
+                    }
+
+                    if (!playedNext && wasPlayingLocal) // Hoặc nếu muốn fallback từ online sang local
+                    {
+                        if (CanSkipNext())
+                        {
+                            await SkipNextAsync();
+                            playedNext = true;
+                        }
+                        else if (RepeatMode == RepeatMode.All && AudioFiles.Any())
+                        {
+                            var firstAudio = GetPlaylist().FirstOrDefault();
+                            if (firstAudio != null)
+                            {
+                                await PlayAudioAsync(firstAudio);
+                                playedNext = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!playedNext)
                 {
                     StopPlaybackInternal();
+                    if (CurrentAudio != null) ResetCurrentAudio();
+                    if (CurrentOnlineAudio != null)
+                    {
+                        CurrentOnlineAudio = null;
+                        if (CurrentAudio == null) ResetPlaybackState();
+                    }
+                    else if (CurrentAudio == null)
+                    {
+                        ResetPlaybackState();
+                    }
                 }
                 UpdateCommandStates();
             });
         }
 
+        public async Task LoadOnlinePlaylistAsync(string playlistUrlOrId)
+        {
+            if (string.IsNullOrWhiteSpace(playlistUrlOrId)) return;
+
+            StopPlaybackInternal();
+            AudioFiles.Clear();
+            FilteredAudioFiles.Clear();
+            FavoriteAudioFiles.Clear();
+            CurrentAudio = null;
+            OnlineAudioTracks.Clear();
+            ResetPlaybackState();
+
+            try
+            {
+                await foreach (var video in _youtubeClient.Playlists.GetVideosAsync(playlistUrlOrId))
+                {
+                    var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(video.Id);
+                    var audioStreamInfo = streamManifest.GetAudioOnlyStreams().TryGetWithHighestBitrate();
+                    if (audioStreamInfo != null)
+                    {
+                        OnlineAudioTracks.Add(new OnlineModel
+                        {
+                            Title = video.Title,
+                            Author = video.Author.ChannelTitle,
+                            DurationTimeSpan = video.Duration,
+                            StreamUrl = audioStreamInfo.Url,
+                            ThumbnailUrl = video.Thumbnails.GetWithHighestResolution().Url,
+                            VideoId = video.Id.Value
+                        });
+                    }
+                }
+                if (OnlineAudioTracks.Any())
+                {
+                    await PlayOnlineAudioAsync(OnlineAudioTracks.First());
+                }
+                else
+                {
+                    NowPlayingTitle = "Playlist online rỗng hoặc lỗi.";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading online playlist: {ex.Message}");
+                NowPlayingTitle = "Lỗi tải playlist online.";
+            }
+            finally
+            {
+                PlaybackStateChanged?.Invoke();
+                UpdateCommandStates();
+            }
+        }
+
+
         public async Task LoadAudioFilesAsync(StorageFolder folder)
         {
             if (folder == null)
             {
-                if (!this.IsPlaying)
+                if (!this.IsPlaying && CurrentOnlineAudio == null)
                 {
                     AudioFiles.Clear();
                     FilteredAudioFiles.Clear();
@@ -266,25 +367,23 @@ namespace App2.ViewModels
                     CurrentAudio = null;
                     ResetPlaybackState();
                     UpdateShufflePlaylist();
-                    PlaybackStateChanged?.Invoke();
-                    UpdateCommandStates();
                 }
+                PlaybackStateChanged?.Invoke();
+                UpdateCommandStates();
                 return;
             }
-            
-            var audioExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+
+            var audioExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".mp3", ".wav", ".aac", ".flac", ".wma", ".ogg", ".m4a" };
+            LocalModel previouslyPlayingLocalAudio = null;
+            if (this.IsPlaying && this.CurrentAudio != null && this.CurrentOnlineAudio == null)
             {
-                ".mp3", ".wav", ".aac", ".flac", ".wma", ".ogg", ".m4a"
-            };
-            LocalAudioModel previouslyPlayingAudio = null;
-            if (this.IsPlaying && this.CurrentAudio != null)
-            {
-                previouslyPlayingAudio = this.CurrentAudio;
+                previouslyPlayingLocalAudio = this.CurrentAudio;
             }
+
             AudioFiles.Clear();
             FilteredAudioFiles.Clear();
 
-            if (previouslyPlayingAudio == null)
+            if (CurrentOnlineAudio == null && previouslyPlayingLocalAudio == null)
             {
                 CurrentAudio = null;
                 ResetPlaybackState();
@@ -292,13 +391,9 @@ namespace App2.ViewModels
 
             try
             {
-                var queryOptions = new QueryOptions(CommonFileQuery.OrderByName, audioExtensions.ToList())
-                {
-                    FolderDepth = FolderDepth.Deep
-                };
+                var queryOptions = new QueryOptions(CommonFileQuery.OrderByName, audioExtensions.ToList()) { FolderDepth = FolderDepth.Deep };
                 var queryResult = folder.CreateItemQueryWithOptions(queryOptions);
                 var items = await queryResult.GetItemsAsync();
-                bool currentPlayingAudioStillExistsInNewFolder = false;
 
                 foreach (var item in items)
                 {
@@ -306,22 +401,15 @@ namespace App2.ViewModels
                     {
                         try
                         {
-                            var audioModel = await LocalAudioModel.FromStorageFileAsync(file);
+                            var audioModel = await LocalModel.FromStorageFileAsync(file);
                             AudioFiles.Add(audioModel);
                             FilteredAudioFiles.Add(audioModel);
-                            if (previouslyPlayingAudio != null && audioModel.FilePath.Equals(previouslyPlayingAudio.FilePath, StringComparison.OrdinalIgnoreCase))
-                            {
-                                currentPlayingAudioStillExistsInNewFolder = true;
-                                
-                            }
                         }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Error creating LocalAudioModel for {file.Name}: {ex.Message}");
-                        }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Error creating LocalAudioModel for {file.Name}: {ex.Message}"); }
                     }
                 }
-                if (previouslyPlayingAudio == null && !AudioFiles.Any())
+
+                if (CurrentOnlineAudio == null && previouslyPlayingLocalAudio == null && !AudioFiles.Any())
                 {
                     CurrentAudio = null;
                     ResetPlaybackState();
@@ -331,7 +419,7 @@ namespace App2.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading audio files from {folder.Path}: {ex.Message}");
-                if (previouslyPlayingAudio == null)
+                if (CurrentOnlineAudio == null && previouslyPlayingLocalAudio == null)
                 {
                     CurrentAudio = null;
                     ResetPlaybackState();
@@ -345,15 +433,16 @@ namespace App2.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanPlayAudio))]
-        public async Task PlayAudioAsync(LocalAudioModel audio)
+        public async Task PlayAudioAsync(LocalModel audio)
         {
             if (audio?.File == null) return;
 
             StopPlaybackInternal();
+            CurrentOnlineAudio = null;
 
             try
             {
-                if (CurrentAudio != null)
+                if (CurrentAudio != null && CurrentAudio != audio)
                 {
                     CurrentAudio.IsPlaying = false;
                     CurrentAudio.IsSelected = false;
@@ -361,20 +450,19 @@ namespace App2.ViewModels
 
                 CurrentAudio = audio;
                 CurrentAudio.IsSelected = true;
-                CurrentAudio.IsPlaying = true;
+
                 NowPlayingTitle = audio.DisplayTitle;
                 NowPlayingArtist = audio.DisplayArtist;
                 NowPlayingAlbum = audio.DisplayAlbum;
-
-                IsMediaPlayerElementVisible = false; // Audio only
+                IsMediaPlayerElementVisible = false;
 
                 _currentMediaTrack = new Media(_libVLC, audio.File.Path, FromType.FromPath);
                 _mediaPlayer.Media = _currentMediaTrack;
+                _mediaPlayer.Volume = Math.Clamp(Volume, 0, 100);
                 bool success = _mediaPlayer.Play();
 
                 if (!success)
                 {
-                    System.Diagnostics.Debug.WriteLine($"MediaPlayer.Play() failed for {audio.File.Path}");
                     ResetCurrentAudio();
                     NowPlayingTitle = "Lỗi khi phát file";
                     IsPlaying = false;
@@ -382,10 +470,10 @@ namespace App2.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error playing audio file {audio.File.Path}: {ex.Message}");
                 ResetCurrentAudio();
                 NowPlayingTitle = "Lỗi khi chuẩn bị file";
                 IsPlaying = false;
+                System.Diagnostics.Debug.WriteLine($"Error playing audio file {audio.File.Path}: {ex.Message}");
             }
             finally
             {
@@ -393,46 +481,99 @@ namespace App2.ViewModels
                 UpdateCommandStates();
             }
         }
+        private bool CanPlayAudio(LocalModel audio) => audio?.File != null;
 
-        private bool CanPlayAudio(LocalAudioModel audio) => audio?.File != null;
+        [RelayCommand(CanExecute = nameof(CanPlayOnlineAudio))]
+        public async Task PlayOnlineAudioAsync(OnlineModel onlineTrack)
+        {
+            if (onlineTrack == null || string.IsNullOrEmpty(onlineTrack.StreamUrl)) return;
+
+            StopPlaybackInternal();
+            if (CurrentAudio != null)
+            {
+                CurrentAudio.IsPlaying = false;
+                CurrentAudio.IsSelected = false;
+            }
+            CurrentAudio = null;
+            CurrentOnlineAudio = onlineTrack;
+
+            try
+            {
+                NowPlayingTitle = onlineTrack.DisplayTitle;
+                NowPlayingArtist = onlineTrack.DisplayArtist;
+                NowPlayingAlbum = "YouTube";
+                IsMediaPlayerElementVisible = false;
+
+                CurrentPosition = TimeSpan.Zero;
+                TotalDuration = onlineTrack.DurationTimeSpan ?? TimeSpan.Zero;
+                CurrentPositionString = FormatDuration(CurrentPosition);
+                TotalDurationString = FormatDuration(TotalDuration);
+
+                _currentMediaTrack = new Media(_libVLC, onlineTrack.StreamUrl, FromType.FromLocation);
+                _mediaPlayer.Media = _currentMediaTrack;
+                _mediaPlayer.Volume = Math.Clamp(Volume, 0, 100);
+                bool success = _mediaPlayer.Play();
+
+                if (!success)
+                {
+                    NowPlayingTitle = "Lỗi khi phát online";
+                    IsPlaying = false;
+                    CurrentOnlineAudio = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                NowPlayingTitle = "Lỗi khi chuẩn bị file online";
+                IsPlaying = false;
+                CurrentOnlineAudio = null;
+                System.Diagnostics.Debug.WriteLine($"Error playing online audio {onlineTrack.Title}: {ex.Message}");
+            }
+            finally
+            {
+                PlaybackStateChanged?.Invoke();
+                UpdateCommandStates();
+            }
+        }
+        private bool CanPlayOnlineAudio(OnlineModel onlineTrack) => onlineTrack != null && !string.IsNullOrEmpty(onlineTrack.StreamUrl);
+
 
         [RelayCommand(CanExecute = nameof(CanTogglePlayPause))]
         public void TogglePlayPause()
         {
             if (_mediaPlayer?.Media == null) return;
-
-            if (_mediaPlayer.State == VLCState.Playing)
-            {
-                _mediaPlayer.Pause();
-            }
-            else
-            {
-                _mediaPlayer.Play();
-            }
+            if (_mediaPlayer.State == VLCState.Playing) _mediaPlayer.Pause();
+            else _mediaPlayer.Play();
         }
-
-        private bool CanTogglePlayPause() => _mediaPlayer?.Media != null && CurrentAudio != null;
+        private bool CanTogglePlayPause() => _mediaPlayer?.Media != null && (CurrentAudio != null || CurrentOnlineAudio != null);
 
         [RelayCommand(CanExecute = nameof(CanStopPlayback))]
         public void StopPlayback()
         {
             StopPlaybackInternal();
+            if (CurrentAudio != null) ResetCurrentAudio();
+            if (CurrentOnlineAudio != null)
+            {
+                CurrentOnlineAudio = null;
+                if (CurrentAudio == null) ResetPlaybackState();
+            }
+            else if (CurrentAudio == null)
+            {
+                ResetPlaybackState();
+            }
             PlaybackStateChanged?.Invoke();
             UpdateCommandStates();
         }
-
-        private bool CanStopPlayback() => _mediaPlayer?.Media != null && CurrentAudio != null;
+        private bool CanStopPlayback() => _mediaPlayer?.Media != null && (CurrentAudio != null || CurrentOnlineAudio != null);
 
         private void StopPlaybackInternal()
         {
             if (_mediaPlayer != null)
             {
-                if (_mediaPlayer.IsPlaying || _mediaPlayer.State == VLCState.Paused)
+                if (_mediaPlayer.IsPlaying || _mediaPlayer.State == VLCState.Paused || _mediaPlayer.State == VLCState.Opening)
                 {
                     _mediaPlayer.Stop();
                 }
             }
-
             _currentMediaTrack?.Dispose();
             _currentMediaTrack = null;
 
@@ -451,8 +592,7 @@ namespace App2.ViewModels
                 _mediaPlayer.Time = (long)position.TotalMilliseconds;
             }
         }
-
-        private bool CanSeekPosition(TimeSpan position) => _mediaPlayer?.Media != null && _mediaPlayer.IsSeekable && CurrentAudio != null;
+        private bool CanSeekPosition(TimeSpan position) => _mediaPlayer?.Media != null && _mediaPlayer.IsSeekable && (CurrentAudio != null || CurrentOnlineAudio != null);
 
         partial void OnVolumeChanged(int value)
         {
@@ -462,14 +602,14 @@ namespace App2.ViewModels
             }
         }
 
-        private List<LocalAudioModel> GetPlaylist()
+        private List<LocalModel> GetPlaylist()
         {
             return ShuffleMode == ShuffleMode.On ? _shuffledPlaylist ?? AudioFiles.ToList() : AudioFiles.ToList();
         }
 
         private int GetCurrentAudioIndex()
         {
-            if (CurrentAudio == null) return -1;
+            if (CurrentAudio == null || CurrentOnlineAudio != null) return -1;
             var playlist = GetPlaylist();
             return playlist.FindIndex(a => a.File.Path.Equals(CurrentAudio.File.Path, StringComparison.OrdinalIgnoreCase));
         }
@@ -477,58 +617,74 @@ namespace App2.ViewModels
         [RelayCommand(CanExecute = nameof(CanSkipPrevious))]
         public async Task SkipPreviousAsync()
         {
+            if (CurrentOnlineAudio != null)
+            {
+                int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
+                if (currentIndexInOnlinePlaylist > 0)
+                {
+                    await PlayOnlineAudioAsync(OnlineAudioTracks[currentIndexInOnlinePlaylist - 1]);
+                }
+                else if (RepeatMode == RepeatMode.All && OnlineAudioTracks.Any())
+                {
+                    await PlayOnlineAudioAsync(OnlineAudioTracks.Last());
+                }
+                return;
+            }
+
             var playlist = GetPlaylist();
             int currentIndex = GetCurrentAudioIndex();
-
-            if (currentIndex > 0)
-            {
-                await PlayAudioAsync(playlist[currentIndex - 1]);
-            }
-            else if (RepeatMode == RepeatMode.All)
-            {
-                await PlayAudioAsync(playlist.LastOrDefault());
-            }
+            if (currentIndex > 0) await PlayAudioAsync(playlist[currentIndex - 1]);
+            else if (RepeatMode == RepeatMode.All && playlist.Any()) await PlayAudioAsync(playlist.Last());
         }
-
         private bool CanSkipPrevious()
         {
+            if (CurrentOnlineAudio != null)
+            {
+                int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
+                return currentIndexInOnlinePlaylist > 0 || (RepeatMode == RepeatMode.All && OnlineAudioTracks.Count > 1);
+            }
             if (CurrentAudio == null || AudioFiles.Count <= 1) return false;
-            return GetCurrentAudioIndex() > 0 || RepeatMode == RepeatMode.All;
+            return GetCurrentAudioIndex() > 0 || (RepeatMode == RepeatMode.All && AudioFiles.Count > 1);
         }
 
         [RelayCommand(CanExecute = nameof(CanSkipNext))]
         public async Task SkipNextAsync()
         {
+            if (CurrentOnlineAudio != null)
+            {
+                int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
+                if (currentIndexInOnlinePlaylist >= 0 && currentIndexInOnlinePlaylist < OnlineAudioTracks.Count - 1)
+                {
+                    await PlayOnlineAudioAsync(OnlineAudioTracks[currentIndexInOnlinePlaylist + 1]);
+                }
+                else if (RepeatMode == RepeatMode.All && OnlineAudioTracks.Any())
+                {
+                    await PlayOnlineAudioAsync(OnlineAudioTracks.First());
+                }
+                return;
+            }
+
             var playlist = GetPlaylist();
             int currentIndex = GetCurrentAudioIndex();
-
-            if (currentIndex >= 0 && currentIndex < playlist.Count - 1)
-            {
-                await PlayAudioAsync(playlist[currentIndex + 1]);
-            }
-            else if (RepeatMode == RepeatMode.All)
-            {
-                await PlayAudioAsync(playlist.FirstOrDefault());
-            }
+            if (currentIndex >= 0 && currentIndex < playlist.Count - 1) await PlayAudioAsync(playlist[currentIndex + 1]);
+            else if (RepeatMode == RepeatMode.All && playlist.Any()) await PlayAudioAsync(playlist.First());
         }
-
         private bool CanSkipNext()
         {
+            if (CurrentOnlineAudio != null)
+            {
+                int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
+                return (currentIndexInOnlinePlaylist >= 0 && currentIndexInOnlinePlaylist < OnlineAudioTracks.Count - 1) || (RepeatMode == RepeatMode.All && OnlineAudioTracks.Count > 1);
+            }
             if (CurrentAudio == null || AudioFiles.Count <= 1) return false;
             int currentIndex = GetCurrentAudioIndex();
-            return (currentIndex >= 0 && currentIndex < AudioFiles.Count - 1) || RepeatMode == RepeatMode.All;
+            return (currentIndex >= 0 && currentIndex < AudioFiles.Count - 1) || (RepeatMode == RepeatMode.All && AudioFiles.Count > 1);
         }
 
         [RelayCommand]
         public void ToggleRepeatMode()
         {
-            RepeatMode = RepeatMode switch
-            {
-                RepeatMode.None => RepeatMode.All,
-                RepeatMode.All => RepeatMode.One,
-                RepeatMode.One => RepeatMode.None,
-                _ => RepeatMode.None
-            };
+            RepeatMode = RepeatMode switch { RepeatMode.None => RepeatMode.All, RepeatMode.All => RepeatMode.One, RepeatMode.One => RepeatMode.None, _ => RepeatMode.None };
             OnPropertyChanged(nameof(RepeatGlyph));
         }
 
@@ -542,32 +698,16 @@ namespace App2.ViewModels
 
         private void UpdateShufflePlaylist()
         {
-            if (ShuffleMode == ShuffleMode.On)
-            {
-                _shuffledPlaylist = AudioFiles.OrderBy(x => _random.Next()).ToList();
-            }
-            else
-            {
-                _shuffledPlaylist = null;
-            }
+            if (ShuffleMode == ShuffleMode.On) _shuffledPlaylist = AudioFiles.OrderBy(x => _random.Next()).ToList();
+            else _shuffledPlaylist = null;
         }
 
-        partial void OnSearchTextChanged(string value)
-        {
-            FilterAudioFiles();
-        }
+        partial void OnSearchTextChanged(string value) { FilterAudioFiles(); }
 
         private void FilterAudioFiles()
         {
             FilteredAudioFiles.Clear();
-
-            if (string.IsNullOrWhiteSpace(SearchText))
-            {
-                foreach (var audio in AudioFiles)
-                {
-                    FilteredAudioFiles.Add(audio);
-                }
-            }
+            if (string.IsNullOrWhiteSpace(SearchText)) foreach (var audio in AudioFiles) FilteredAudioFiles.Add(audio);
             else
             {
                 var searchLower = SearchText.ToLower();
@@ -585,16 +725,12 @@ namespace App2.ViewModels
         }
 
         [RelayCommand]
-        public void ClearSearch()
-        {
-            SearchText = "";
-        }
+        public void ClearSearch() { SearchText = ""; }
 
         [RelayCommand]
-        public void ToggleFavorite(LocalAudioModel audio)
+        public void ToggleFavorite(LocalModel audio)
         {
             if (audio == null) return;
-
             audio.ToggleFavorite();
             UpdateFavoritesList();
         }
@@ -602,11 +738,9 @@ namespace App2.ViewModels
         private void UpdateFavoritesList()
         {
             FavoriteAudioFiles.Clear();
-            foreach (var audio in AudioFiles.Where(a => a.IsFavorite))
-            {
-                FavoriteAudioFiles.Add(audio);
-            }
+            foreach (var audio in AudioFiles.Where(a => a.IsFavorite)) FavoriteAudioFiles.Add(audio);
         }
+
         public void ResetPlaybackState()
         {
             NowPlayingTitle = "Không có file nào đang phát";
@@ -628,16 +762,16 @@ namespace App2.ViewModels
                 CurrentAudio.IsSelected = false;
             }
             CurrentAudio = null;
-            NowPlayingArtist = "";
-            NowPlayingAlbum = "";
+            if (CurrentOnlineAudio == null)
+            {
+                NowPlayingArtist = "";
+                NowPlayingAlbum = "";
+            }
         }
 
         private static string FormatDuration(TimeSpan duration)
         {
-            if (duration.TotalHours >= 1)
-            {
-                return duration.ToString(@"h\:mm\:ss");
-            }
+            if (duration.TotalHours >= 1) return duration.ToString(@"h\:mm\:ss");
             return duration.ToString(@"m\:ss");
         }
 
@@ -646,6 +780,7 @@ namespace App2.ViewModels
             _dispatcherQueue.TryEnqueue(() =>
             {
                 PlayAudioCommand.NotifyCanExecuteChanged();
+                PlayOnlineAudioCommand.NotifyCanExecuteChanged();
                 TogglePlayPauseCommand.NotifyCanExecuteChanged();
                 StopPlaybackCommand.NotifyCanExecuteChanged();
                 SeekCommand.NotifyCanExecuteChanged();
@@ -657,7 +792,6 @@ namespace App2.ViewModels
         public void Cleanup()
         {
             StopPlaybackInternal();
-
             if (_mediaPlayer != null)
             {
                 _mediaPlayer.EndReached -= MediaPlayer_EndReached;
@@ -670,16 +804,16 @@ namespace App2.ViewModels
                 _mediaPlayer.Dispose();
                 _mediaPlayer = null;
             }
-
             _currentMediaTrack?.Dispose();
             _currentMediaTrack = null;
-
             _libVLC?.Dispose();
             _libVLC = null;
-
             AudioFiles.Clear();
             FilteredAudioFiles.Clear();
             FavoriteAudioFiles.Clear();
+            OnlineAudioTracks.Clear();
+            CurrentAudio = null;
+            CurrentOnlineAudio = null;
         }
     }
 }

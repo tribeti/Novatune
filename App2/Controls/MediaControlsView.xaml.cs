@@ -69,20 +69,41 @@ namespace App2.Controls
 
         private void UpdateControlsAppearance()
         {
-            if (_mediaPlayerViewModel == null || _mediaPlayerViewModel.CurrentAudio == null)
+            if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.CurrentOnlineAudio != null && _mediaPlayerViewModel.IsPlaying)
+            {
+                MediaTitleText.Text = _mediaPlayerViewModel.CurrentOnlineAudio.Title; // Hoặc .DisplayTitle
+                                                                                      // Artist và Album có thể không có hoặc bạn đặt giá trị mặc định trong OnlineModel
+                                                                                      // MediaArtistText.Text = _mediaPlayerViewModel.CurrentOnlineAudio.Author; // Nếu có control này
+                PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768";
+                UpdateSliderAndTimeTexts(true);
+                SetButtonsEnabled(true);
+                return;
+            }
+            else if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.CurrentAudio != null)
+            {
+                MediaTitleText.Text = _mediaPlayerViewModel.CurrentAudio.DisplayTitle;
+
+                PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768";
+                UpdateSliderAndTimeTexts(true);
+                SetButtonsEnabled(true);
+                return;
+            }
+            else if (_mediaPlayerViewModel != null)
+            {
+                MediaTitleText.Text = _mediaPlayerViewModel.NowPlayingTitle;
+                PlayPauseIcon.Glyph = "\uE768";
+                UpdateSliderAndTimeTexts(false);
+                SetButtonsEnabled(false);
+                TimeSlider.IsEnabled = false;
+            }
+            else
             {
                 MediaTitleText.Text = "Không có file nào đang phát";
                 PlayPauseIcon.Glyph = "\uE768";
                 UpdateSliderAndTimeTexts(false);
                 SetButtonsEnabled(false);
-                return;
+                TimeSlider.IsEnabled = false;
             }
-
-            MediaTitleText.Text = Path.GetFileNameWithoutExtension(_mediaPlayerViewModel.CurrentAudio.DisplayTitle);
-            PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768"; // Pause : Play
-
-            UpdateSliderAndTimeTexts(true);
-            SetButtonsEnabled(true);
         }
 
         private void SetButtonsEnabled(bool isEnabled)
@@ -111,6 +132,31 @@ namespace App2.Controls
 
             var totalDuration = _mediaPlayerViewModel.TotalDuration;
             var currentPosition = _mediaPlayerViewModel.CurrentPosition;
+
+            if (_mediaPlayerViewModel.CurrentOnlineAudio != null && _mediaPlayerViewModel.IsPlaying)
+            {
+                totalDuration = _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan ?? TimeSpan.Zero;
+            }
+            else if (_mediaPlayerViewModel.CurrentAudio != null)
+            {
+                totalDuration = _mediaPlayerViewModel.TotalDuration;
+            }
+            else
+            {
+                totalDuration = TimeSpan.Zero;
+            }
+            if (totalDuration == TimeSpan.Zero)
+            {
+                if (_mediaPlayerViewModel.CurrentOnlineAudio != null && _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan.HasValue)
+                {
+                    totalDuration = _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan.Value;
+                }
+                else if (_mediaPlayerViewModel.CurrentAudio != null)
+                {
+                    totalDuration = _mediaPlayerViewModel.CurrentAudio.Duration;
+                }
+            }
+
 
             TimeSlider.Maximum = totalDuration.TotalSeconds > 0 ? totalDuration.TotalSeconds : 1;
             if (!_isUserDraggingSlider)
