@@ -28,7 +28,6 @@ namespace App2.Controls
 
             if (_mediaPlayerViewModel == null)
             {
-                System.Diagnostics.Debug.WriteLine("Error: MediaPlayerViewModel is null in MediaControlsView.Initialize.");
                 UpdateControlsAppearance();
                 return;
             }
@@ -75,6 +74,9 @@ namespace App2.Controls
                                                                                       // Artist và Album có thể không có hoặc bạn đặt giá trị mặc định trong OnlineModel
                                                                                       // MediaArtistText.Text = _mediaPlayerViewModel.CurrentOnlineAudio.Author; // Nếu có control này
                 PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768";
+                RepeatIcon.Glyph = _mediaPlayerViewModel.RepeatGlyph;
+                ShuffleIcon.Glyph = _mediaPlayerViewModel.ShuffleGlyph;
+                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
                 UpdateSliderAndTimeTexts(true);
                 SetButtonsEnabled(true);
                 return;
@@ -84,6 +86,9 @@ namespace App2.Controls
                 MediaTitleText.Text = _mediaPlayerViewModel.CurrentAudio.DisplayTitle;
 
                 PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768";
+                RepeatIcon.Glyph = _mediaPlayerViewModel.RepeatGlyph;
+                ShuffleIcon.Glyph = _mediaPlayerViewModel.ShuffleGlyph;
+                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
                 UpdateSliderAndTimeTexts(true);
                 SetButtonsEnabled(true);
                 return;
@@ -92,6 +97,9 @@ namespace App2.Controls
             {
                 MediaTitleText.Text = _mediaPlayerViewModel.NowPlayingTitle;
                 PlayPauseIcon.Glyph = "\uE768";
+                RepeatIcon.Glyph = _mediaPlayerViewModel.RepeatGlyph;
+                ShuffleIcon.Glyph = _mediaPlayerViewModel.ShuffleGlyph;
+                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
                 UpdateSliderAndTimeTexts(false);
                 SetButtonsEnabled(false);
                 TimeSlider.IsEnabled = false;
@@ -216,6 +224,18 @@ namespace App2.Controls
         private void StopButton_Click(object sender, RoutedEventArgs e) => _mediaPlayerViewModel?.StopPlaybackCommand.Execute(null);
         private void PreviousButton_Click(object sender, RoutedEventArgs e) => _mediaPlayerViewModel?.SkipPreviousCommand.Execute(null);
         private void NextButton_Click(object sender, RoutedEventArgs e) => _mediaPlayerViewModel?.SkipNextCommand.Execute(null);
+
+        private void RepeatButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayerViewModel?.ToggleRepeatModeCommand.Execute(null);
+            RepeatIcon.Glyph = _mediaPlayerViewModel?.RepeatGlyph;
+        }
+
+        private void ShuffleButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayerViewModel?.ToggleShuffleModeCommand.Execute(null);
+            UpdateControlsAppearance();
+        }
 
         public void Cleanup()
         {

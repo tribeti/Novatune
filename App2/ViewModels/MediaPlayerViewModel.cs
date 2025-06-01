@@ -96,7 +96,7 @@ namespace App2.ViewModels
         public string PlayPauseGlyph => IsPlaying ? "\uE769" : "\uE768";
         public string RepeatGlyph => RepeatMode switch
         {
-            RepeatMode.None => "\uE8EE",
+            RepeatMode.None => "\uF5E7",
             RepeatMode.One => "\uE8ED",
             RepeatMode.All => "\uE8EE",
             _ => "\uE8EE"
@@ -353,7 +353,6 @@ namespace App2.ViewModels
                 UpdateCommandStates();
             }
         }
-
 
         public async Task LoadAudioFilesAsync(StorageFolder folder)
         {

@@ -11,7 +11,7 @@
 
     <Grid x:Name="RootGrid" Background="Transparent">
         <Grid
-            Height="120"
+            Height="140"
             VerticalAlignment="Bottom"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
@@ -65,89 +65,142 @@
                     <TextBlock
                         x:Name="MediaTitleText"
                         Margin="0,0,0,4"
-                        FontSize="16"
+                        FontSize="14"
                         FontWeight="SemiBold"
                         Text="Không có file nào đang phát"
                         TextTrimming="CharacterEllipsis" />
                 </StackPanel>
+
                 <StackPanel
                     Grid.Column="1"
-                    Margin="16"
+                    Margin="14"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="8">
+
+                    <Button
+                        x:Name="ShuffleButton"
+                        Width="45"
+                        Height="45"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="ShuffleButton_Click"
+                        CornerRadius="200">
+                        <Grid>
+                            <FontIcon
+                                x:Name="ShuffleIcon"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="16"
+                                Glyph="{x:Bind _mediaPlayerViewModel.ShuffleGlyph}" />
+                            <FontIcon
+                                x:Name="ShuffleOffOverlay"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="16"
+                                Glyph="&#xE894;"
+                                Visibility="Collapsed" />
+
+                        </Grid>
+                    </Button>
                     <Button
                         x:Name="PreviousButton"
                         Width="40"
                         Height="40"
+                        Background="Transparent"
+                        BorderThickness="0"
                         Click="PreviousButton_Click"
                         CornerRadius="20"
                         ToolTipService.ToolTip="Previous">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
+                            FontSize="16"
                             Glyph="&#xE892;" />
                     </Button>
                     <Button
                         x:Name="SeekBackwardButton"
                         Width="40"
                         Height="40"
+                        Background="Transparent"
+                        BorderThickness="0"
                         Click="SeekBackwardButton_Click"
                         CornerRadius="20"
                         ToolTipService.ToolTip="Seek backward 5s">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
+                            FontSize="16"
                             Glyph="&#xEB9E;" />
                     </Button>
                     <Button
                         x:Name="PlayPauseButton"
-                        Width="40"
-                        Height="40"
+                        Width="60"
+                        Height="60"
+                        Background="Transparent"
+                        BorderThickness="0"
                         Click="PlayPauseButton_Click"
-                        CornerRadius="20"
+                        CornerRadius="200"
                         ToolTipService.ToolTip="Play/Pause">
                         <FontIcon
                             x:Name="PlayPauseIcon"
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
+                            FontSize="20"
                             Glyph="" />
                     </Button>
                     <Button
                         x:Name="SeekForwardButton"
                         Width="40"
                         Height="40"
+                        Background="Transparent"
+                        BorderThickness="0"
                         Click="SeekForwardButton_Click"
                         CornerRadius="20"
                         ToolTipService.ToolTip="Seek forward 5s">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
+                            FontSize="16"
                             Glyph="&#xEB9D;" />
                     </Button>
                     <Button
                         x:Name="NextButton"
                         Width="40"
                         Height="40"
+                        Background="Transparent"
+                        BorderThickness="0"
                         Click="NextButton_Click"
                         CornerRadius="20"
                         ToolTipService.ToolTip="Next">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
+                            FontSize="16"
                             Glyph="&#xE101;" />
+                    </Button>
+                    <Button
+                        x:Name="RepeatButton"
+                        Width="40"
+                        Height="40"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="RepeatButton_Click"
+                        CornerRadius="20">
+                        <FontIcon
+                            x:Name="RepeatIcon"
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="16"
+                            Glyph="{x:Bind _mediaPlayerViewModel.RepeatGlyph}" />
                     </Button>
                     <Button
                         x:Name="StopButton"
                         Width="40"
                         Height="40"
+                        Background="Transparent"
+                        BorderThickness="0"
                         Click="StopButton_Click"
                         CornerRadius="20"
                         ToolTipService.ToolTip="Reset">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
+                            FontSize="16"
                             Glyph="&#xE72C;" />
                     </Button>
                 </StackPanel>
