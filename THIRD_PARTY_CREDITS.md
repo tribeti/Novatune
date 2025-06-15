@@ -12,7 +12,6 @@ This project uses the following open source libraries. Full credit and thanks to
 | Microsoft.Windows.SDK.BuildTools                  | Microsoft                  | MIT          | https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools |
 | Microsoft.WindowsAppSDK                           | Microsoft                  | MIT          | https://github.com/microsoft/WindowsAppSDK              |
 | runtime.win-x64.Microsoft.DotNet.ILCompiler       | Microsoft                  | MIT          | https://www.nuget.org/packages/runtime.win-x64.Microsoft.DotNet.ILCompiler |
-| SpotifyAPI.Web, SpotifyAPI.Web.Auth               | JohnnyCrazy                | MIT          | https://github.com/JohnnyCrazy/SpotifyAPI-NET           |
 | System.Private.Uri                                | Microsoft                  | MIT          | https://www.nuget.org/packages/System.Private.Uri        |
 | VideoLAN.LibVLC.Windows                          | VideoLAN                   | LGPL 2.1     | https://www.videolan.org/vlc/                           |
 | WinUIEx                                           | Morten Nielsen             | MIT          | https://github.com/dotMorten/WinUIEx                    |
