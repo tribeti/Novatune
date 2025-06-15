@@ -34,7 +34,6 @@ A modern Windows audio player application built with WinUI 3 and .NET 8. App2 al
 - [LibVLCSharp](https://github.com/videolan/libvlcsharp) (for media playback)
 - [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) (for YouTube integration)
 - [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)
-- [SpotifyAPI-NET](https://github.com/JohnnyCrazy/SpotifyAPI-NET)
 
 ## Third-Party Libraries and Credits
 This project makes use of the following open source libraries:
@@ -42,7 +41,6 @@ This project makes use of the following open source libraries:
 - [LibVLCSharp](https://github.com/videolan/libvlcsharp) - LGPL 2.1
 - [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) - MIT
 - [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) - MIT
-- [SpotifyAPI-NET](https://github.com/JohnnyCrazy/SpotifyAPI-NET) - MIT
 - [WinUIEx](https://github.com/dotMorten/WinUIEx) - MIT
 
 Please refer to each library's repository for their respective licenses and attributions.
