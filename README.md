@@ -19,7 +19,8 @@ A modern Windows audio player application built with WinUI 3 and .NET 8. App2 al
 - Visual Studio 2022 or later (with UWP/WinUI workloads)
 
 ### Build and Run
-1. Clone the repository:git clone <your-repo-url>2. Open the solution in Visual Studio.
+1. Clone the repository:git clone <your-repo-url>
+2. Open the solution in Visual Studio.
 3. Restore NuGet packages.
 4. Build and run the project.
 
