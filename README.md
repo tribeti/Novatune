@@ -18,7 +18,7 @@ A modern Windows audio player application built with WinUI 3 and .NET 8. Novatun
 - Visual Studio 2022 or later (with UWP/WinUI workloads)
 
 ### Build and Run
-1. Clone the repository: git clone https://github.com/tribeti/Novatune.git
+1. Clone the repository.
 2. Open the solution in Visual Studio.
 3. Restore NuGet packages.
 4. Build and run the project.
