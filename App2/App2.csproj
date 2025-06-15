@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
-		<RootNamespace>App2</RootNamespace>
+		<RootNamespace>Novatune</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x86;x64;ARM64</Platforms>
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
@@ -19,11 +19,7 @@
 		<SelfContained>true</SelfContained>
 		<PublishSingleFile>true</PublishSingleFile>
 		<!--Enable Native AOT (error)-->
-
 		<!--https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8-->
-
-		<!--<PublishAot>true</PublishAot>-->
-		
 		<NoWarn>$(NoWarn);CS8305;WMC1501</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
@@ -60,11 +56,11 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
 		<PackageReference Include="LibVLCSharp" Version="3.9.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
 		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250513003" />
-		<PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="9.0.5" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+		<PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="9.0.6" />
 		<PackageReference Include="SpotifyAPI.Web" Version="7.2.1" />
 		<PackageReference Include="SpotifyAPI.Web.Auth" Version="7.2.1" />
 		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
@@ -116,7 +112,10 @@
 	<PropertyGroup>
 		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
 		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">True</PublishTrimmed>
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+		<AssemblyName>Novatune</AssemblyName>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<!--<PublishAot>True</PublishAot>-->
 	</PropertyGroup>
 </Project>

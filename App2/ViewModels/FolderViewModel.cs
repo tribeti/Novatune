@@ -260,12 +260,15 @@ namespace App2.ViewModels
         {
             if (folder == null) return;
 
-            StorageApplicationPermissions.FutureAccessList.Remove(
-                StorageApplicationPermissions.FutureAccessList.Entries
-                    .Where(entry => entry.Metadata == folder.Path)
-                    .Select(entry => entry.Token)
-                    .FirstOrDefault()
-            );
+            var tokenToRemove = StorageApplicationPermissions.FutureAccessList.Entries
+                .Where(entry => entry.Metadata == folder.Path)
+                .Select(entry => entry.Token)
+                .FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(tokenToRemove))
+            {
+                StorageApplicationPermissions.FutureAccessList.Remove(tokenToRemove);
+            }
 
             Folders.Remove(folder);
         }
