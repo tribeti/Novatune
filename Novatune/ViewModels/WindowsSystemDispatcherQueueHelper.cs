@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace App2.ViewModels
+namespace Novatune.ViewModels
 {
-    class WindowsSystemDispatcherQueueHelper
+    internal class WindowsSystemDispatcherQueueHelper
     {
 
         [StructLayout(LayoutKind.Sequential)]
-        struct DispatcherQueueOptions
+        private struct DispatcherQueueOptions
         {
             internal int dwSize;
             internal int threadType;

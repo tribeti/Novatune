@@ -1,12 +1,12 @@
-﻿using App2.Models;
-using App2.ViewModels;
+﻿using System;
+using Novatune.Models;
+using Novatune.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
 using Windows.Storage;
 
-namespace App2.Pages
+namespace Novatune.Pages
 {
     public sealed partial class FolderDetailPage : Page
     {

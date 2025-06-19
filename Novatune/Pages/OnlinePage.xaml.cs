@@ -1,12 +1,12 @@
-﻿using App2.Models;
-using App2.ViewModels;
+﻿using System;
+using Novatune.Models;
+using Novatune.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using System;
 
-namespace App2.Pages
+namespace Novatune.Pages
 {
     public sealed partial class OnlinePage : Page
     {
@@ -14,7 +14,7 @@ namespace App2.Pages
         public OnlinePage()
         {
             this.InitializeComponent();
-            
+
         }
 
         private async void SearchTextBox_KeyDown(object sender, KeyRoutedEventArgs e)

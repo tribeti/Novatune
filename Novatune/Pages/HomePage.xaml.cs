@@ -1,10 +1,10 @@
 ﻿using System;
-using App2.ViewModels;
-using Microsoft.UI.Xaml.Controls;
 using System.Linq;
+using Novatune.ViewModels;
+using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 
-namespace App2.Pages
+namespace Novatune.Pages
 {
     public sealed partial class HomePage : Page
     {

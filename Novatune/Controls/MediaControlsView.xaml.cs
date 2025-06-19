@@ -1,11 +1,11 @@
-﻿using App2.ViewModels;
+﻿using System;
+using System.IO;
+using Novatune.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using System;
-using System.IO;
 
-namespace App2.Controls
+namespace Novatune.Controls
 {
     public sealed partial class MediaControlsView : UserControl
     {

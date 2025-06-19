@@ -1,6 +1,9 @@
-﻿using App2.Controls;
-using App2.Pages;
-using App2.ViewModels;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Novatune.Controls;
+using Novatune.Pages;
+using Novatune.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -9,15 +12,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 using WinUIEx;
 
-namespace App2
+namespace Novatune
 {
     public sealed partial class MainWindow : WinUIEx.WindowEx
     {

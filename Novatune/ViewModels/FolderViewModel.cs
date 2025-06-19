@@ -1,18 +1,18 @@
-﻿using App2.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Dispatching;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Novatune.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 
-namespace App2.ViewModels
+namespace Novatune.ViewModels
 {
     public partial class FolderViewModel : ObservableObject
     {
@@ -213,7 +213,7 @@ namespace App2.ViewModels
                 SearchStatus = $"Đang xử lý... {FilesFoundCount} file được tìm thấy.";
             });
         }
-        
+
         private async Task LoadSavedFoldersAsync()
         {
             Folders.Clear();

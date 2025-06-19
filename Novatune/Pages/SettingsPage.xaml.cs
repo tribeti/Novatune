@@ -1,10 +1,10 @@
-﻿using App2.Controls;
-using App2.ViewModels;
+﻿using Novatune.Controls;
+using Novatune.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 
-namespace App2.Pages
+namespace Novatune.Pages
 {
     public sealed partial class SettingsPage : Page
     {

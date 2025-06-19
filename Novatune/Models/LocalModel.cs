@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 
-namespace App2.Models
+namespace Novatune.Models
 {
     public class LocalModel : INotifyPropertyChanged
     {

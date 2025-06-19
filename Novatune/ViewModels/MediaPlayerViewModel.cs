@@ -1,20 +1,20 @@
-﻿using App2.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using LibVLCSharp.Shared;
-using Microsoft.UI.Dispatching;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Novatune.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using LibVLCSharp.Shared;
+using Microsoft.UI.Dispatching;
 using Windows.Storage;
 using Windows.Storage.Search;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Videos.Streams;
 
-namespace App2.ViewModels
+namespace Novatune.ViewModels
 {
     public enum RepeatMode
     {
