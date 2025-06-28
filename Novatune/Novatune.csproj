@@ -62,7 +62,7 @@
 		<PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="9.0.6" />
 		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
 		<PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
-		<PackageReference Include="WinUIEx" Version="2.5.1" />
+		<PackageReference Include="WinUIEx" Version="2.6.0" />
 		<PackageReference Include="YoutubeExplode" Version="6.5.4" />
 	</ItemGroup>
 	<ItemGroup>

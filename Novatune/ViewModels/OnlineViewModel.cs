@@ -27,7 +27,10 @@ namespace Novatune.ViewModels
 
         public OnlineViewModel(MediaPlayerViewModel mediaPlayerVM)
         {
-            _youtubeClient = new YoutubeClient();
+            var httpClient = new HttpClient ();
+            httpClient.DefaultRequestHeaders.Add ("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+            _youtubeClient = new YoutubeClient(httpClient);
             _mediaPlayerViewModel = mediaPlayerVM ?? throw new ArgumentNullException(nameof(mediaPlayerVM));
         }
 

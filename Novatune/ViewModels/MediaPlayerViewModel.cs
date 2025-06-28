@@ -40,11 +40,10 @@ namespace Novatune.ViewModels
         private Random _random = new Random();
         private YoutubeClient _youtubeClient;
 
-        public ObservableCollection<LocalModel> AudioFiles { get; } = new ObservableCollection<LocalModel>();
-        public ObservableCollection<LocalModel> FilteredAudioFiles { get; } = new ObservableCollection<LocalModel>();
-        public ObservableCollection<LocalModel> FavoriteAudioFiles { get; } = new ObservableCollection<LocalModel>();
-
-        public ObservableCollection<OnlineModel> OnlineAudioTracks { get; } = new ObservableCollection<OnlineModel>();
+        public ObservableCollection<LocalModel> AudioFiles { get; } = new ();
+        public ObservableCollection<LocalModel> FilteredAudioFiles { get; } = new ();
+        public ObservableCollection<LocalModel> FavoriteAudioFiles { get; } = new ();
+        public ObservableCollection<OnlineModel> OnlineAudioTracks { get; } = new ();
 
 
         [ObservableProperty]

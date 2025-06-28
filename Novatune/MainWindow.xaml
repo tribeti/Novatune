@@ -32,12 +32,12 @@
                 <NavigationViewItem
                     Content="Trang chủ"
                     Icon="Home"
-                    Tag="App2.Pages.HomePage" />
+                    Tag="Novatune.Pages.HomePage" />
 
                 <NavigationViewItem
                     Content="Online"
                     Icon="Globe"
-                    Tag="App2.Pages.OnlinePage" />
+                    Tag="Novatune.Pages.OnlinePage" />
                 <NavigationViewItemSeparator />
             </NavigationView.MenuItems>
 
