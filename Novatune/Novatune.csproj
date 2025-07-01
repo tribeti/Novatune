@@ -20,6 +20,7 @@
 		<!--Enable Native AOT (error)-->
 		<!--https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8-->
 		<NoWarn>$(NoWarn);CS8305;WMC1501</NoWarn>
+		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Controls\MediaControlsView.xaml" />

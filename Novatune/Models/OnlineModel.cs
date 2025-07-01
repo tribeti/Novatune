@@ -1,31 +1,29 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace Novatune.Models
 {
-    public class OnlineModel : INotifyPropertyChanged
+    public partial class OnlineModel : ObservableObject, INotifyPropertyChanged
     {
-        private string _title;
-        private string _author;
+        [ObservableProperty]
+        public partial string Title { get; set; }
+
+        [ObservableProperty]
+        public partial string Author { get; set; }
+
+        [ObservableProperty]
+        public partial string ThumbnailUrl { get; set; }
+        
+        [ObservableProperty]
+        public partial string VideoId { get; set; }
+        
+        [ObservableProperty]
+        public partial string StreamUrl { get; set; }
+
         private TimeSpan? _durationTimeSpan;
-        private string _thumbnailUrl;
-        private string _videoId;
-        private string _streamUrl;
-
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
-
-        public string Author
-        {
-            get => _author;
-            set => SetProperty(ref _author, value);
-        }
-
         public TimeSpan? DurationTimeSpan
         {
             get => _durationTimeSpan;
@@ -39,26 +37,8 @@ namespace Novatune.Models
         }
         public string DurationDisplay => DurationTimeSpan.HasValue ? FormatDurationStatic(DurationTimeSpan.Value) : "N/A";
 
-        public string ThumbnailUrl
-        {
-            get => _thumbnailUrl;
-            set => SetProperty(ref _thumbnailUrl, value);
-        }
-
-        public string VideoId
-        {
-            get => _videoId;
-            set => SetProperty(ref _videoId, value);
-        }
-
-        public string StreamUrl
-        {
-            get => _streamUrl;
-            set => SetProperty(ref _streamUrl, value);
-        }
-
-        public string DisplayTitle => !string.IsNullOrWhiteSpace(Title) ? Title : "Không rõ tiêu đề";
-        public string DisplayArtist => !string.IsNullOrWhiteSpace(Author) ? Author : "Không rõ nghệ sĩ";
+        public string DisplayTitle => !string.IsNullOrWhiteSpace(Title) ? Title : "Unknown Title";
+        public string DisplayArtist => !string.IsNullOrWhiteSpace(Author) ? Author : "Unknown Artist";
 
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,58 +9,54 @@ using Windows.Storage.FileProperties;
 
 namespace Novatune.Models
 {
-    public class LocalModel : INotifyPropertyChanged
+    public partial class LocalModel : ObservableObject, INotifyPropertyChanged
     {
-        private string _songTitle;
-        private string _artist;
-        private string _album;
-        private string _genre;
-        private uint _year;
-        private uint _trackNumber;
+        [ObservableProperty]
+        public partial string SongTitle { get; set; }
+
+        [ObservableProperty]
+        public partial string Artist { get; set; }
+
+        [ObservableProperty]
+        public partial string Album { get; set; }
+
+        [ObservableProperty]
+        public partial string Genre { get; set; }
+        
+        [ObservableProperty]
+        public partial uint Year { get; set; }
+        
+        [ObservableProperty]
+        public partial uint TrackNumber { get; set; }
+               
+        [ObservableProperty]
+        public partial StorageItemThumbnail Thumbnail { get; set; }
+
+        [ObservableProperty]
+        public partial StorageFile File { get; set; }
+
+        [ObservableProperty]
+        public partial string FilePath { get; set; }        
+
+        [ObservableProperty]
+        public partial ulong FileSize { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsPlaying { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsSelected { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsFavorite { get; set; }
+
         private TimeSpan _duration;
         private string _durationString;
-        private StorageItemThumbnail _thumbnail;
-        private StorageFile _file;
-        private string _filePath;
-        private ulong _fileSize;
-        private bool _isPlaying;
-        private bool _isFavorite;
-        private bool _isSelected;
 
-        public string SongTitle
+        public string DurationString
         {
-            get => _songTitle;
-            set => SetProperty(ref _songTitle, value);
-        }
-
-        public string Artist
-        {
-            get => _artist;
-            set => SetProperty(ref _artist, value);
-        }
-
-        public string Album
-        {
-            get => _album;
-            set => SetProperty(ref _album, value);
-        }
-
-        public string Genre
-        {
-            get => _genre;
-            set => SetProperty(ref _genre, value);
-        }
-
-        public uint Year
-        {
-            get => _year;
-            set => SetProperty(ref _year, value);
-        }
-
-        public uint TrackNumber
-        {
-            get => _trackNumber;
-            set => SetProperty(ref _trackNumber, value);
+            get => _durationString;
+            private set => SetProperty (ref _durationString, value);
         }
 
         public TimeSpan Duration
@@ -74,61 +71,12 @@ namespace Novatune.Models
             }
         }
 
-        public string DurationString
-        {
-            get => _durationString;
-            private set => SetProperty(ref _durationString, value);
-        }
-
-        public StorageItemThumbnail Thumbnail
-        {
-            get => _thumbnail;
-            set => SetProperty(ref _thumbnail, value);
-        }
-
-        public StorageFile File
-        {
-            get => _file;
-            set => SetProperty(ref _file, value);
-        }
-
-        public string FilePath
-        {
-            get => _filePath;
-            set => SetProperty(ref _filePath, value);
-        }
-
-        public ulong FileSize
-        {
-            get => _fileSize;
-            set => SetProperty(ref _fileSize, value);
-        }
-
-        public bool IsPlaying
-        {
-            get => _isPlaying;
-            set => SetProperty(ref _isPlaying, value);
-        }
-
-        public bool IsFavorite
-        {
-            get => _isFavorite;
-            set => SetProperty(ref _isFavorite, value);
-        }
-
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set => SetProperty(ref _isSelected, value);
-        }
-
-        // Computed properties
         public string DisplayTitle => !string.IsNullOrWhiteSpace(SongTitle) ? SongTitle : "Unknown Title";
         public string DisplayArtist => !string.IsNullOrWhiteSpace(Artist) ? Artist : "Unknown Artist";
         public string DisplayAlbum => !string.IsNullOrWhiteSpace(Album) ? Album : "Unknown Album";
         public string FileSizeString => FormatFileSize(FileSize);
 
-        private LocalModel() { }
+        private LocalModel () {}
 
         public static async Task<LocalModel> FromStorageFileAsync(StorageFile file)
         {

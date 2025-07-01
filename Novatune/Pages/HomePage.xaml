@@ -18,12 +18,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock
-            Grid.Row="0"
-            Margin="0,0,0,20"
-            FontSize="28"
-            FontWeight="SemiBold"
-            Text="{Binding Title}" />
+        <TextBox
+            Width="400"
+            MinWidth="300"
+            Margin="0,0,0,8"
+            HorizontalAlignment="Right"
+            PlaceholderText="Search" />
+        <!--  TextChanged=""  -->
 
 
         <ScrollViewer
