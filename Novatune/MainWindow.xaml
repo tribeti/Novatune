@@ -8,7 +8,6 @@
     xmlns:ex="using:WinUIEx"
     xmlns:local="using:Novatune"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="App2 Media Player"
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>

@@ -1,57 +1,54 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 
 namespace Novatune.Models
 {
-    public partial class LocalModel : ObservableObject, INotifyPropertyChanged
+    public partial class LocalModel : ObservableObject
     {
         [ObservableProperty]
-        public partial string SongTitle { get; set; }
+        public partial string SongTitle { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string Artist { get; set; }
+        public partial string Artist { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string Album { get; set; }
+        public partial string Album { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string Genre { get; set; }
+        public partial string Genre { get; set; } = string.Empty;
         
         [ObservableProperty]
-        public partial uint Year { get; set; }
+        public partial uint Year { get; set; } = 0;
         
         [ObservableProperty]
-        public partial uint TrackNumber { get; set; }
+        public partial uint TrackNumber { get; set; } = 0;
                
         [ObservableProperty]
-        public partial StorageItemThumbnail Thumbnail { get; set; }
+        public partial StorageItemThumbnail? Thumbnail { get; set; }
 
         [ObservableProperty]
-        public partial StorageFile File { get; set; }
+        public required partial StorageFile File { get; set; }
 
         [ObservableProperty]
-        public partial string FilePath { get; set; }        
+        public partial string FilePath { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial ulong FileSize { get; set; }
+        public partial ulong FileSize { get; set; } = 0;
 
         [ObservableProperty]
-        public partial bool IsPlaying { get; set; }
+        public partial bool IsPlaying { get; set; } = false;
 
         [ObservableProperty]
-        public partial bool IsSelected { get; set; }
+        public partial bool IsSelected { get; set; } = false;
 
         [ObservableProperty]
-        public partial bool IsFavorite { get; set; }
+        public partial bool IsFavorite { get; set; } = false;
 
-        private TimeSpan _duration;
-        private string _durationString;
+        private TimeSpan _duration = TimeSpan.Zero;
+        private string _durationString = string.Empty;
 
         public string DurationString
         {
@@ -135,23 +132,6 @@ namespace Novatune.Models
             if (bytes >= KB)
                 return $"{bytes / (double)KB:F2} KB";
             return $"{bytes} bytes";
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "")
-        {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
-
-            backingStore = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void ToggleFavorite()

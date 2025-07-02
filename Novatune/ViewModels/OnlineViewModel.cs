@@ -23,7 +23,7 @@ namespace Novatune.ViewModels
         [ObservableProperty]
         private bool _isLoading;
 
-        public ObservableCollection<OnlineModel> Videos { get; } = new ObservableCollection<OnlineModel>();
+        public ObservableCollection<OnlineModel> Videos { get; } = new ();
 
         public OnlineViewModel(MediaPlayerViewModel mediaPlayerVM)
         {

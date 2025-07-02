@@ -4,6 +4,7 @@ using Novatune.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Novatune.Enums;
 
 namespace Novatune.Controls
 {
@@ -76,7 +77,7 @@ namespace Novatune.Controls
                 PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768";
                 RepeatIcon.Glyph = _mediaPlayerViewModel.RepeatGlyph;
                 ShuffleIcon.Glyph = _mediaPlayerViewModel.ShuffleGlyph;
-                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
+                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == MediaEnums.ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
                 UpdateSliderAndTimeTexts(true);
                 SetButtonsEnabled(true);
                 return;
@@ -88,7 +89,7 @@ namespace Novatune.Controls
                 PlayPauseIcon.Glyph = _mediaPlayerViewModel.IsPlaying ? "\uE769" : "\uE768";
                 RepeatIcon.Glyph = _mediaPlayerViewModel.RepeatGlyph;
                 ShuffleIcon.Glyph = _mediaPlayerViewModel.ShuffleGlyph;
-                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
+                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == MediaEnums.ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
                 UpdateSliderAndTimeTexts(true);
                 SetButtonsEnabled(true);
                 return;
@@ -99,7 +100,7 @@ namespace Novatune.Controls
                 PlayPauseIcon.Glyph = "\uE768";
                 RepeatIcon.Glyph = _mediaPlayerViewModel.RepeatGlyph;
                 ShuffleIcon.Glyph = _mediaPlayerViewModel.ShuffleGlyph;
-                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
+                ShuffleOffOverlay.Visibility = _mediaPlayerViewModel.ShuffleMode == MediaEnums.ShuffleMode.Off ? Visibility.Visible : Visibility.Collapsed;
                 UpdateSliderAndTimeTexts(false);
                 SetButtonsEnabled(false);
                 TimeSlider.IsEnabled = false;

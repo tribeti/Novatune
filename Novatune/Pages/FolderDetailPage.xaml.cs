@@ -10,8 +10,8 @@ namespace Novatune.Pages
 {
     public sealed partial class FolderDetailPage : Page
     {
-        public MediaPlayerViewModel MediaPlayerVM { get; private set; }
-        public StorageFolder SelectedFolder { get; private set; }
+        public MediaPlayerViewModel? MediaPlayerVM { get; private set; }
+        public StorageFolder? SelectedFolder { get; private set; }
         public FolderDetailPage()
         {
             this.InitializeComponent();

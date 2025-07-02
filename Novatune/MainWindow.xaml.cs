@@ -1,33 +1,28 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Novatune.Controls;
 using Novatune.Pages;
 using Novatune.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT.Interop;
 using WinUIEx;
 
 namespace Novatune
 {
     public sealed partial class MainWindow : WinUIEx.WindowEx
     {
-        public MediaPlayerViewModel GlobalMediaPlayerVM { get; private set; }
+        public MediaPlayerViewModel? GlobalMediaPlayerVM { get; private set; }
         public MediaControlsView GlobalMediaControlsPublic => this.GlobalMediaControls;
-        public AppWindowTitleBar TitleBar { get; private set; }
+        public AppWindowTitleBar? TitleBar { get; private set; }
         public MainWindow()
         {
             this.InitializeComponent();
-            this.Title = "App2 Media Player";
+            this.Title = "Novatune";
 
             if (this.GlobalMediaControls == null)
             {
@@ -35,11 +30,11 @@ namespace Novatune
                 return;
             }
 
-            GlobalMediaPlayerVM = new MediaPlayerViewModel();
+            GlobalMediaPlayerVM = new ();
             this.GlobalMediaControls.Initialize(GlobalMediaPlayerVM);
 
-            this.MinHeight = 500;
-            this.MinWidth = 700;
+            this.MinHeight = 600;
+            this.MinWidth = 900;
             this.PersistenceId = "MainWindow";
 
             this.Closed += MainWindow_Closed;
@@ -70,7 +65,7 @@ namespace Novatune
                 RootNavigationView.SelectedItem = firstItem;
                 if (firstItem.Tag is string tag && !string.IsNullOrEmpty(tag))
                 {
-                    Type pageType = Type.GetType(tag);
+                    Type? pageType = Type.GetType(tag);
                     if (pageType != null) ContentFrame.Navigate(pageType);
                 }
             }
@@ -116,7 +111,7 @@ namespace Novatune
             }
         }
 
-        private async void RootNavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        private void RootNavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
             NavigationTransitionInfo transitionInfo = args.RecommendedNavigationTransitionInfo;
 
@@ -128,7 +123,7 @@ namespace Novatune
             {
                 if (selectedItem.Tag is string pageTag)
                 {
-                    Type targetPageType = Type.GetType(pageTag);
+                    Type? targetPageType = Type.GetType(pageTag);
                     if (targetPageType != null)
                     {
                         NavigateToPage(targetPageType, null, transitionInfo);
@@ -137,7 +132,7 @@ namespace Novatune
             }
         }
 
-        private void NavigateToPage(Type targetPageType, object parameter = null, NavigationTransitionInfo transitionInfo = null)
+        private void NavigateToPage(Type targetPageType, object? parameter = null, NavigationTransitionInfo? transitionInfo = null)
         {
             if (ContentFrame.CurrentSourcePageType != targetPageType)
             {
@@ -153,7 +148,7 @@ namespace Novatune
             }
             else if (args.SelectedItemContainer is NavigationViewItem selectedItem)
             {
-                string selectedPage = selectedItem.Tag.ToString();
+                string? selectedPage = selectedItem.Tag.ToString();
 
                 switch (selectedPage)
                 {

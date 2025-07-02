@@ -19,35 +19,35 @@
         <!--  Search Section  -->
         <StackPanel
             Grid.Row="0"
-            Margin="20"
+            Margin="20,30,0,20"
             Orientation="Horizontal"
             Spacing="10">
             <TextBox
                 x:Name="SearchTextBox"
                 Width="300"
                 KeyDown="SearchTextBox_KeyDown"
-                PlaceholderText="Nhập tên bài hát hoặc từ khóa..."
+                PlaceholderText="Enter song or keywords"
                 Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-            <Button Command="{x:Bind ViewModel.SearchCommand}" Content="Tìm kiếm" />
+            <Button Command="{x:Bind ViewModel.SearchCommand}" Style="{StaticResource AccentButtonStyle}">
+                <FontIcon Glyph="&#xE721;" />
+            </Button>
         </StackPanel>
 
         <!--  Videos ListView  -->
         <ListView
             x:Name="VideosListView"
             Grid.Row="1"
-            Margin="20,0,20,20"
+            Margin="20,20,20,0"
             IsItemClickEnabled="True"
             ItemClick="VideosListView_ItemClick"
             ItemsSource="{x:Bind ViewModel.Videos, Mode=OneWay}"
-            SelectionMode="Single">
-
+            SelectionMode="None">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:OnlineModel">
                     <Grid
                         Margin="0,5"
                         Padding="10"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         CornerRadius="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120" />

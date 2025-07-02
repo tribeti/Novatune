@@ -17,7 +17,7 @@ namespace Novatune.Pages
 
         }
 
-        private async void SearchTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        private void SearchTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
@@ -27,6 +27,7 @@ namespace Novatune.Pages
                 }
             }
         }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -35,10 +36,6 @@ namespace Novatune.Pages
             {
                 ViewModel = new OnlineViewModel(mainWindow.GlobalMediaPlayerVM);
                 this.DataContext = ViewModel;
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("Lỗi nghiêm trọng: GlobalMediaPlayerVM không được tìm thấy khi khởi tạo OnlinePage.");
             }
         }
 

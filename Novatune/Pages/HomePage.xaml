@@ -19,8 +19,7 @@
         </Grid.RowDefinitions>
 
         <TextBox
-            Width="400"
-            MinWidth="300"
+            Width="300"
             Margin="0,0,0,8"
             HorizontalAlignment="Right"
             PlaceholderText="Search" />

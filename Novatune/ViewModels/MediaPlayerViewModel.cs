@@ -13,21 +13,11 @@ using Windows.Storage.Search;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Videos.Streams;
+using Novatune.Enums;
 
 namespace Novatune.ViewModels
 {
-    public enum RepeatMode
-    {
-        None,
-        One,
-        All
-    }
-
-    public enum ShuffleMode
-    {
-        Off,
-        On
-    }
+    
 
     public partial class MediaPlayerViewModel : ObservableObject
     {
@@ -37,7 +27,7 @@ namespace Novatune.ViewModels
         private readonly DispatcherQueue _dispatcherQueue;
         private static bool _isLibVLCSharpCoreInitialized = false;
         private List<LocalModel> _shuffledPlaylist;
-        private Random _random = new Random();
+        private Random _random = new ();
         private YoutubeClient _youtubeClient;
 
         public ObservableCollection<LocalModel> AudioFiles { get; } = new ();
@@ -56,10 +46,10 @@ namespace Novatune.ViewModels
         private string _nowPlayingTitle = "Không có file nào đang phát";
 
         [ObservableProperty]
-        private string _nowPlayingArtist = "";
+        private string _nowPlayingArtist = string.Empty;
 
         [ObservableProperty]
-        private string _nowPlayingAlbum = "";
+        private string _nowPlayingAlbum = string.Empty;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PlayPauseGlyph))]
@@ -81,26 +71,26 @@ namespace Novatune.ViewModels
         private string _totalDurationString = "0:00";
 
         [ObservableProperty]
-        private RepeatMode _repeatMode = RepeatMode.None;
+        private MediaEnums.RepeatMode _repeatMode = MediaEnums.RepeatMode.None;
 
         [ObservableProperty]
-        private ShuffleMode _shuffleMode = ShuffleMode.Off;
+        private MediaEnums.ShuffleMode _shuffleMode = MediaEnums.ShuffleMode.Off;
 
         [ObservableProperty]
         private int _volume = 300;
 
         [ObservableProperty]
-        private string _searchText = "";
+        private string _searchText = string.Empty;
 
         public string PlayPauseGlyph => IsPlaying ? "\uE769" : "\uE768";
         public string RepeatGlyph => RepeatMode switch
         {
-            RepeatMode.None => "\uF5E7",
-            RepeatMode.One => "\uE8ED",
-            RepeatMode.All => "\uE8EE",
+            MediaEnums.RepeatMode.None => "\uF5E7",
+            MediaEnums.RepeatMode.One => "\uE8ED",
+            MediaEnums.RepeatMode.All => "\uE8EE",
             _ => "\uE8EE"
         };
-        public string ShuffleGlyph => ShuffleMode == ShuffleMode.On ? "\uE8B1" : "\uE8B1";
+        public string ShuffleGlyph => ShuffleMode == MediaEnums.ShuffleMode.On ? "\uE8B1" : "\uE8B1";
 
         public event Action PlaybackStateChanged;
         public LibVLCSharp.Shared.MediaPlayer PlayerInstance => _mediaPlayer;
@@ -223,7 +213,7 @@ namespace Novatune.ViewModels
                 PlaybackStateChanged?.Invoke();
                 bool playedNext = false;
 
-                if (RepeatMode == RepeatMode.One)
+                if (RepeatMode == MediaEnums.RepeatMode.One)
                 {
                     if (wasPlayingOnline && CurrentOnlineAudio != null && !string.IsNullOrEmpty(CurrentOnlineAudio.VideoId))
                     {
@@ -257,7 +247,7 @@ namespace Novatune.ViewModels
                             await PlayOnlineAudioAsync(OnlineAudioTracks[currentIndexInOnlinePlaylist + 1]);
                             playedNext = true;
                         }
-                        else if (RepeatMode == RepeatMode.All && OnlineAudioTracks.Any())
+                        else if (RepeatMode == MediaEnums.RepeatMode.All && OnlineAudioTracks.Any())
                         {
                             await PlayOnlineAudioAsync(OnlineAudioTracks.First());
                             playedNext = true;
@@ -271,7 +261,7 @@ namespace Novatune.ViewModels
                             await SkipNextAsync();
                             playedNext = true;
                         }
-                        else if (RepeatMode == RepeatMode.All && AudioFiles.Any())
+                        else if (RepeatMode == MediaEnums.RepeatMode.All && AudioFiles.Any())
                         {
                             var firstAudio = GetPlaylist().FirstOrDefault();
                             if (firstAudio != null)
@@ -602,7 +592,7 @@ namespace Novatune.ViewModels
 
         private List<LocalModel> GetPlaylist()
         {
-            return ShuffleMode == ShuffleMode.On ? _shuffledPlaylist ?? AudioFiles.ToList() : AudioFiles.ToList();
+            return ShuffleMode == MediaEnums.ShuffleMode.On ? _shuffledPlaylist ?? AudioFiles.ToList() : AudioFiles.ToList();
         }
 
         private int GetCurrentAudioIndex()
@@ -622,7 +612,7 @@ namespace Novatune.ViewModels
                 {
                     await PlayOnlineAudioAsync(OnlineAudioTracks[currentIndexInOnlinePlaylist - 1]);
                 }
-                else if (RepeatMode == RepeatMode.All && OnlineAudioTracks.Any())
+                else if (RepeatMode == MediaEnums.RepeatMode.All && OnlineAudioTracks.Any())
                 {
                     await PlayOnlineAudioAsync(OnlineAudioTracks.Last());
                 }
@@ -632,17 +622,17 @@ namespace Novatune.ViewModels
             var playlist = GetPlaylist();
             int currentIndex = GetCurrentAudioIndex();
             if (currentIndex > 0) await PlayAudioAsync(playlist[currentIndex - 1]);
-            else if (RepeatMode == RepeatMode.All && playlist.Any()) await PlayAudioAsync(playlist.Last());
+            else if (RepeatMode == MediaEnums.RepeatMode.All && playlist.Any()) await PlayAudioAsync(playlist.Last());
         }
         private bool CanSkipPrevious()
         {
             if (CurrentOnlineAudio != null)
             {
                 int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
-                return currentIndexInOnlinePlaylist > 0 || (RepeatMode == RepeatMode.All && OnlineAudioTracks.Count > 1);
+                return currentIndexInOnlinePlaylist > 0 || (RepeatMode == MediaEnums.RepeatMode.All && OnlineAudioTracks.Count > 1);
             }
             if (CurrentAudio == null || AudioFiles.Count <= 1) return false;
-            return GetCurrentAudioIndex() > 0 || (RepeatMode == RepeatMode.All && AudioFiles.Count > 1);
+            return GetCurrentAudioIndex() > 0 || (RepeatMode == MediaEnums.RepeatMode.All && AudioFiles.Count > 1);
         }
 
         [RelayCommand(CanExecute = nameof(CanSkipNext))]
@@ -655,7 +645,7 @@ namespace Novatune.ViewModels
                 {
                     await PlayOnlineAudioAsync(OnlineAudioTracks[currentIndexInOnlinePlaylist + 1]);
                 }
-                else if (RepeatMode == RepeatMode.All && OnlineAudioTracks.Any())
+                else if (RepeatMode == MediaEnums.RepeatMode.All && OnlineAudioTracks.Any())
                 {
                     await PlayOnlineAudioAsync(OnlineAudioTracks.First());
                 }
@@ -665,38 +655,38 @@ namespace Novatune.ViewModels
             var playlist = GetPlaylist();
             int currentIndex = GetCurrentAudioIndex();
             if (currentIndex >= 0 && currentIndex < playlist.Count - 1) await PlayAudioAsync(playlist[currentIndex + 1]);
-            else if (RepeatMode == RepeatMode.All && playlist.Any()) await PlayAudioAsync(playlist.First());
+            else if (RepeatMode == MediaEnums.RepeatMode.All && playlist.Any()) await PlayAudioAsync(playlist.First());
         }
         private bool CanSkipNext()
         {
             if (CurrentOnlineAudio != null)
             {
                 int currentIndexInOnlinePlaylist = OnlineAudioTracks.IndexOf(CurrentOnlineAudio);
-                return (currentIndexInOnlinePlaylist >= 0 && currentIndexInOnlinePlaylist < OnlineAudioTracks.Count - 1) || (RepeatMode == RepeatMode.All && OnlineAudioTracks.Count > 1);
+                return (currentIndexInOnlinePlaylist >= 0 && currentIndexInOnlinePlaylist < OnlineAudioTracks.Count - 1) || (RepeatMode == MediaEnums.RepeatMode.All && OnlineAudioTracks.Count > 1);
             }
             if (CurrentAudio == null || AudioFiles.Count <= 1) return false;
             int currentIndex = GetCurrentAudioIndex();
-            return (currentIndex >= 0 && currentIndex < AudioFiles.Count - 1) || (RepeatMode == RepeatMode.All && AudioFiles.Count > 1);
+            return (currentIndex >= 0 && currentIndex < AudioFiles.Count - 1) || (RepeatMode == MediaEnums.RepeatMode.All && AudioFiles.Count > 1);
         }
 
         [RelayCommand]
         public void ToggleRepeatMode()
         {
-            RepeatMode = RepeatMode switch { RepeatMode.None => RepeatMode.All, RepeatMode.All => RepeatMode.One, RepeatMode.One => RepeatMode.None, _ => RepeatMode.None };
+            RepeatMode = RepeatMode switch { MediaEnums.RepeatMode.None => MediaEnums.RepeatMode.All, MediaEnums.RepeatMode.All => MediaEnums.RepeatMode.One, MediaEnums.RepeatMode.One => MediaEnums.RepeatMode.None, _ => MediaEnums.RepeatMode.None };
             OnPropertyChanged(nameof(RepeatGlyph));
         }
 
         [RelayCommand]
         public void ToggleShuffleMode()
         {
-            ShuffleMode = ShuffleMode == ShuffleMode.Off ? ShuffleMode.On : ShuffleMode.Off;
+            ShuffleMode = ShuffleMode == MediaEnums.ShuffleMode.Off ? MediaEnums.ShuffleMode.On : MediaEnums.ShuffleMode.Off;
             UpdateShufflePlaylist();
             OnPropertyChanged(nameof(ShuffleGlyph));
         }
 
         private void UpdateShufflePlaylist()
         {
-            if (ShuffleMode == ShuffleMode.On) _shuffledPlaylist = AudioFiles.OrderBy(x => _random.Next()).ToList();
+            if (ShuffleMode == MediaEnums.ShuffleMode.On) _shuffledPlaylist = AudioFiles.OrderBy(x => _random.Next()).ToList();
             else _shuffledPlaylist = null;
         }
 

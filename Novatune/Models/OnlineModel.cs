@@ -1,12 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace Novatune.Models
 {
-    public partial class OnlineModel : ObservableObject, INotifyPropertyChanged
+    public partial class OnlineModel : ObservableObject
     {
         [ObservableProperty]
         public partial string Title { get; set; }
@@ -39,23 +36,6 @@ namespace Novatune.Models
 
         public string DisplayTitle => !string.IsNullOrWhiteSpace(Title) ? Title : "Unknown Title";
         public string DisplayArtist => !string.IsNullOrWhiteSpace(Author) ? Author : "Unknown Artist";
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "")
-        {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
-
-            backingStore = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         private static string FormatDurationStatic(TimeSpan duration)
         {
