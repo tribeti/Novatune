@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
 		<SupportedPlatform>windows</SupportedPlatform>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
@@ -25,7 +25,6 @@
 		<None Remove="Pages\FolderDetailPage.xaml" />
 		<None Remove="Pages\HomePage.xaml" />
 		<None Remove="Pages\OnlinePage.xaml" />
-		<None Remove="Resources\HomePageResourceDictionary.xaml" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
@@ -52,6 +51,7 @@
 	<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
 	<PackageReference Include="LibVLCSharp" Version="3.9.3" />
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
 	<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
 	<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
 	<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
@@ -82,11 +82,6 @@
 	</Page>
   </ItemGroup>
   <ItemGroup>
-	<Page Update="Resources\HomePageResourceDictionary.xaml">
-	  <Generator>MSBuild:Compile</Generator>
-	</Page>
-  </ItemGroup>
-  <ItemGroup>
 	<Page Update="Controls\MediaControlsView.xaml">
 	  <Generator>MSBuild:Compile</Generator>
 	</Page>
@@ -106,6 +101,6 @@
 		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">True</PublishTrimmed>
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-		<PublishAot>True</PublishAot>
+		<PublishAot>true</PublishAot>
 	</PropertyGroup>
 </Project>

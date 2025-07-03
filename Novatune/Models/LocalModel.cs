@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -16,15 +16,6 @@ namespace Novatune.Models
 
         [ObservableProperty]
         public partial string Album { get; set; } = string.Empty;
-
-        [ObservableProperty]
-        public partial string Genre { get; set; } = string.Empty;
-        
-        [ObservableProperty]
-        public partial uint Year { get; set; } = 0;
-        
-        [ObservableProperty]
-        public partial uint TrackNumber { get; set; } = 0;
                
         [ObservableProperty]
         public partial StorageItemThumbnail? Thumbnail { get; set; }
@@ -88,9 +79,6 @@ namespace Novatune.Models
                     SongTitle = string.IsNullOrWhiteSpace(musicProperties.Title) ? file.DisplayName : musicProperties.Title,
                     Artist = musicProperties.Artist ?? string.Empty,
                     Album = musicProperties.Album ?? string.Empty,
-                    Genre = string.Join(", ", musicProperties.Genre),
-                    Year = musicProperties.Year,
-                    TrackNumber = musicProperties.TrackNumber,
                     Duration = musicProperties.Duration,
                     Thumbnail = thumbnail,
                     File = file,

@@ -20,6 +20,27 @@ namespace Novatune.ViewModels
 {
     public partial class FolderViewModel : ObservableObject
     {
+        private static FolderViewModel? _instance;
+        private static readonly object _lock = new object ();
+
+        public static FolderViewModel Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new FolderViewModel ();
+                        }
+                    }
+                }
+                return _instance;
+            }
+        }
+
         private const string FolderTokensKey = "SavedFolderTokens";
         private const int DefaultBatchSize = 100;
         private const int MaxConcurrentFolders = 4;
@@ -72,6 +93,15 @@ namespace Novatune.ViewModels
             await TriggerContentsUpdateAsync ();
         }
         private bool CanStartSearch () => !IsSearching && SelectedFolders.Any ();
+
+        public async Task ForceRefreshAsync ()
+        {
+            foreach (var folder in SelectedFolders)
+            {
+                _folderScanCache.TryRemove (folder.Path, out _);
+            }
+            await TriggerContentsUpdateAsync ();
+        }
 
         [RelayCommand (CanExecute = nameof (CanCancelSearch))]
         public void CancelSearch ()
@@ -184,8 +214,6 @@ namespace Novatune.ViewModels
                         batch.Clear ();
                     }
                 }
-
-                // Thêm batch cuối cùng nếu còn
                 if (batch.Count > 0)
                 {
                     await AddModelsToContentsOnUiThreadAsync (batch);
@@ -341,6 +369,31 @@ namespace Novatune.ViewModels
             });
         }
 
+        public async Task LoadSpecificFolderAsync (StorageFolder folder)
+        {
+            _folderScanCache.TryRemove (folder.Path, out _);
+            Contents.Clear ();
+            SelectedFolders.Clear ();
+            SelectedFolders.Add (folder);
+            if (!Folders.Any (f => f.Path == folder.Path))
+            {
+                Folders.Insert (0, folder);
+            }
+            await TriggerContentsUpdateAsync ();
+        }
+
+        public void RemoveTemporaryFolder (StorageFolder folder)
+        {
+            var hasToken = StorageApplicationPermissions.FutureAccessList.Entries
+                .Any (entry => entry.Metadata == folder.Path);
+
+            if (!hasToken)
+            {
+                Folders.Remove (folder);
+            }
+            SelectedFolders.Remove (folder);
+        }
+
         private async Task LoadSavedFoldersAsync ()
         {
             Folders.Clear ();
@@ -399,7 +452,7 @@ namespace Novatune.ViewModels
         [RelayCommand]
         public void RemoveFolder (StorageFolder folder)
         {
-            if (folder == null)
+            if (folder is null)
                 return;
 
             var tokenToRemove = StorageApplicationPermissions.FutureAccessList.Entries

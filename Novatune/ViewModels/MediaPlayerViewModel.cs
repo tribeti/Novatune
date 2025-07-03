@@ -701,8 +701,7 @@ namespace Novatune.ViewModels
                 {
                     if (audio.SongTitle?.ToLower().Contains(searchLower) == true ||
                         audio.Artist?.ToLower().Contains(searchLower) == true ||
-                        audio.Album?.ToLower().Contains(searchLower) == true ||
-                        audio.Genre?.ToLower().Contains(searchLower) == true)
+                        audio.Album?.ToLower().Contains(searchLower) == true)
                     {
                         FilteredAudioFiles.Add(audio);
                     }
