@@ -16,15 +16,13 @@ using YoutubeExplode.Videos.Streams;
 using Novatune.Enums;
 
 namespace Novatune.ViewModels
-{
-    
-
+{  
     public partial class MediaPlayerViewModel : ObservableObject
     {
-        private LibVLC _libVLC;
-        private LibVLCSharp.Shared.MediaPlayer _mediaPlayer;
-        private Media _currentMediaTrack;
-        private readonly DispatcherQueue _dispatcherQueue;
+        private LibVLC? _libVLC;
+        private MediaPlayer? _mediaPlayer;
+        private Media? _currentMediaTrack;
+        private readonly DispatcherQueue? _dispatcherQueue;
         private static bool _isLibVLCSharpCoreInitialized = false;
         private List<LocalModel> _shuffledPlaylist;
         private Random _random = new ();
@@ -33,54 +31,54 @@ namespace Novatune.ViewModels
         public ObservableCollection<LocalModel> AudioFiles { get; } = new ();
         public ObservableCollection<LocalModel> FilteredAudioFiles { get; } = new ();
         public ObservableCollection<LocalModel> FavoriteAudioFiles { get; } = new ();
-        public ObservableCollection<OnlineModel> OnlineAudioTracks { get; } = new ();
+        public ObservableCollection<OnlineModel>? OnlineAudioTracks { get; } = new ();
 
 
         [ObservableProperty]
-        private LocalModel _currentAudio;
+        public partial LocalModel? CurrentAudio { get; set; }
 
         [ObservableProperty]
-        private OnlineModel _currentOnlineAudio;
+        public partial OnlineModel? CurrentOnlineAudio { get; set; }
 
         [ObservableProperty]
-        private string _nowPlayingTitle = "Không có file nào đang phát";
+        public partial string NowPlayingTitle { get; set; } = "Không có file nào đang phát";
 
         [ObservableProperty]
-        private string _nowPlayingArtist = string.Empty;
+        public partial string NowPlayingArtist { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private string _nowPlayingAlbum = string.Empty;
+        public partial string NowPlayingAlbum { get; set; } = string.Empty;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(PlayPauseGlyph))]
-        private bool _isPlaying;
+        [NotifyPropertyChangedFor (nameof (PlayPauseGlyph))]
+        public partial bool IsPlaying { get; set; }
 
         [ObservableProperty]
-        private bool _isMediaPlayerElementVisible;
+        public partial bool IsMediaPlayerElementVisible { get; set; }
 
         [ObservableProperty]
-        private TimeSpan _currentPosition;
+        public partial TimeSpan CurrentPosition { get; set; }
 
         [ObservableProperty]
-        private TimeSpan _totalDuration;
+        public partial TimeSpan TotalDuration { get; set; }
 
         [ObservableProperty]
-        private string _currentPositionString = "0:00";
+        public partial string CurrentPositionString { get; set; } = "0:00";
 
         [ObservableProperty]
-        private string _totalDurationString = "0:00";
+        public partial string TotalDurationString { get; set; } = "0:00";
 
         [ObservableProperty]
-        private MediaEnums.RepeatMode _repeatMode = MediaEnums.RepeatMode.None;
+        public partial MediaEnums.RepeatMode RepeatMode { get; set; } = MediaEnums.RepeatMode.None;
 
         [ObservableProperty]
-        private MediaEnums.ShuffleMode _shuffleMode = MediaEnums.ShuffleMode.Off;
+        public partial MediaEnums.ShuffleMode ShuffleMode { get; set; } = MediaEnums.ShuffleMode.Off;
 
         [ObservableProperty]
-        private int _volume = 300;
+        public partial int Volume { get; set; } = 300;
 
         [ObservableProperty]
-        private string _searchText = string.Empty;
+        public partial string? SearchText { get; set; } = string.Empty;
 
         public string PlayPauseGlyph => IsPlaying ? "\uE769" : "\uE768";
         public string RepeatGlyph => RepeatMode switch
@@ -92,8 +90,8 @@ namespace Novatune.ViewModels
         };
         public string ShuffleGlyph => ShuffleMode == MediaEnums.ShuffleMode.On ? "\uE8B1" : "\uE8B1";
 
-        public event Action PlaybackStateChanged;
-        public LibVLCSharp.Shared.MediaPlayer PlayerInstance => _mediaPlayer;
+        public event Action? PlaybackStateChanged;
+        public LibVLCSharp.Shared.MediaPlayer? PlayerInstance => _mediaPlayer;
 
         public MediaPlayerViewModel()
         {
@@ -131,7 +129,7 @@ namespace Novatune.ViewModels
             _mediaPlayer.Volume = Math.Clamp(Volume, 0, 100);
         }
 
-        private void MediaPlayer_EncounteredError(object sender, EventArgs e)
+        private void MediaPlayer_EncounteredError(object? sender, EventArgs e)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -146,7 +144,7 @@ namespace Novatune.ViewModels
             });
         }
 
-        private void MediaPlayer_LengthChanged(object sender, MediaPlayerLengthChangedEventArgs e)
+        private void MediaPlayer_LengthChanged(object? sender, MediaPlayerLengthChangedEventArgs e)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -155,7 +153,7 @@ namespace Novatune.ViewModels
             });
         }
 
-        private void MediaPlayer_TimeChanged(object sender, MediaPlayerTimeChangedEventArgs e)
+        private void MediaPlayer_TimeChanged(object? sender, MediaPlayerTimeChangedEventArgs e)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -164,7 +162,7 @@ namespace Novatune.ViewModels
             });
         }
 
-        private void MediaPlayer_Stopped(object sender, EventArgs e)
+        private void MediaPlayer_Stopped(object? sender, EventArgs e)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -177,7 +175,7 @@ namespace Novatune.ViewModels
             });
         }
 
-        private void MediaPlayer_Paused(object sender, EventArgs e)
+        private void MediaPlayer_Paused(object? sender, EventArgs e)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -187,7 +185,7 @@ namespace Novatune.ViewModels
             });
         }
 
-        private void MediaPlayer_Playing(object sender, EventArgs e)
+        private void MediaPlayer_Playing(object? sender, EventArgs e)
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -197,7 +195,7 @@ namespace Novatune.ViewModels
             });
         }
 
-        private async void MediaPlayer_EndReached(object sender, EventArgs e)
+        private void MediaPlayer_EndReached(object? sender, EventArgs e)
         {
             _dispatcherQueue.TryEnqueue(async () =>
             {
@@ -276,13 +274,13 @@ namespace Novatune.ViewModels
                 if (!playedNext)
                 {
                     StopPlaybackInternal();
-                    if (CurrentAudio != null) ResetCurrentAudio();
+                    if (CurrentAudio is not null) ResetCurrentAudio();
                     if (CurrentOnlineAudio != null)
                     {
                         CurrentOnlineAudio = null;
-                        if (CurrentAudio == null) ResetPlaybackState();
+                        if (CurrentAudio is null) ResetPlaybackState();
                     }
-                    else if (CurrentAudio == null)
+                    else if (CurrentAudio is null)
                     {
                         ResetPlaybackState();
                     }
@@ -328,7 +326,7 @@ namespace Novatune.ViewModels
                 }
                 else
                 {
-                    NowPlayingTitle = "Playlist online rỗng hoặc lỗi.";
+                    NowPlayingTitle = "Online playlist error";
                 }
             }
             catch (Exception ex)
@@ -343,7 +341,7 @@ namespace Novatune.ViewModels
             }
         }
 
-        public async Task LoadAudioFilesAsync(StorageFolder folder)
+        public async Task LoadAudioFilesAsync(StorageFolder? folder)
         {
             if (folder == null)
             {
@@ -362,7 +360,7 @@ namespace Novatune.ViewModels
             }
 
             var audioExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".mp3", ".wav", ".aac", ".flac", ".wma", ".ogg", ".m4a" };
-            LocalModel previouslyPlayingLocalAudio = null;
+            LocalModel? previouslyPlayingLocalAudio = null;
             if (this.IsPlaying && this.CurrentAudio != null && this.CurrentOnlineAudio == null)
             {
                 previouslyPlayingLocalAudio = this.CurrentAudio;

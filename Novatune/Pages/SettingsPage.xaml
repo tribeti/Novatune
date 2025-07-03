@@ -12,13 +12,8 @@
     Background="Transparent"
     mc:Ignorable="d">
 
-    <Page.DataContext>
-        <viewModels:FolderViewModel />
-    </Page.DataContext>
-
     <ScrollViewer Margin="36,40,36,0">
         <StackPanel Spacing="4">
-            <!--#region: title-->
             <TextBlock
                 Margin="0,0,0,52"
                 FontSize="36"
@@ -32,16 +27,13 @@
                 Style="{StaticResource SubtitleTextBlockStyle}"
                 Text="Local libraries" />
 
-            <!--#endregion-->
-
-
             <controls:SettingsExpander
                 Description="List of media folders you have selected."
                 Header="Media folder locations"
-                ItemsSource="{Binding Folders}">
+                ItemsSource="{x:Bind ViewModel.Folders}">
 
                 <Button
-                    Command="{Binding AddFolderCommand}"
+                    Command="{x:Bind ViewModel.AddFolderCommand}"
                     Content="Add a folder"
                     Style="{StaticResource AccentButtonStyle}" />
 
@@ -55,8 +47,8 @@
                         <controls:SettingsCard Description="{x:Bind Name}" Header="{x:Bind Path}">
                             <Button
                                 Grid.Column="1"
-                                Command="{Binding RemoveFolderCommand, Source={Binding DataContext}}"
-                                CommandParameter="{x:Bind}"
+                                Click="RemoveFolder_Click"
+                                DataContext="{x:Bind}"
                                 Style="{StaticResource AccentButtonStyle}">
                                 <FontIcon FontSize="14" Glyph="&#xE74D;" />
                             </Button>

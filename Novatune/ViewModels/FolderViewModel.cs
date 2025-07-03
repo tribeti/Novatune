@@ -36,16 +36,16 @@ namespace Novatune.ViewModels
         public ObservableCollection<LocalModel> Contents { get; } = new ();
 
         [ObservableProperty]
-        private bool _isSearching;
+        public partial bool IsSearching { get; set; }
 
         [ObservableProperty]
-        private string _searchStatus;
+        public partial string SearchStatus { get; set; }
 
         [ObservableProperty]
-        private int _filesFoundCount;
+        public partial int FilesFoundCount { get; set; }
 
         [ObservableProperty]
-        private int _foldersProcessedCount;
+        public partial int FoldersProcessedCount { get; set; }
 
         private readonly HashSet<string> _audioExtensions = new HashSet<string> (StringComparer.OrdinalIgnoreCase)
         {
@@ -111,20 +111,14 @@ namespace Novatune.ViewModels
 
             try
             {
-                // Sử dụng Channel để streaming kết quả
                 var channel = Channel.CreateBounded<LocalModel> (ChannelCapacity);
                 var writer = channel.Writer;
                 var reader = channel.Reader;
-
-                // Task để xử lý kết quả từ channel
                 var processingTask = ProcessSearchResultsAsync (reader, token);
-
-                // Task để tìm kiếm
                 var searchTask = Task.Run (async () =>
                 {
                     try
                     {
-                        // Sử dụng parallel processing cho nhiều thư mục
                         await Parallel.ForEachAsync (foldersToSearch,
                             new ParallelOptions
                             {

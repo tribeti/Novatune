@@ -18,10 +18,10 @@ namespace Novatune.ViewModels
         private readonly MediaPlayerViewModel _mediaPlayerViewModel;
 
         [ObservableProperty]
-        private string _searchQuery;
+        public partial string SearchQuery { get; set; }
 
         [ObservableProperty]
-        private bool _isLoading;
+        public partial bool IsLoading { get; set; }
 
         public ObservableCollection<OnlineModel> Videos { get; } = new ();
 

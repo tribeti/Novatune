@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Novatune.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -10,9 +9,9 @@ namespace Novatune.Controls
 {
     public sealed partial class MediaControlsView : UserControl
     {
-        private MediaPlayerViewModel _mediaPlayerViewModel;
+        private MediaPlayerViewModel? _mediaPlayerViewModel;
         private bool _isUserDraggingSlider = false;
-        private DispatcherTimer _updateTimer;
+        private DispatcherTimer? _updateTimer;
 
         public MediaControlsView()
         {
@@ -27,7 +26,7 @@ namespace Novatune.Controls
         {
             _mediaPlayerViewModel = viewModel;
 
-            if (_mediaPlayerViewModel == null)
+            if (_mediaPlayerViewModel is null)
             {
                 UpdateControlsAppearance();
                 return;
@@ -48,20 +47,20 @@ namespace Novatune.Controls
             {
                 UpdateControlsAppearance();
 
-                if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.IsPlaying)
+                if (_mediaPlayerViewModel is not null && _mediaPlayerViewModel.IsPlaying)
                 {
-                    _updateTimer.Start();
+                    _updateTimer?.Start();
                 }
                 else
                 {
-                    _updateTimer.Stop();
+                    _updateTimer?.Stop();
                 }
             });
         }
 
-        private void UpdateTimer_Tick(object sender, object e)
+        private void UpdateTimer_Tick(object? sender, object e)
         {
-            if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.IsPlaying && !_isUserDraggingSlider)
+            if (_mediaPlayerViewModel is not null && _mediaPlayerViewModel.IsPlaying && !_isUserDraggingSlider)
             {
                 DispatcherQueue.TryEnqueue(() => UpdateSliderAndTimeTexts(true));
             }
@@ -69,7 +68,7 @@ namespace Novatune.Controls
 
         private void UpdateControlsAppearance()
         {
-            if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.CurrentOnlineAudio != null && _mediaPlayerViewModel.IsPlaying)
+            if (_mediaPlayerViewModel is not null && _mediaPlayerViewModel.CurrentOnlineAudio is not null && _mediaPlayerViewModel.IsPlaying)
             {
                 MediaTitleText.Text = _mediaPlayerViewModel.CurrentOnlineAudio.Title; // Hoặc .DisplayTitle
                                                                                       // Artist và Album có thể không có hoặc bạn đặt giá trị mặc định trong OnlineModel
@@ -82,7 +81,7 @@ namespace Novatune.Controls
                 SetButtonsEnabled(true);
                 return;
             }
-            else if (_mediaPlayerViewModel != null && _mediaPlayerViewModel.CurrentAudio != null)
+            else if (_mediaPlayerViewModel is not null && _mediaPlayerViewModel.CurrentAudio is not null)
             {
                 MediaTitleText.Text = _mediaPlayerViewModel.CurrentAudio.DisplayTitle;
 
@@ -94,7 +93,7 @@ namespace Novatune.Controls
                 SetButtonsEnabled(true);
                 return;
             }
-            else if (_mediaPlayerViewModel != null)
+            else if (_mediaPlayerViewModel is not null)
             {
                 MediaTitleText.Text = _mediaPlayerViewModel.NowPlayingTitle;
                 PlayPauseIcon.Glyph = "\uE768";
@@ -107,7 +106,7 @@ namespace Novatune.Controls
             }
             else
             {
-                MediaTitleText.Text = "Không có file nào đang phát";
+                MediaTitleText.Text = "No file is currently playing";
                 PlayPauseIcon.Glyph = "\uE768";
                 UpdateSliderAndTimeTexts(false);
                 SetButtonsEnabled(false);
@@ -117,7 +116,7 @@ namespace Novatune.Controls
 
         private void SetButtonsEnabled(bool isEnabled)
         {
-            if (_mediaPlayerViewModel == null) isEnabled = false;
+            if (_mediaPlayerViewModel is null) isEnabled = false;
 
             PlayPauseButton.IsEnabled = isEnabled && (_mediaPlayerViewModel?.TogglePlayPauseCommand.CanExecute(null) ?? false);
             StopButton.IsEnabled = isEnabled && (_mediaPlayerViewModel?.StopPlaybackCommand.CanExecute(null) ?? false);
@@ -130,7 +129,7 @@ namespace Novatune.Controls
 
         private void UpdateSliderAndTimeTexts(bool hasMedia = true)
         {
-            if (!hasMedia || _mediaPlayerViewModel == null)
+            if (!hasMedia || _mediaPlayerViewModel is null)
             {
                 CurrentTimeText.Text = FormatTimeSpan(TimeSpan.Zero);
                 TotalTimeText.Text = FormatTimeSpan(TimeSpan.Zero);
@@ -142,11 +141,11 @@ namespace Novatune.Controls
             var totalDuration = _mediaPlayerViewModel.TotalDuration;
             var currentPosition = _mediaPlayerViewModel.CurrentPosition;
 
-            if (_mediaPlayerViewModel.CurrentOnlineAudio != null && _mediaPlayerViewModel.IsPlaying)
+            if (_mediaPlayerViewModel.CurrentOnlineAudio is not null && _mediaPlayerViewModel.IsPlaying)
             {
                 totalDuration = _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan ?? TimeSpan.Zero;
             }
-            else if (_mediaPlayerViewModel.CurrentAudio != null)
+            else if (_mediaPlayerViewModel.CurrentAudio is not null)
             {
                 totalDuration = _mediaPlayerViewModel.TotalDuration;
             }
@@ -156,11 +155,11 @@ namespace Novatune.Controls
             }
             if (totalDuration == TimeSpan.Zero)
             {
-                if (_mediaPlayerViewModel.CurrentOnlineAudio != null && _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan.HasValue)
+                if (_mediaPlayerViewModel.CurrentOnlineAudio is not null && _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan.HasValue)
                 {
                     totalDuration = _mediaPlayerViewModel.CurrentOnlineAudio.DurationTimeSpan.Value;
                 }
-                else if (_mediaPlayerViewModel.CurrentAudio != null)
+                else if (_mediaPlayerViewModel.CurrentAudio is not null)
                 {
                     totalDuration = _mediaPlayerViewModel.CurrentAudio.Duration;
                 }
@@ -240,7 +239,7 @@ namespace Novatune.Controls
 
         public void Cleanup()
         {
-            if (_mediaPlayerViewModel != null)
+            if (_mediaPlayerViewModel is not null)
             {
                 _mediaPlayerViewModel.PlaybackStateChanged -= MediaPlayerViewModel_PlaybackStateChanged;
                 _mediaPlayerViewModel = null;

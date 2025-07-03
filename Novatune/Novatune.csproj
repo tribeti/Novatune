@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+		<SupportedPlatform>windows</SupportedPlatform>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<WindowsSdkPackageVersion>10.0.22621.38</WindowsSdkPackageVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -13,12 +14,9 @@
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
-
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<SelfContained>true</SelfContained>
-		<PublishSingleFile>true</PublishSingleFile>
-		<!--Enable Native AOT (error)-->
-		<!--https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8-->
+		<PublishSingleFile>true</PublishSingleFile>	 
 		<NoWarn>$(NoWarn);CS8305;WMC1501</NoWarn>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
@@ -29,7 +27,6 @@
 		<None Remove="Pages\OnlinePage.xaml" />
 		<None Remove="Resources\HomePageResourceDictionary.xaml" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
 		<Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -39,12 +36,10 @@
 		<Content Include="Assets\StoreLogo.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
-
-	<!--
+  <!--
 	Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
 	Tools extension to be activated for this project even if the Windows App SDK Nuget
 	package has not yet been restored.
@@ -52,67 +47,65 @@
 	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
-		<PackageReference Include="LibVLCSharp" Version="3.9.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
-		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
-		<PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="9.0.6" />
-		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
-		<PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
-		<PackageReference Include="WinUIEx" Version="2.6.0" />
-		<PackageReference Include="YoutubeExplode" Version="6.5.4" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Page Update="Pages\OnlinePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Pages\SettingsPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Pages\HomePage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Pages\FolderDetailPage.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Resources\HomePageResourceDictionary.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-	  <Page Update="Controls\MediaControlsView.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-
-	<!--
+  <ItemGroup>
+	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
+	<PackageReference Include="LibVLCSharp" Version="3.9.3" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+	<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
+	<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
+	<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+	<PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="9.0.6" />
+	<PackageReference Include="System.Private.Uri" Version="4.3.2" />
+	<PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
+	<PackageReference Include="WinUIEx" Version="2.6.0" />
+	<PackageReference Include="YoutubeExplode" Version="6.5.4" />
+  </ItemGroup>
+  <ItemGroup>
+	<Page Update="Pages\OnlinePage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
+  </ItemGroup>
+  <ItemGroup>
+	<Page Update="Pages\SettingsPage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
+  </ItemGroup>
+  <ItemGroup>
+	<Page Update="Pages\HomePage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
+  </ItemGroup>
+  <ItemGroup>
+	<Page Update="Pages\FolderDetailPage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
+  </ItemGroup>
+  <ItemGroup>
+	<Page Update="Resources\HomePageResourceDictionary.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
+  </ItemGroup>
+  <ItemGroup>
+	<Page Update="Controls\MediaControlsView.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
+  </ItemGroup>
+  <!--
 	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
 	Explorer "Package and Publish" context menu entry to be enabled for this project even if
 	the Windows App SDK Nuget package has not yet been restored.
   -->
-	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-	</PropertyGroup>
-
-	<!-- Publish Properties -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+	<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+  <!-- Publish Properties -->
 	<PropertyGroup>
 		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
 		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
 		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">True</PublishTrimmed>
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-		<!--<PublishAot>True</PublishAot>-->
+		<PublishAot>True</PublishAot>
 	</PropertyGroup>
 </Project>

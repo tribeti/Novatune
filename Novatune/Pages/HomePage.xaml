@@ -7,10 +7,6 @@
     xmlns:vm="using:Novatune.ViewModels"
     Background="Transparent">
 
-    <Page.DataContext>
-        <vm:FolderViewModel />
-    </Page.DataContext>
-
     <Grid Margin="20,50,20,20" CacheMode="BitmapCache">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -25,7 +21,6 @@
             PlaceholderText="Search" />
         <!--  TextChanged=""  -->
 
-
         <ScrollViewer
             Grid.Row="2"
             HorizontalScrollBarVisibility="Hidden"
@@ -35,7 +30,7 @@
 
             <ItemsView
                 x:Name="FoldersListView"
-                ItemsSource="{Binding Folders}"
+                ItemsSource="{x:Bind ViewModel.Folders}"
                 SelectionChanged="Folders_SelectionChanged"
                 SelectionMode="Single">
                 <ItemsView.Layout>

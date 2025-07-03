@@ -32,7 +32,7 @@ namespace Novatune.Pages
             if (e.Parameter is StorageFolder folder)
             {
                 SelectedFolder = folder;
-                if (MediaPlayerVM != null)
+                if (MediaPlayerVM is not null)
                 {
                     await MediaPlayerVM.LoadAudioFilesAsync(SelectedFolder);
                 }
@@ -41,7 +41,7 @@ namespace Novatune.Pages
             {
                 System.Diagnostics.Debug.WriteLine("Warning: No StorageFolder parameter received in FolderDetailPage.");
                 SelectedFolder = null;
-                if (MediaPlayerVM != null)
+                if (MediaPlayerVM is not null)
                 {
                     await MediaPlayerVM.LoadAudioFilesAsync(null);
                 }

@@ -8,9 +8,19 @@ namespace Novatune.Pages
 {
     public sealed partial class SettingsPage : Page
     {
-        public SettingsPage()
+        public FolderViewModel ViewModel { get; }
+        public SettingsPage ()
         {
-            this.InitializeComponent();
+            this.InitializeComponent ();
+            ViewModel = new FolderViewModel ();
+            this.DataContext = ViewModel;
+        }
+        private void RemoveFolder_Click (object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is StorageFolder folder)
+            {
+                ViewModel.RemoveFolderCommand.Execute (folder);
+            }
         }
     }
 }
