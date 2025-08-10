@@ -43,11 +43,10 @@ namespace Novatune.ViewModels
 
         private const string FolderTokensKey = "SavedFolderTokens";
         private const int DefaultBatchSize = 100;
-        private const int MaxConcurrentFolders = 4;
         private const int ChannelCapacity = 1000;
 
         private readonly ApplicationDataContainer _localSettings;
-        private CancellationTokenSource _searchCancellationTokenSource;
+        private CancellationTokenSource? _searchCancellationTokenSource;
         private readonly DispatcherQueue _dispatcherQueue;
         private readonly SemaphoreSlim _folderSemaphore;
         private readonly int _actualMaxConcurrentFolders;
@@ -324,13 +323,11 @@ namespace Novatune.ViewModels
             }
             catch (UnauthorizedAccessException ex)
             {
-                System.Diagnostics.Debug.WriteLine ($"Access denied to folder: {currentFolder.Path}. Error: {ex.Message}");
                 _dispatcherQueue.TryEnqueue (() => SearchStatus = $"Bỏ qua thư mục không có quyền: {currentFolder.Name}");
                 return;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine ($"Error accessing folder: {currentFolder.Path}. Error: {ex.Message}");
                 _dispatcherQueue.TryEnqueue (() => SearchStatus = $"Lỗi truy cập thư mục: {currentFolder.Name}");
                 return;
             }
@@ -352,6 +349,7 @@ namespace Novatune.ViewModels
             }
         }
 
+        // TODO : optimize
         private async Task AddModelsToContentsOnUiThreadAsync (List<LocalModel> modelsToAdd)
         {
             await _dispatcherQueue.EnqueueAsync (() =>
@@ -371,7 +369,7 @@ namespace Novatune.ViewModels
 
         public async Task LoadSpecificFolderAsync (StorageFolder folder)
         {
-            _folderScanCache.TryRemove (folder.Path, out _);
+                _folderScanCache.TryRemove (folder.Path, out _);
             Contents.Clear ();
             SelectedFolders.Clear ();
             SelectedFolders.Add (folder);

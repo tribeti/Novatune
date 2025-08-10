@@ -11,6 +11,7 @@
     xmlns:storage="using:Windows.Storage"
     xmlns:viewModels="using:Novatune.ViewModels"
     Background="Transparent"
+    NavigationCacheMode="Required"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -80,13 +81,12 @@
             Name="FileListView"
             Grid.Row="2"
             Padding="0,0,0,8"
-            IncrementalLoadingThreshold="5"
-            IncrementalLoadingTrigger="Edge"
+            IncrementalLoadingThreshold="12"
             IsItemClickEnabled="True"
             ItemClick="FileListView_ItemClick"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectionMode="None"
-            ShowsScrollingPlaceholders="True">
+            ShowsScrollingPlaceholders="False">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:LocalModel">
                     <Grid Style="{StaticResource FileItemStyle}">
@@ -102,7 +102,10 @@
                             Height="68"
                             Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                             CornerRadius="4">
-                            <Image Source="{x:Bind Thumbnail, Converter={StaticResource ThumbnailConverter}}" Stretch="Uniform" />
+                            <Image
+                                x:Phase="4"
+                                Source="{x:Bind Thumbnail, Converter={StaticResource ThumbnailConverter}}"
+                                Stretch="Uniform" />
                         </Border>
 
                         <StackPanel

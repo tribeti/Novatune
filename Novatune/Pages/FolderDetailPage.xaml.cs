@@ -22,6 +22,7 @@ namespace Novatune.Pages
         private ObservableCollection<LocalModel> allFiles = new ObservableCollection<LocalModel> ();
         private ObservableCollection<LocalModel> filteredFiles = new ObservableCollection<LocalModel> ();
 
+        // TODO : optimize
         public FolderDetailPage ()
         {
             this.InitializeComponent ();
@@ -45,6 +46,7 @@ namespace Novatune.Pages
             FileListView.ItemsSource = filteredFiles;
         }
 
+        // TODO : optimize
         private void UpdateFileCollections ()
         {
             allFiles.Clear ();
@@ -72,7 +74,6 @@ namespace Novatune.Pages
             var mainWindow = App.MainWindow as MainWindow;
             if (mainWindow == null || mainWindow.GlobalMediaPlayerVM == null)
             {
-                System.Diagnostics.Debug.WriteLine ("Critical Error: Could not access MainWindow or GlobalMediaPlayerVM from FolderDetailPage.");
                 if (Frame.CanGoBack)
                     Frame.GoBack ();
                 return;
@@ -97,14 +98,10 @@ namespace Novatune.Pages
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine ($"Setting up folder content for: {folder.Name}");
                 await FolderVM.LoadSpecificFolderAsync (folder);
-                System.Diagnostics.Debug.WriteLine ($"Setup complete. Found {FolderVM.Contents.Count} files");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine ($"Error setting up folder content: {ex.Message}");
-                await ShowErrorDialog ("Lỗi tải thư mục", $"Không thể tải nội dung thư mục: {ex.Message}");
             }
         }
 
@@ -133,21 +130,13 @@ namespace Novatune.Pages
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine ($"Lỗi khi bắt đầu phát media: {ex.Message}");
                         await DisplayPlaybackErrorDialog (audioModel.DisplayTitle, ex.Message);
                     }
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine ("PlayAudioCommand cannot execute for the selected audio model.");
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine ($"ClickedItem không phải là LocalModel hoặc MediaPlayerVM là null. ClickedItem type: {e.ClickedItem?.GetType ().FullName}");
             }
         }
 
+        // TODO : optimize filter
         private void OnFilterChanged (object sender, TextChangedEventArgs args)
         {
 
@@ -210,10 +199,7 @@ namespace Novatune.Pages
             {
                 await errorDialog.ShowAsync ();
             }
-            catch (Exception dialogEx)
-            {
-                System.Diagnostics.Debug.WriteLine ($"Lỗi khi hiển thị dialog: {dialogEx.Message}");
-            }
+            catch (Exception) { }
         }
 
         protected override void OnNavigatedFrom (NavigationEventArgs e)

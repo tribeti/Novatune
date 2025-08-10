@@ -66,6 +66,7 @@ namespace Novatune.Models
 
         private LocalModel () {}
 
+        // TODO : optimize
         public static async Task<LocalModel> FromStorageFileAsync(StorageFile file)
         {
             try
