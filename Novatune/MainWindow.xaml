@@ -3,7 +3,7 @@
     x:Class="Novatune.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:Novatune.Controls"
+    xmlns:controls="using:Novatune.UI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ex="using:WinUIEx"
     xmlns:local="using:Novatune"

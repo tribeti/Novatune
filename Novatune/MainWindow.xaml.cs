@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Novatune.Controls;
+using Novatune.UI;
 using Novatune.Pages;
 using Novatune.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -26,7 +26,6 @@ namespace Novatune
 
             if (this.GlobalMediaControls == null)
             {
-                System.Diagnostics.Debug.WriteLine("FATAL ERROR: GlobalMediaControls instance is null in MainWindow constructor. Check x:Name in XAML.");
                 return;
             }
 
@@ -34,7 +33,7 @@ namespace Novatune
             this.GlobalMediaControls.Initialize(GlobalMediaPlayerVM);
 
             this.MinHeight = 600;
-            this.MinWidth = 900;
+            this.MinWidth = 1000;
             this.PersistenceId = "MainWindow";
 
             this.Closed += MainWindow_Closed;

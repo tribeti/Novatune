@@ -17,10 +17,9 @@ namespace Novatune.Pages
         public MediaPlayerViewModel? MediaPlayerVM { get; private set; }
         public FolderViewModel FolderVM { get; private set; }
         public StorageFolder? SelectedFolder { get; private set; }
-        public bool ShowEmptyState => FolderVM?.Contents?.Count == 0 && !FolderVM.IsSearching;
 
-        private ObservableCollection<LocalModel> allFiles = new ObservableCollection<LocalModel> ();
-        private ObservableCollection<LocalModel> filteredFiles = new ObservableCollection<LocalModel> ();
+        private ObservableCollection<LocalModel> allFiles = new ();
+        private ObservableCollection<LocalModel> filteredFiles = new ();
 
         // TODO : optimize
         public FolderDetailPage ()
@@ -83,11 +82,11 @@ namespace Novatune.Pages
             if (e.Parameter is StorageFolder folder)
             {
                 SelectedFolder = folder;
+                FilterByFirstName.Text = null;
                 await SetupFolderContentAsync (folder);
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine ("Warning: No StorageFolder parameter received in FolderDetailPage.");
                 SelectedFolder = null;
                 FolderVM.Contents.Clear ();
             }
@@ -100,9 +99,7 @@ namespace Novatune.Pages
             {
                 await FolderVM.LoadSpecificFolderAsync (folder);
             }
-            catch (Exception ex)
-            {
-            }
+            catch (Exception) { }
         }
 
         private void BackButton_Click (object sender, RoutedEventArgs e)

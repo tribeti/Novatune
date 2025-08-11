@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Novatune.Enums;
 
-namespace Novatune.Controls
+namespace Novatune.UI
 {
     public sealed partial class MediaControlsView : UserControl
     {
@@ -176,7 +176,7 @@ namespace Novatune.Controls
             TotalTimeText.Text = FormatTimeSpan(totalDuration);
         }
 
-        private string FormatTimeSpan(TimeSpan timeSpan)
+        private static string FormatTimeSpan(TimeSpan timeSpan)
         {
             return timeSpan.TotalHours >= 1 ? timeSpan.ToString(@"h\:mm\:ss") : timeSpan.ToString(@"m\:ss");
         }

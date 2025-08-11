@@ -20,18 +20,18 @@ namespace Novatune.ViewModels
     public partial class MediaPlayerViewModel : ObservableObject
     {
         private LibVLC? _libVLC;
-        private MediaPlayer? _mediaPlayer;
+        private MediaPlayer _mediaPlayer;
         private Media? _currentMediaTrack;
-        private readonly DispatcherQueue? _dispatcherQueue;
+        private readonly DispatcherQueue _dispatcherQueue;
         private static bool _isLibVLCSharpCoreInitialized = false;
-        private List<LocalModel> _shuffledPlaylist;
+        private List<LocalModel>? _shuffledPlaylist;
         private Random _random = new ();
         private YoutubeClient _youtubeClient;
 
         public ObservableCollection<LocalModel> AudioFiles { get; } = new ();
         public ObservableCollection<LocalModel> FilteredAudioFiles { get; } = new ();
         public ObservableCollection<LocalModel> FavoriteAudioFiles { get; } = new ();
-        public ObservableCollection<OnlineModel>? OnlineAudioTracks { get; } = new ();
+        public ObservableCollection<OnlineModel> OnlineAudioTracks { get; } = new ();
 
 
         [ObservableProperty]
@@ -138,7 +138,7 @@ namespace Novatune.ViewModels
                 NowPlayingAlbum = "";
                 IsPlaying = false;
                 CurrentPosition = TimeSpan.Zero;
-                if (CurrentAudio != null) CurrentAudio.IsPlaying = false;
+                if (CurrentAudio is not null) CurrentAudio.IsPlaying = false;
                 PlaybackStateChanged?.Invoke();
                 UpdateCommandStates();
             });
@@ -454,12 +454,11 @@ namespace Novatune.ViewModels
                     IsPlaying = false;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ResetCurrentAudio();
                 NowPlayingTitle = "Lỗi khi chuẩn bị file";
                 IsPlaying = false;
-                System.Diagnostics.Debug.WriteLine($"Error playing audio file {audio.File.Path}: {ex.Message}");
             }
             finally
             {
@@ -467,7 +466,7 @@ namespace Novatune.ViewModels
                 UpdateCommandStates();
             }
         }
-        private bool CanPlayAudio(LocalModel audio) => audio?.File != null;
+        private static bool CanPlayAudio(LocalModel audio) => audio?.File != null;
 
         [RelayCommand(CanExecute = nameof(CanPlayOnlineAudio))]
         public async Task PlayOnlineAudioAsync(OnlineModel onlineTrack)
@@ -520,7 +519,7 @@ namespace Novatune.ViewModels
                 UpdateCommandStates();
             }
         }
-        private bool CanPlayOnlineAudio(OnlineModel onlineTrack) => onlineTrack != null && !string.IsNullOrEmpty(onlineTrack.StreamUrl);
+        private static bool CanPlayOnlineAudio(OnlineModel onlineTrack) => onlineTrack != null && !string.IsNullOrEmpty(onlineTrack.StreamUrl);
 
 
         [RelayCommand(CanExecute = nameof(CanTogglePlayPause))]

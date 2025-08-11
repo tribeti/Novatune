@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -21,7 +22,7 @@ namespace Novatune.ViewModels
     public partial class FolderViewModel : ObservableObject
     {
         private static FolderViewModel? _instance;
-        private static readonly object _lock = new object ();
+        private static readonly object _lock = new ();
 
         public static FolderViewModel Instance
         {
@@ -41,7 +42,7 @@ namespace Novatune.ViewModels
             }
         }
 
-        private const string FolderTokensKey = "SavedFolderTokens";
+        private const string FolderTokensKey = "DkudeUjO2bpHr1jua5WA";
         private const int DefaultBatchSize = 100;
         private const int ChannelCapacity = 1000;
 
@@ -60,12 +61,6 @@ namespace Novatune.ViewModels
 
         [ObservableProperty]
         public partial string SearchStatus { get; set; }
-
-        [ObservableProperty]
-        public partial int FilesFoundCount { get; set; }
-
-        [ObservableProperty]
-        public partial int FoldersProcessedCount { get; set; }
 
         private readonly HashSet<string> _audioExtensions = new HashSet<string> (StringComparer.OrdinalIgnoreCase)
         {
@@ -121,8 +116,6 @@ namespace Novatune.ViewModels
 
             IsSearching = true;
             SearchStatus = "Đang tìm kiếm...";
-            FilesFoundCount = 0;
-            FoldersProcessedCount = 0;
             Contents.Clear ();
             StartSearchCommand.NotifyCanExecuteChanged ();
             CancelSearchCommand.NotifyCanExecuteChanged ();
@@ -169,18 +162,6 @@ namespace Novatune.ViewModels
 
                 await Task.WhenAll (searchTask, processingTask);
 
-                if (token.IsCancellationRequested)
-                {
-                    SearchStatus = $"Tìm kiếm đã hủy. Đã tìm thấy {FilesFoundCount} file trong {FoldersProcessedCount} thư mục.";
-                }
-                else
-                {
-                    SearchStatus = $"Hoàn tất. Tìm thấy {FilesFoundCount} file trong {FoldersProcessedCount} thư mục.";
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                SearchStatus = $"Tìm kiếm đã hủy. Đã tìm thấy {FilesFoundCount} file trong {FoldersProcessedCount} thư mục.";
             }
             catch (Exception ex)
             {
@@ -236,7 +217,6 @@ namespace Novatune.ViewModels
                     {
                         _dispatcherQueue.TryEnqueue (() =>
                         {
-                            FoldersProcessedCount++;
                             SearchStatus = $"Bỏ qua thư mục đã scan gần đây: {folder.Name}";
                         });
                         return;
@@ -248,13 +228,11 @@ namespace Novatune.ViewModels
                 {
                     await ProcessFoundFilesAsync (foundFiles, writer, token);
                     _folderScanCache[folderPath] = DateTime.Now;
-                    _dispatcherQueue.TryEnqueue (() => FoldersProcessedCount++);
                     return;
                 }
 
                 await SearchInFolderRecursiveOptimizedAsync (folder, writer, token);
                 _folderScanCache[folderPath] = DateTime.Now;
-                _dispatcherQueue.TryEnqueue (() => FoldersProcessedCount++);
             }
             finally
             {
@@ -262,7 +240,7 @@ namespace Novatune.ViewModels
             }
         }
 
-        private async Task<IReadOnlyList<StorageFile>> TryWindowsSearchAsync (StorageFolder folder, CancellationToken token)
+        private async Task<IReadOnlyList<StorageFile>?> TryWindowsSearchAsync (StorageFolder folder, CancellationToken token)
         {
             try
             {
@@ -275,14 +253,13 @@ namespace Novatune.ViewModels
                 var query = folder.CreateFileQueryWithOptions (queryOptions);
                 return await query.GetFilesAsync ();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine ($"Windows Search failed for {folder.Path}: {ex.Message}");
                 return null;
             }
         }
 
-        private async Task ProcessFoundFilesAsync (IReadOnlyList<StorageFile> files, ChannelWriter<LocalModel> writer, CancellationToken token)
+        private static async Task ProcessFoundFilesAsync (IReadOnlyList<StorageFile> files, ChannelWriter<LocalModel> writer, CancellationToken token)
         {
             await Parallel.ForEachAsync (files,
                 new ParallelOptions
@@ -301,7 +278,6 @@ namespace Novatune.ViewModels
                         if (audioModel != null)
                         {
                             await writer.WriteAsync (audioModel, ct);
-                            _dispatcherQueue.TryEnqueue (() => FilesFoundCount++);
                         }
                     }
                     catch (Exception ex)
@@ -321,12 +297,12 @@ namespace Novatune.ViewModels
             {
                 items = await currentFolder.GetItemsAsync ();
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 _dispatcherQueue.TryEnqueue (() => SearchStatus = $"Bỏ qua thư mục không có quyền: {currentFolder.Name}");
                 return;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _dispatcherQueue.TryEnqueue (() => SearchStatus = $"Lỗi truy cập thư mục: {currentFolder.Name}");
                 return;
@@ -363,13 +339,12 @@ namespace Novatune.ViewModels
                     else
                         break;
                 }
-                SearchStatus = $"Đang xử lý... {FilesFoundCount} file được tìm thấy trong {FoldersProcessedCount} thư mục.";
             });
         }
 
         public async Task LoadSpecificFolderAsync (StorageFolder folder)
         {
-                _folderScanCache.TryRemove (folder.Path, out _);
+            _folderScanCache.TryRemove (folder.Path, out _);
             Contents.Clear ();
             SelectedFolders.Clear ();
             SelectedFolders.Add (folder);
@@ -415,29 +390,30 @@ namespace Novatune.ViewModels
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch (FileNotFoundException)
                     {
-                        System.Diagnostics.Debug.WriteLine ($"Failed to load folder for token {token}: {ex.Message}");
+                        StorageApplicationPermissions.FutureAccessList.Remove (token);
+                    }
+                    catch (Exception)
+                    {
+                        StorageApplicationPermissions.FutureAccessList.Remove (token);
                     }
                 }
-                if (validTokens.Count != tokens.Length)
-                {
-                    _localSettings.Values[FolderTokensKey] = string.Join (",", validTokens);
-                }
+                _localSettings.Values[FolderTokensKey] = string.Join (",", validTokens);
             }
         }
 
         [RelayCommand]
         public async Task AddFolderAsync ()
         {
-            var picker = new FolderPicker ();
-            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            picker.FileTypeFilter.Add ("*");
+            FolderPicker openPicker = new Windows.Storage.Pickers.FolderPicker ();
+            openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            openPicker.FileTypeFilter.Add ("*");
 
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle (App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize (picker, hwnd);
+            WinRT.Interop.InitializeWithWindow.Initialize (openPicker, hwnd);
 
-            var folder = await picker.PickSingleFolderAsync ();
+            StorageFolder folder = await openPicker.PickSingleFolderAsync ();
             if (folder != null && !Folders.Any (f => f.Path == folder.Path))
             {
                 var token = StorageApplicationPermissions.FutureAccessList.Add (folder, folder.Path);
@@ -466,7 +442,6 @@ namespace Novatune.ViewModels
             Folders.Remove (folder);
             SelectedFolders.Remove (folder);
             _folderScanCache.TryRemove (folder.Path, out _);
-
             SaveFolderTokens ();
         }
 

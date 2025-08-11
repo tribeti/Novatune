@@ -1,9 +1,9 @@
 <UserControl
-    x:Class="Novatune.Controls.MediaControlsView"
+    x:Class="Novatune.UI.MediaControlsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:Novatune.Controls"
+    xmlns:local="using:Novatune.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="100"
     d:DesignWidth="800"
