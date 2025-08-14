@@ -1,10 +1,11 @@
 {
   "profiles": {
     "App2 (Package)": {
-      "commandName": "MsixPackage"
-    },
-    "App2 (Unpackaged)": {
-      "commandName": "Project"
+      "commandName": "MsixPackage",
+      "alwaysReinstallApp": true
     }
+  },
+  "App2 (Unpackaged)": {
+    "commandName": "Project"
   }
 }

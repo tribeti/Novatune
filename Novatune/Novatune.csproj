@@ -19,6 +19,8 @@
 		<PublishSingleFile>true</PublishSingleFile>	 
 		<NoWarn>$(NoWarn);CS8305;WMC1501</NoWarn>
 		<LangVersion>preview</LangVersion>
+		<PackageCertificateThumbprint>A322CA151FD9A92D6948480B703016E1770E9069</PackageCertificateThumbprint>
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Screenshot 2025-05-22 102906.png" />
