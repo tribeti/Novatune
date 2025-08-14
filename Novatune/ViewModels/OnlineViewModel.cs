@@ -61,10 +61,7 @@ namespace Novatune.ViewModels
                     Videos.Add(onlineModel);
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Lỗi tìm kiếm YouTube: {ex.Message}");
-            }
+            catch (Exception) {}
             finally
             {
                 IsLoading = false;
@@ -120,11 +117,7 @@ namespace Novatune.ViewModels
 
                 return audioStreamInfo?.Url ?? "";
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Lỗi lấy stream URL: {ex.Message}");
-                return "";
-            }
+            catch (Exception) { return ""; }
         }
     }
 }

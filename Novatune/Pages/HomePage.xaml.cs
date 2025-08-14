@@ -9,30 +9,30 @@ namespace Novatune.Pages
     {
         public FolderViewModel ViewModel => FolderViewModel.Instance;
 
-        public HomePage()
+        public HomePage ()
         {
             this.InitializeComponent();
             this.DataContext = new FolderViewModel();
         }
 
-        private void Folders_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs e)
+        private void Folders_SelectionChanged (ItemsView sender , ItemsViewSelectionChangedEventArgs e)
         {
 
-            if (FoldersListView.SelectedItem is StorageFolder folder)
-            { 
-                if (ViewModel.Folders.Any (f => f.Path == folder.Path))
+            if ( FoldersListView.SelectedItem is StorageFolder folder )
+            {
+                if ( ViewModel.Folders.Any(f => f.Path == folder.Path) )
                 {
-                    Frame.Navigate (typeof (FolderDetailPage), folder);
+                    Frame.Navigate(typeof(FolderDetailPage) , folder);
                 }
                 else
                 {
-                    if (Frame.CanGoBack)
+                    if ( Frame.CanGoBack )
                     {
-                        Frame.GoBack ();
+                        Frame.GoBack();
                     }
                     else
                     {
-                        Frame.Navigate (typeof (HomePage));
+                        Frame.Navigate(typeof(HomePage));
                     }
                 }
             }

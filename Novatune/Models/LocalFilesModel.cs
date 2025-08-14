@@ -6,7 +6,7 @@ using Windows.Storage.FileProperties;
 
 namespace Novatune.Models
 {
-    public partial class LocalModel : ObservableObject
+    public partial class LocalFilesModel : ObservableObject
     {
         [ObservableProperty]
         public partial string SongTitle { get; set; } = string.Empty;
@@ -16,7 +16,7 @@ namespace Novatune.Models
 
         [ObservableProperty]
         public partial string Album { get; set; } = string.Empty;
-               
+
         [ObservableProperty]
         public partial StorageItemThumbnail? Thumbnail { get; set; }
 
@@ -44,7 +44,7 @@ namespace Novatune.Models
         public string DurationString
         {
             get => _durationString;
-            private set => SetProperty (ref _durationString, value);
+            private set => SetProperty(ref _durationString , value);
         }
 
         public TimeSpan Duration
@@ -52,7 +52,7 @@ namespace Novatune.Models
             get => _duration;
             set
             {
-                if (SetProperty(ref _duration, value))
+                if ( SetProperty(ref _duration , value) )
                 {
                     DurationString = FormatDuration(value);
                 }
@@ -64,76 +64,76 @@ namespace Novatune.Models
         public string DisplayAlbum => !string.IsNullOrWhiteSpace(Album) ? Album : "Unknown Album";
         public string FileSizeString => FormatFileSize(FileSize);
 
-        private LocalModel () {}
+        private LocalFilesModel () { }
 
         // TODO : optimize
-        public static async Task<LocalModel> FromStorageFileAsync(StorageFile file)
+        public static async Task<LocalFilesModel> FromStorageFileAsync (StorageFile file)
         {
             try
             {
                 var musicProperties = await file.Properties.GetMusicPropertiesAsync();
                 var basicProperties = await file.GetBasicPropertiesAsync();
-                var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+                var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView , 200);
 
-                var model = new LocalModel
+                var model = new LocalFilesModel
                 {
-                    SongTitle = string.IsNullOrWhiteSpace(musicProperties.Title) ? file.DisplayName : musicProperties.Title,
-                    Artist = musicProperties.Artist ?? string.Empty,
-                    Album = musicProperties.Album ?? string.Empty,
-                    Duration = musicProperties.Duration,
-                    Thumbnail = thumbnail,
-                    File = file,
-                    FilePath = file.Path,
-                    FileSize = basicProperties.Size,
-                    IsPlaying = false,
-                    IsFavorite = false,
+                    SongTitle = string.IsNullOrWhiteSpace(musicProperties.Title) ? file.DisplayName : musicProperties.Title ,
+                    Artist = musicProperties.Artist ?? string.Empty ,
+                    Album = musicProperties.Album ?? string.Empty ,
+                    Duration = musicProperties.Duration ,
+                    Thumbnail = thumbnail ,
+                    File = file ,
+                    FilePath = file.Path ,
+                    FileSize = basicProperties.Size ,
+                    IsPlaying = false ,
+                    IsFavorite = false ,
                     IsSelected = false
                 };
 
                 model.DurationString = FormatDuration(model.Duration);
                 return model;
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                throw new InvalidOperationException($"Failed to create LocalAudioModel from file: {file?.Name}", ex);
+                throw new InvalidOperationException($"Failed to create LocalAudioModel from file: {file?.Name}" , ex);
             }
         }
 
-        private static string FormatDuration(TimeSpan duration)
+        private static string FormatDuration (TimeSpan duration)
         {
-            if (duration.TotalHours >= 1)
+            if ( duration.TotalHours >= 1 )
             {
                 return duration.ToString(@"h\:mm\:ss");
             }
             return duration.ToString(@"m\:ss");
         }
 
-        private static string FormatFileSize(ulong bytes)
+        private static string FormatFileSize (ulong bytes)
         {
             const ulong KB = 1024;
             const ulong MB = KB * 1024;
             const ulong GB = MB * 1024;
 
-            if (bytes >= GB)
-                return $"{bytes / (double)GB:F2} GB";
-            if (bytes >= MB)
-                return $"{bytes / (double)MB:F2} MB";
-            if (bytes >= KB)
-                return $"{bytes / (double)KB:F2} KB";
+            if ( bytes >= GB )
+                return $"{bytes / (double) GB:F2} GB";
+            if ( bytes >= MB )
+                return $"{bytes / (double) MB:F2} MB";
+            if ( bytes >= KB )
+                return $"{bytes / (double) KB:F2} KB";
             return $"{bytes} bytes";
         }
 
-        public void ToggleFavorite()
+        public void ToggleFavorite ()
         {
             IsFavorite = !IsFavorite;
         }
 
-        public void SetPlayingState(bool isPlaying)
+        public void SetPlayingState (bool isPlaying)
         {
             IsPlaying = isPlaying;
         }
 
-        public override string ToString()
+        public override string ToString ()
         {
             return $"{DisplayArtist} - {DisplayTitle}";
         }

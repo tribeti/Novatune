@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -18,197 +19,219 @@ namespace Novatune.Pages
         public FolderViewModel FolderVM { get; private set; }
         public StorageFolder? SelectedFolder { get; private set; }
 
-        private ObservableCollection<LocalModel> allFiles = new ();
-        private ObservableCollection<LocalModel> filteredFiles = new ();
+        private ObservableCollection<LocalFilesModel> allFiles = new();
+        private ObservableCollection<LocalFilesModel> filteredFiles = new();
+        private CancellationTokenSource? _filterCts;
 
         // TODO : optimize
         public FolderDetailPage ()
         {
-            this.InitializeComponent ();
+            this.InitializeComponent();
             FolderVM = FolderViewModel.Instance;
 
-            FolderVM.PropertyChanged += (s, e) =>
+            FolderVM.PropertyChanged += (s , e) =>
             {
-                if (e.PropertyName == nameof (FolderVM.Contents) ||
-                    e.PropertyName == nameof (FolderVM.IsSearching))
+                if ( e.PropertyName == nameof(FolderVM.Contents) ||
+                    e.PropertyName == nameof(FolderVM.IsSearching) )
                 {
-                    UpdateFileCollections ();
-                    this.Bindings.Update ();
+                    UpdateFileCollections();
                 }
             };
 
-            FolderVM.Contents.CollectionChanged += (s, e) =>
+            FolderVM.Contents.CollectionChanged += (s , e) =>
             {
-                UpdateFileCollections ();
-                this.Bindings.Update ();
+                UpdateFileCollections();
             };
-            FileListView.ItemsSource = filteredFiles;
+            SongList.ItemsSource = filteredFiles;
         }
 
-        // TODO : optimize
         private void UpdateFileCollections ()
         {
-            allFiles.Clear ();
-            if (FolderVM.Contents != null)
+            var newItems = FolderVM.Contents ?? new ObservableCollection<LocalFilesModel>();
+            for ( int i = allFiles.Count - 1 ; i >= 0 ; i-- )
             {
-                foreach (var item in FolderVM.Contents)
-                {
-                    allFiles.Add (item);
-                }
+                if ( !newItems.Contains(allFiles [i]) )
+                    allFiles.RemoveAt(i);
             }
-            ApplyCurrentFilter ();
+
+            foreach ( var item in newItems )
+            {
+                if ( !allFiles.Contains(item) )
+                    allFiles.Add(item);
+            }
+
+            ApplyCurrentFilter();
         }
 
         private void ApplyCurrentFilter ()
         {
-            var filtered = allFiles.Where (file => FilterFile (file));
-            RemoveNonMatchingFiles (filtered);
-            AddBackFiles (filtered);
+            var filtered = allFiles.Where(FilterFile);
+            ApplyFilterOptimized(filtered);
+        }
+
+        private void ApplyFilterOptimized (IEnumerable<LocalFilesModel> filteredData)
+        {
+            var filteredSet = new HashSet<LocalFilesModel>(filteredData);
+            for ( int i = filteredFiles.Count - 1 ; i >= 0 ; i-- )
+            {
+                if ( !filteredSet.Contains(filteredFiles [i]) )
+                    filteredFiles.RemoveAt(i);
+            }
+            foreach ( var item in filteredSet )
+            {
+                if ( !filteredFiles.Contains(item) )
+                    filteredFiles.Add(item);
+            }
         }
 
         protected override async void OnNavigatedTo (NavigationEventArgs e)
         {
-            base.OnNavigatedTo (e);
+            base.OnNavigatedTo(e);
 
             var mainWindow = App.MainWindow as MainWindow;
-            if (mainWindow == null || mainWindow.GlobalMediaPlayerVM == null)
+            if ( mainWindow == null || mainWindow.GlobalMediaPlayerVM == null )
             {
-                if (Frame.CanGoBack)
-                    Frame.GoBack ();
+                if ( Frame.CanGoBack )
+                    Frame.GoBack();
                 return;
             }
             MediaPlayerVM = mainWindow.GlobalMediaPlayerVM;
 
-            if (e.Parameter is StorageFolder folder)
+            if ( e.Parameter is StorageFolder folder )
             {
                 SelectedFolder = folder;
                 FilterByFirstName.Text = null;
-                await SetupFolderContentAsync (folder);
+                await SetupFolderContentAsync(folder);
             }
             else
             {
                 SelectedFolder = null;
-                FolderVM.Contents.Clear ();
+                FolderVM.Contents.Clear();
             }
-            this.Bindings.Update ();
         }
 
         private async Task SetupFolderContentAsync (StorageFolder folder)
         {
             try
             {
-                await FolderVM.LoadSpecificFolderAsync (folder);
+                await FolderVM.LoadSpecificFolderAsync(folder);
             }
-            catch (Exception) { }
+            catch { }
         }
 
-        private void BackButton_Click (object sender, RoutedEventArgs e)
+        private void BackButton_Click (object sender , RoutedEventArgs e)
         {
-            if (FolderVM.IsSearching && FolderVM.CancelSearchCommand.CanExecute (null))
+            if ( FolderVM.IsSearching && FolderVM.CancelSearchCommand.CanExecute(null) )
             {
-                FolderVM.CancelSearchCommand.Execute (null);
+                FolderVM.CancelSearchCommand.Execute(null);
             }
 
-            if (this.Frame.CanGoBack)
+            if ( this.Frame.CanGoBack )
             {
-                this.Frame.GoBack ();
+                this.Frame.GoBack();
             }
         }
 
-        private async void FileListView_ItemClick (object sender, ItemClickEventArgs e)
+        private async void SongList_ItemClick (object sender , ItemClickEventArgs e)
         {
-            if (e.ClickedItem is LocalModel audioModel && MediaPlayerVM is not null)
+            if ( e.ClickedItem is LocalFilesModel audioModel && MediaPlayerVM is not null )
             {
-                if (MediaPlayerVM.PlayAudioCommand.CanExecute (audioModel))
+                if ( MediaPlayerVM.PlayAudioCommand.CanExecute(audioModel) )
                 {
                     try
                     {
-                        await MediaPlayerVM.PlayAudioCommand.ExecuteAsync (audioModel);
+                        await MediaPlayerVM.PlayAudioCommand.ExecuteAsync(audioModel);
                     }
-                    catch (Exception ex)
+                    catch ( Exception ex )
                     {
-                        await DisplayPlaybackErrorDialog (audioModel.DisplayTitle, ex.Message);
+                        await DisplayPlaybackErrorDialog(audioModel.DisplayTitle , ex.Message);
                     }
                 }
             }
         }
 
-        // TODO : optimize filter
-        private void OnFilterChanged (object sender, TextChangedEventArgs args)
-        {
-
-            var filtered = allFiles.Where (file => FilterFile (file));
-            RemoveNonMatchingFiles (filtered);
-            AddBackFiles (filtered);
-        }
-
-        private bool FilterFile (LocalModel file)
+        private bool FilterFile (LocalFilesModel file)
         {
             string filterText = FilterByFirstName.Text ?? string.Empty;
-            if (string.IsNullOrWhiteSpace (filterText))
+            if ( string.IsNullOrWhiteSpace(filterText) )
                 return true;
-            bool matchesSongTitle = file.SongTitle?.Contains (filterText, StringComparison.InvariantCultureIgnoreCase) ?? false;
-            bool matchesArtist = file.Artist?.Contains (filterText, StringComparison.InvariantCultureIgnoreCase) ?? false;
-            bool matchesDisplayTitle = file.DisplayTitle?.Contains (filterText, StringComparison.InvariantCultureIgnoreCase) ?? false;
+            bool matchesSongTitle = file.SongTitle?.Contains(filterText , StringComparison.InvariantCultureIgnoreCase) ?? false;
+            bool matchesArtist = file.Artist?.Contains(filterText , StringComparison.InvariantCultureIgnoreCase) ?? false;
+            bool matchesDisplayTitle = file.DisplayTitle?.Contains(filterText , StringComparison.InvariantCultureIgnoreCase) ?? false;
 
             return matchesSongTitle || matchesArtist || matchesDisplayTitle;
         }
 
-        private void RemoveNonMatchingFiles (IEnumerable<LocalModel> filteredData)
+        private async void OnFilterChanged (object sender , TextChangedEventArgs args)
         {
-            for (int i = filteredFiles.Count - 1; i >= 0; i--)
+            _filterCts?.Cancel();
+            _filterCts = new CancellationTokenSource();
+            var token = _filterCts.Token;
+
+            try
             {
-                var item = filteredFiles[i];
-                if (!filteredData.Contains (item))
+                await Task.Delay(200 , token);
+                if ( !token.IsCancellationRequested )
+                    ApplyCurrentFilter();
+            }
+            catch ( TaskCanceledException ) { }
+        }
+
+        private void RemoveNonMatchingFiles (IEnumerable<LocalFilesModel> filteredData)
+        {
+            for ( int i = filteredFiles.Count - 1 ; i >= 0 ; i-- )
+            {
+                var item = filteredFiles [i];
+                if ( !filteredData.Contains(item) )
                 {
-                    filteredFiles.Remove (item);
+                    filteredFiles.Remove(item);
                 }
             }
         }
 
-        private void AddBackFiles (IEnumerable<LocalModel> filteredData)
+        private void AddBackFiles (IEnumerable<LocalFilesModel> filteredData)
         {
-            foreach (var item in filteredData)
+            foreach ( var item in filteredData )
             {
-                if (!filteredFiles.Contains (item))
+                if ( !filteredFiles.Contains(item) )
                 {
-                    filteredFiles.Add (item);
+                    filteredFiles.Add(item);
                 }
             }
         }
 
-        private async Task DisplayPlaybackErrorDialog (string audioTitle, string errorMessage)
+        private async Task DisplayPlaybackErrorDialog (string audioTitle , string errorMessage)
         {
-            await ShowErrorDialog ("Lỗi phát media", $"Không thể phát: {audioTitle}\nChi tiết: {errorMessage}");
+            await ShowErrorDialog("Lỗi phát media" , $"Không thể phát: {audioTitle}\nChi tiết: {errorMessage}");
         }
 
-        private async Task ShowErrorDialog (string title, string content)
+        private async Task ShowErrorDialog (string title , string content)
         {
             ContentDialog errorDialog = new ContentDialog
             {
-                XamlRoot = this.XamlRoot,
-                Title = title,
-                Content = content,
+                XamlRoot = this.XamlRoot ,
+                Title = title ,
+                Content = content ,
                 CloseButtonText = "Đóng"
             };
 
             try
             {
-                await errorDialog.ShowAsync ();
+                await errorDialog.ShowAsync();
             }
-            catch (Exception) { }
+            catch ( Exception ) { }
         }
 
         protected override void OnNavigatedFrom (NavigationEventArgs e)
         {
-            base.OnNavigatedFrom (e);
-            if (FolderVM.IsSearching && FolderVM.CancelSearchCommand.CanExecute (null))
+            base.OnNavigatedFrom(e);
+            if ( FolderVM.IsSearching && FolderVM.CancelSearchCommand.CanExecute(null) )
             {
-                FolderVM.CancelSearchCommand.Execute (null);
+                FolderVM.CancelSearchCommand.Execute(null);
             }
-            if (SelectedFolder is not null)
+            if ( SelectedFolder is not null )
             {
-                FolderVM.RemoveTemporaryFolder (SelectedFolder);
+                FolderVM.RemoveTemporaryFolder(SelectedFolder);
             }
         }
     }

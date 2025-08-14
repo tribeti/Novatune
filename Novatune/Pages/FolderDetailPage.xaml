@@ -58,7 +58,7 @@
 
             <TextBox
                 x:Name="FilterByFirstName"
-                Width="200"
+                MinWidth="200"
                 HorizontalAlignment="Right"
                 RelativePanel.AlignHorizontalCenterWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
@@ -78,17 +78,16 @@
         </StackPanel>
 
         <GridView
-            Name="FileListView"
+            Name="SongList"
             Grid.Row="2"
             Padding="0,0,0,8"
             IncrementalLoadingThreshold="12"
             IsItemClickEnabled="True"
-            ItemClick="FileListView_ItemClick"
+            ItemClick="SongList_ItemClick"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
-            SelectionMode="None"
-            ShowsScrollingPlaceholders="False">
+            SelectionMode="None">
             <GridView.ItemTemplate>
-                <DataTemplate x:DataType="models:LocalModel">
+                <DataTemplate x:DataType="models:LocalFilesModel">
                     <Grid Style="{StaticResource FileItemStyle}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120" />
@@ -113,19 +112,24 @@
                             Margin="20,0,0,0"
                             VerticalAlignment="Center">
                             <TextBlock
+                                MinWidth="400"
+                                x:Phase="1"
                                 FontWeight="SemiBold"
                                 MaxLines="1"
                                 Text="{x:Bind SongTitle}"
                                 TextTrimming="CharacterEllipsis" />
                             <TextBlock
+                                x:Phase="1"
                                 FontSize="14"
                                 Opacity="0.6"
                                 Text="{x:Bind Artist}" />
                         </StackPanel>
                         <TextBlock
                             Grid.Column="2"
+                            Margin="100,4,4,4"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
+                            x:Phase="2"
                             FontSize="12"
                             Opacity="0.5"
                             Text="{x:Bind DurationString}"
@@ -133,20 +137,24 @@
                     </Grid>
                 </DataTemplate>
             </GridView.ItemTemplate>
+
             <GridView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListViewItem">
-                                <ListViewItemPresenter
-                                    Padding="0,0,4,0"
-                                    HorizontalContentAlignment="Stretch"
-                                    SelectionCheckMarkVisualEnabled="False" />
+                                <ListViewItemPresenter Padding="0,0,4,0" HorizontalContentAlignment="Stretch" />
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
                 </Style>
             </GridView.ItemContainerStyle>
+
+            <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsWrapGrid MaximumRowsOrColumns="1" Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </GridView.ItemsPanel>
         </GridView>
     </Grid>
 </Page>

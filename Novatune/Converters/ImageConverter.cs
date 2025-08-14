@@ -7,20 +7,20 @@ namespace Novatune.Converters
 {
     public partial class ImageConverter : IValueConverter
     {
-        public object? Convert (object value, Type targetType, object parameter, string language)
+        public object? Convert (object value , Type targetType , object parameter , string language)
         {
-            if (value is StorageItemThumbnail thumbnail)
+            if ( value is StorageItemThumbnail thumbnail )
             {
-                var bitmap = new BitmapImage ();
-                bitmap.SetSource (thumbnail);
+                var bitmap = new BitmapImage();
+                bitmap.SetSource(thumbnail);
                 return bitmap;
             }
             return null;
         }
 
-        public object ConvertBack (object value, Type targetType, object parameter, string language)
+        public object ConvertBack (object value , Type targetType , object parameter , string language)
         {
-            throw new NotImplementedException ();
+            throw new NotImplementedException();
         }
     }
 }

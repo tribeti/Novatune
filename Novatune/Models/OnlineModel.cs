@@ -33,7 +33,6 @@ namespace Novatune.Models
             }
         }
         public string DurationDisplay => DurationTimeSpan.HasValue ? FormatDurationStatic(DurationTimeSpan.Value) : "N/A";
-
         public string DisplayTitle => !string.IsNullOrWhiteSpace(Title) ? Title : "Unknown Title";
         public string DisplayArtist => !string.IsNullOrWhiteSpace(Author) ? Author : "Unknown Artist";
 
