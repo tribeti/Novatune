@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# IDE and code editor dotfiles
+.vscode/
+.idea/
+.kiro/
+.cursor/
