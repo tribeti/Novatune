@@ -53,7 +53,7 @@
                 FontSize="20"
                 RelativePanel.AlignVerticalCenterWithPanel="True"
                 RelativePanel.RightOf="BackButton"
-                Text="{x:Bind SelectedFolder.Name, Mode=OneWay, FallbackValue='Đang tải thông tin thư mục...'}"
+                Text="{x:Bind SelectedFolder.Name, Mode=OneWay, FallbackValue='Loading...'}"
                 TextTrimming="CharacterEllipsis" />
 
             <TextBox

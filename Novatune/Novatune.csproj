@@ -24,10 +24,6 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Screenshot 2025-05-22 102906.png" />
-		<None Remove="UI\MediaControlsView.xaml" />
-		<None Remove="Pages\FolderDetailPage.xaml" />
-		<None Remove="Pages\HomePage.xaml" />
-		<None Remove="Pages\OnlinePage.xaml" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
