@@ -24,6 +24,8 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Screenshot 2025-05-22 102906.png" />
+		<None Remove="Styles\SongCardResourceDict.xaml" />
+		<None Remove="Style\SongCard.xaml" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
@@ -47,6 +49,7 @@
 	</ItemGroup>
   <ItemGroup>
 	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	<PackageReference Include="CommunityToolkit.WinUI.Collections" Version="8.2.250402" />
 	<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
 	<PackageReference Include="LibVLCSharp" Version="3.9.4" />
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
@@ -84,6 +87,16 @@
 	<Page Update="Controls\MediaControlsView.xaml">
 	  <Generator>MSBuild:Compile</Generator>
 	</Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Style\SongCard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Styles\SongCardResourceDict.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <!--
 	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

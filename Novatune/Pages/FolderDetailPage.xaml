@@ -15,11 +15,6 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <Style x:Key="FileItemStyle" TargetType="Grid">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="12" />
-            <Setter Property="Margin" Value="0,0,0,8" />
-        </Style>
         <Style x:Key="BackButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -81,6 +76,9 @@
             Name="SongList"
             Grid.Row="2"
             Padding="0,0,0,8"
+            AllowDrop="True"
+            CanDrag="True"
+            CanReorderItems="True"
             IncrementalLoadingThreshold="12"
             IsItemClickEnabled="True"
             ItemClick="SongList_ItemClick"
@@ -88,7 +86,7 @@
             SelectionMode="None">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="models:LocalFilesModel">
-                    <Grid Style="{StaticResource FileItemStyle}">
+                    <Grid Style="{StaticResource SongCardStyle}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120" />
                             <ColumnDefinition Width="*" />
@@ -139,10 +137,10 @@
             </GridView.ItemTemplate>
 
             <GridView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
+                <Style TargetType="GridViewItem">
                     <Setter Property="Template">
                         <Setter.Value>
-                            <ControlTemplate TargetType="ListViewItem">
+                            <ControlTemplate TargetType="GridViewItem">
                                 <ListViewItemPresenter Padding="0,0,4,0" HorizontalContentAlignment="Stretch" />
                             </ControlTemplate>
                         </Setter.Value>

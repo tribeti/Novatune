@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="SongCardStyle" TargetType="Grid">
+        <Setter Property="Width" Value="Auto" />
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <!--<Setter Property="BorderBrush" Value="{ThemeResource DividerStrokeColorDefaultBrush}" />-->
+        <Setter Property="Padding" Value="0,16,16,16" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+</ResourceDictionary>

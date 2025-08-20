@@ -3,25 +3,23 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Novatune.ViewModels;
 
-namespace Novatune
+namespace Novatune;
+
+public partial class App : Application
 {
-
-    public partial class App : Application
+    public static MainWindow MainWindow = new();
+    public App ()
     {
-        public static MainWindow MainWindow = new();
-        public App ()
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            Ioc.Default.ConfigureServices(new ServiceCollection()
-                .AddSingleton<FolderViewModel>()
-                .BuildServiceProvider());
+        Ioc.Default.ConfigureServices(new ServiceCollection()
+            .AddSingleton<FolderViewModel>()
+            .BuildServiceProvider());
 
-        }
+    }
 
-        protected override void OnLaunched (LaunchActivatedEventArgs args)
-        {
-            MainWindow.Activate();
-        }
+    protected override void OnLaunched (LaunchActivatedEventArgs args)
+    {
+        MainWindow.Activate();
     }
 }
