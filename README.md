@@ -1,7 +1,7 @@
 # Novatune
 
 A modern Windows audio player application built with WinUI 3 and .NET 8. Novatune allows you to play local audio files, stream music from YouTube, and manage your playlists with a rich, user-friendly interface.
-
+# Currently this proj is in maintain mode and I am still working to port this proj to Avalonia 
 [![Screenshot-2025-07-03-144730.png](https://i.postimg.cc/50bDhDFq/Screenshot-2025-07-03-144730.png)](https://postimg.cc/sBHnS6mv)
 ## Features
 
