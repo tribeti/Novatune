@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Novatune.Controls;
+using Novatune.ViewModels;
 
 namespace Novatune;
 
