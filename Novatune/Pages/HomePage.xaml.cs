@@ -1,39 +1,47 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Input;
 using Novatune.ViewModels;
 using System.Linq;
 using Windows.Storage;
 
 namespace Novatune.Pages
 {
-    public sealed partial class HomePage : Page
+    public partial class HomePage : UserControl
     {
         public FolderViewModel ViewModel => FolderViewModel.Instance;
 
         public HomePage ()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             this.DataContext = new FolderViewModel();
+            
+            if ( FoldersListView != null )
+            {
+                FoldersListView.AddHandler(InputElement.TappedEvent, OnFolderTapped, RoutingStrategies.Tunnel);
+            }
         }
 
-        private void Folders_SelectionChanged (ItemsView sender , ItemsViewSelectionChangedEventArgs e)
+        private void OnFolderTapped (object? sender , TappedEventArgs e)
         {
-
-            if ( FoldersListView.SelectedItem is StorageFolder folder )
+            if ( sender is Border border && border.Tag is StorageFolder folder )
             {
                 if ( ViewModel.Folders.Any(f => f.Path == folder.Path) )
                 {
-                    Frame.Navigate(typeof(FolderDetailPage) , folder);
+                    // Navigate to FolderDetailPage - need to implement navigation for Avalonia
+                    // For now, we'll just select the folder
+                    System.Diagnostics.Debug.WriteLine($"Navigate to folder: {folder.Path}");
                 }
-                else
+            }
+        }
+        
+        private void Folder_Click (object? sender , RoutedEventArgs e)
+        {
+            if ( sender is Border border && border.Tag is StorageFolder folder )
+            {
+                if ( ViewModel.Folders.Any(f => f.Path == folder.Path) )
                 {
-                    if ( Frame.CanGoBack )
-                    {
-                        Frame.GoBack();
-                    }
-                    else
-                    {
-                        Frame.Navigate(typeof(HomePage));
-                    }
+                    System.Diagnostics.Debug.WriteLine($"Navigate to folder: {folder.Path}");
                 }
             }
         }
