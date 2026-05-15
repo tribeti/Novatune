@@ -1,0 +1,90 @@
+<UserControl
+    x:Class="Novatune.Pages.SettingsPage"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Novatune.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="using:Novatune.ViewModels"
+    Background="Transparent"
+    mc:Ignorable="d">
+
+    <ScrollViewer Margin="36,40,36,0">
+        <StackPanel Spacing="4">
+            <TextBlock
+                Margin="0,0,0,52"
+                FontSize="36"
+                FontWeight="Bold"
+                Text="Settings" />
+
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,0,0,0"
+                Padding="4,0,0,8"
+                FontSize="18"
+                FontWeight="SemiBold"
+                Text="Local libraries" />
+
+            <!--  Custom SettingsExpander replacement  -->
+            <Border
+                CornerRadius="8"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1">
+                <StackPanel>
+                    <!--  Header  -->
+                    <Grid Margin="16" ColumnDefinitions="Auto,*,Auto">
+                        <PathIcon 
+                            Grid.Column="0"
+                            Margin="0,0,16,0"
+                            Data="M19.14,12.94C19.14,12.94 19.14,12.94 19.14,12.94C19.14,12.94 19.14,12.94 19.14,12.94L16.27,10.07C16.08,9.88 15.99,9.62 16,9.36V5.82C16,5.56 15.9,5.3 15.71,5.11L13.59,2.99C13.4,2.8 13.14,2.7 12.88,2.7H9.29C9.03,2.7 8.77,2.8 8.58,2.99L6.46,5.11C6.27,5.3 6.17,5.56 6.17,5.82V9.36C6.18,9.62 6.09,9.88 5.9,10.07L3.03,12.94C2.84,13.13 2.74,13.39 2.74,13.65C2.74,13.91 2.84,14.17 3.03,14.36L5.15,16.48C5.34,16.67 5.6,16.77 5.86,16.77H9.45C9.71,16.77 9.97,16.87 10.16,17.06L12.28,19.18C12.47,19.37 12.73,19.47 12.99,19.47C13.25,19.47 13.51,19.37 13.7,19.18L15.82,17.06C16.01,16.87 16.27,16.77 16.53,16.77H20.12C20.38,16.77 20.64,16.67 20.83,16.48L22.95,14.36C23.14,14.17 23.24,13.91 23.24,13.65C23.24,13.39 23.14,13.13 22.95,12.94M12,15C9.24,15 7,12.76 7,10C7,7.24 9.24,5 12,5C14.76,5 17,7.24 17,10C17,12.76 14.76,15 12,15Z" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock FontWeight="SemiBold" Text="Media folder locations" />
+                            <TextBlock 
+                                FontSize="12" 
+                                Foreground="#80000000"
+                                Text="List of media folders you have selected." />
+                        </StackPanel>
+                        <Button 
+                            Grid.Column="2"
+                            Command="{Binding ViewModel.AddFolderCommand}"
+                            Content="Add a folder"
+                            Classes="Accent"/>
+                    </Grid>
+                    
+                    <!--  Items List  -->
+                    <ItemsControl 
+                        Margin="16,0,16,16"
+                        ItemsSource="{Binding ViewModel.Folders}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid 
+                                    Margin="0,4"
+                                    ColumnDefinitions="*,Auto"
+                                    RowDefinitions="Auto,Auto">
+                                    <TextBlock 
+                                        Grid.Row="0"
+                                        FontWeight="SemiBold"
+                                        Text="{Binding Path}" />
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        FontSize="12"
+                                        Foreground="#80000000"
+                                        Text="{Binding Name}" />
+                                    <Button 
+                                        Grid.Column="1"
+                                        Grid.RowSpan="2"
+                                        Click="RemoveFolder_Click"
+                                        Tag="{Binding}"
+                                        Classes="Accent"
+                                        HorizontalAlignment="Right">
+                                        <PathIcon Data="M19.36,2.72L20.78,4.14C21.17,4.53 21.17,5.17 20.78,5.56L16.2,10.14L14.78,8.72L19.36,4.14C19.75,3.75 19.75,3.11 19.36,2.72M5.93,17.07L10.5,12.5L9.08,11.08L4.5,15.64C4.11,16.03 4.11,16.67 4.5,17.07L5.93,17.07M14.5,10.38L13.08,8.96L8.5,13.54L9.92,14.96L14.5,10.38M3,17.07L17.07,3L15.65,1.59L1.59,15.65L3,17.07Z" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
