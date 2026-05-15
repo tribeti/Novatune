@@ -1,0 +1,130 @@
+<UserControl
+    x:Class="Novatune.Pages.FolderDetailPage"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="https://github.com/avaloniaui"
+    xmlns:converters="using:Novatune.Converters"
+    xmlns:models="using:Novatune.Models"
+    xmlns:viewModels="using:Novatune.ViewModels"
+    Background="Transparent">
+
+    <UserControl.Resources>
+        <converters:ImageConverter x:Key="ThumbnailConverter" />
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="12,8" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Name="RootPageGrid" Padding="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,8,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <Button
+                Name="BackButton"
+                Margin="8"
+                Click="BackButton_Click"
+                Style="{StaticResource BackButtonStyle}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center">
+                <Button.Content>
+                    <TextBlock Text="&#xE72B;" FontFamily="Avalonia Defaults" FontSize="16" />
+                </Button.Content>
+            </Button>
+
+            <TextBlock
+                Grid.Column="1"
+                Margin="20,0,0,0"
+                HorizontalAlignment="Center"
+                FontSize="20"
+                VerticalAlignment="Center"
+                Text="{Binding SelectedFolder.Name, FallbackValue='Loading...'}"
+                TextTrimming="CharacterEllipsis" />
+
+            <TextBox
+                x:Name="FilterByFirstName"
+                MinWidth="200"
+                HorizontalAlignment="Right"
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                Watermark="Filter by name..." />
+        </Grid>
+
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,0,0,16"
+            IsVisible="{Binding FolderVM.IsSearching}">
+            <ProgressBar Margin="0,0,0,8" IsIndeterminate="True" />
+            <TextBlock
+                FontSize="14"
+                Opacity="0.7"
+                Text="{Binding FolderVM.SearchStatus}" />
+        </StackPanel>
+
+        <ListBox
+            Name="SongList"
+            Grid.Row="2"
+            Margin="0,0,0,8"
+            SelectionMode="None"
+            ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Classes="SongCard">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Column="0"
+                            Width="64"
+                            Height="64"
+                            Background="#333333"
+                            CornerRadius="4">
+                            <Image
+                                Source="{Binding Thumbnail, Converter={StaticResource ThumbnailConverter}}"
+                                Stretch="Uniform" />
+                        </Border>
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                MinWidth="400"
+                                FontWeight="SemiBold"
+                                MaxLines="1"
+                                Text="{Binding SongTitle}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                FontSize="14"
+                                Opacity="0.6"
+                                Text="{Binding Artist}" />
+                        </StackPanel>
+                        <TextBlock
+                            Grid.Column="2"
+                            Margin="100,4,4,4"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Opacity="0.5"
+                            Text="{Binding DurationString}"
+                            TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

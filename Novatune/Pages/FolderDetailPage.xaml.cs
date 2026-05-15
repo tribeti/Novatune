@@ -1,6 +1,5 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
+﻿using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Novatune.Models;
 using Novatune.ViewModels;
 using System;
@@ -13,7 +12,7 @@ using Windows.Storage;
 
 namespace Novatune.Pages
 {
-    public sealed partial class FolderDetailPage : Page
+    public partial class FolderDetailPage : UserControl
     {
         public MediaPlayerViewModel? MediaPlayerVM { get; private set; }
         public FolderViewModel FolderVM { get; private set; }
@@ -23,10 +22,9 @@ namespace Novatune.Pages
         private ObservableCollection<LocalFilesModel> filteredFiles = new();
         private CancellationTokenSource? _filterCts;
 
-        // TODO : optimize
         public FolderDetailPage ()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             FolderVM = FolderViewModel.Instance;
 
             FolderVM.PropertyChanged += (s , e) =>
@@ -42,7 +40,12 @@ namespace Novatune.Pages
             {
                 UpdateFileCollections();
             };
-            SongList.ItemsSource = filteredFiles;
+            
+            if ( SongList != null )
+            {
+                SongList.ItemsSource = filteredFiles;
+                SongList.AddHandler(Control.TappedEvent, OnSongTapped, RoutingStrategies.Tunnel);
+            }
         }
 
         private void UpdateFileCollections ()
@@ -84,33 +87,7 @@ namespace Novatune.Pages
             }
         }
 
-        protected override async void OnNavigatedTo (NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            var mainWindow = App.MainWindow as MainWindow;
-            if ( mainWindow == null || mainWindow.GlobalMediaPlayerVM == null )
-            {
-                if ( Frame.CanGoBack )
-                    Frame.GoBack();
-                return;
-            }
-            MediaPlayerVM = mainWindow.GlobalMediaPlayerVM;
-
-            if ( e.Parameter is StorageFolder folder )
-            {
-                SelectedFolder = folder;
-                FilterByFirstName.Text = null;
-                await SetupFolderContentAsync(folder);
-            }
-            else
-            {
-                SelectedFolder = null;
-                FolderVM.Contents.Clear();
-            }
-        }
-
-        private async Task SetupFolderContentAsync (StorageFolder folder)
+        public async Task SetupFolderContentAsync (StorageFolder folder)
         {
             try
             {
@@ -119,22 +96,17 @@ namespace Novatune.Pages
             catch { }
         }
 
-        private void BackButton_Click (object sender , RoutedEventArgs e)
+        private void BackButton_Click (object? sender , RoutedEventArgs e)
         {
             if ( FolderVM.IsSearching && FolderVM.CancelSearchCommand.CanExecute(null) )
             {
                 FolderVM.CancelSearchCommand.Execute(null);
             }
-
-            if ( this.Frame.CanGoBack )
-            {
-                this.Frame.GoBack();
-            }
         }
 
-        private async void SongList_ItemClick (object sender , ItemClickEventArgs e)
+        private async void OnSongTapped (object? sender , Avalonia.Input.TappedEventArgs e)
         {
-            if ( e.ClickedItem is LocalFilesModel audioModel && MediaPlayerVM is not null )
+            if ( sender is Grid grid && grid.DataContext is LocalFilesModel audioModel && MediaPlayerVM is not null )
             {
                 if ( MediaPlayerVM.PlayAudioCommand.CanExecute(audioModel) )
                 {
@@ -162,7 +134,7 @@ namespace Novatune.Pages
             return matchesSongTitle || matchesArtist || matchesDisplayTitle;
         }
 
-        private async void OnFilterChanged (object sender , TextChangedEventArgs args)
+        private async void OnFilterChanged (object? sender , TextChangedEventArgs args)
         {
             _filterCts?.Cancel();
             _filterCts = new CancellationTokenSource();
@@ -177,29 +149,6 @@ namespace Novatune.Pages
             catch ( TaskCanceledException ) { }
         }
 
-        private void RemoveNonMatchingFiles (IEnumerable<LocalFilesModel> filteredData)
-        {
-            for ( int i = filteredFiles.Count - 1 ; i >= 0 ; i-- )
-            {
-                var item = filteredFiles [i];
-                if ( !filteredData.Contains(item) )
-                {
-                    filteredFiles.Remove(item);
-                }
-            }
-        }
-
-        private void AddBackFiles (IEnumerable<LocalFilesModel> filteredData)
-        {
-            foreach ( var item in filteredData )
-            {
-                if ( !filteredFiles.Contains(item) )
-                {
-                    filteredFiles.Add(item);
-                }
-            }
-        }
-
         private async Task DisplayPlaybackErrorDialog (string audioTitle , string errorMessage)
         {
             await ShowErrorDialog("Lỗi phát media" , $"Không thể phát: {audioTitle}\nChi tiết: {errorMessage}");
@@ -207,24 +156,50 @@ namespace Novatune.Pages
 
         private async Task ShowErrorDialog (string title , string content)
         {
-            ContentDialog errorDialog = new ContentDialog
+            var window = TopLevel.GetTopLevel(this);
+            var dialog = new Window
             {
-                XamlRoot = this.XamlRoot ,
-                Title = title ,
-                Content = content ,
-                CloseButtonText = "Đóng"
+                Width = 400,
+                Height = 200,
+                Title = title
             };
-
-            try
+                
+            var stackPanel = new StackPanel
             {
-                await errorDialog.ShowAsync();
+                Margin = new Avalonia.Thickness(20),
+                Spacing = 15
+            };
+            
+            stackPanel.Children.Add(new TextBlock { Text = content, TextWrapping = Avalonia.Media.TextWrapping.Wrap });
+            
+            var closeButton = new Button 
+            { 
+                Content = "Đóng", 
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right 
+            };
+            closeButton.Click += (s, e) => dialog.Close();
+            stackPanel.Children.Add(closeButton);
+            
+            dialog.Content = stackPanel;
+            
+            if ( window != null )
+            {
+                await dialog.ShowDialog(window);
             }
-            catch ( Exception ) { }
         }
 
-        protected override void OnNavigatedFrom (NavigationEventArgs e)
+        protected override void OnAttachedToVisualTree (Avalonia.VisualTreeAttachmentEventArgs e)
         {
-            base.OnNavigatedFrom(e);
+            base.OnAttachedToVisualTree(e);
+            if ( FilterByFirstName != null )
+            {
+                FilterByFirstName.TextChanged += OnFilterChanged;
+            }
+        }
+
+        protected override void OnDetachedFromVisualTree (Avalonia.VisualTreeAttachmentEventArgs e)
+        {
+            base.OnDetachedFromVisualTree(e);
             if ( FolderVM.IsSearching && FolderVM.CancelSearchCommand.CanExecute(null) )
             {
                 FolderVM.CancelSearchCommand.Execute(null);
@@ -232,6 +207,10 @@ namespace Novatune.Pages
             if ( SelectedFolder is not null )
             {
                 FolderVM.RemoveTemporaryFolder(SelectedFolder);
+            }
+            if ( FilterByFirstName != null )
+            {
+                FilterByFirstName.TextChanged -= OnFilterChanged;
             }
         }
     }
