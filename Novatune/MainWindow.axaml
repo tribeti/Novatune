@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="using:Novatune.Controls"
+        mc:Ignorable="d" x:Class="Novatune.MainWindow"
+        Title="Novatune" MinHeight="600" MinWidth="1000">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <NavigationView x:Name="RootNavigationView"
+                        Grid.Row="0"
+                        IsBackButtonVisible="Collapsed"
+                        PaneDisplayMode="LeftCompact">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Home" Icon="Home" Tag="Novatune.Pages.HomePage" />
+                <NavigationViewItem Content="Online" Icon="Globe" Tag="Novatune.Pages.OnlinePage" />
+                <NavigationViewSeparator />
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewSeparator />
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+
+        <controls:MediaControlsView x:Name="GlobalMediaControls"
+                                    Grid.Row="1"
+                                    VerticalAlignment="Bottom" />
+    </Grid>
+</Window>

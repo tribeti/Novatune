@@ -1,0 +1,13 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Novatune.App"
+             RequestedTheme="Light">
+    <Application.DataTemplates>
+        <local:ViewLocator xmlns:local="using:Novatune"/>
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Novatune/Styles/SongCardResourceDict.axaml"/>
+    </Application.Styles>
+</Application>
