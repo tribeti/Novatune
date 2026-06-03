@@ -21,6 +21,7 @@
   <ItemGroup>
     <None Remove="Views\HomePage.xaml" />
     <None Remove="Views\LibraryPage.xaml" />
+    <None Remove="Views\OnlinePage.xaml" />
     <None Remove="Views\SettingPage.xaml" />
   </ItemGroup>
 
@@ -55,6 +56,11 @@
     <Content Update="Assets\Big_Buck_Bunny_720_10s_2MB.mp4">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\OnlinePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\LibraryPage.xaml">

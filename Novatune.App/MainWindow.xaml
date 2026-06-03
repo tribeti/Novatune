@@ -15,198 +15,172 @@
 
     <Grid x:Name="Root">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border
-            Grid.Row="0"
-            Margin="20,20,20,10"
-            Background="#15FFFFFF"
-            BorderBrush="#20FFFFFF"
-            BorderThickness="1"
-            CornerRadius="8">
+        <NavigationView
+            x:Name="NavigationBar"
+            AlwaysShowHeader="False"
+            ExpandedModeThresholdWidth="500"
+            IsBackButtonVisible="Collapsed"
+            IsBackEnabled="False"
+            IsSettingsVisible="True"
+            IsTabStop="False"
+            Loaded="NavigationBar_Loaded"
+            PaneDisplayMode="Top"
+            SelectionChanged="NavigationBar_SelectionChanged"
+            SelectionFollowsFocus="Enabled">
 
-            <NavigationView
-                x:Name="NavigationBar"
-                AlwaysShowHeader="False"
-                ExpandedModeThresholdWidth="500"
-                IsBackButtonVisible="Collapsed"
-                IsBackEnabled="False"
-                IsSettingsVisible="True"
-                IsTabStop="False"
-                PaneDisplayMode="Top"
-                SelectionChanged="NavigationBar_SelectionChanged"
-                SelectionFollowsFocus="Enabled">
+            <NavigationView.MenuItems>
+                <NavigationViewItem
+                    x:Name="HomePage"
+                    Content="Home"
+                    Tag="Novatune.App.Views.HomePage">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Home" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    x:Name="LibraryPage"
+                    Content="Library"
+                    Tag="Novatune.App.Views.LibraryPage">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Library" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    x:Name="OnlinePage"
+                    Content="Online"
+                    Tag="Novatune.App.Views.OnlinePage">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Globe" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+            <Frame
+                x:Name="ContentFrame"
+                Background="Transparent"
+                NavigationFailed="ContentFrame_NavigationFailed" />
+        </NavigationView>
 
-                <NavigationView.MenuItems>
-                    <NavigationViewItem
-                        x:Name="HomePage"
-                        Content="Home"
-                        Tag="Novatune.App.Views.HomePage">
-                        <NavigationViewItem.Icon>
-                            <SymbolIcon Symbol="Home" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem
-                        x:Name="LibraryPage"
-                        Content="Library"
-                        Tag="Novatune.App.Views.LibraryPage">
-                        <NavigationViewItem.Icon>
-                            <SymbolIcon Symbol="Save" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem
-                        x:Name="SamplePage3Item"
-                        Content="Menu Item3"
-                        Tag="SamplePage3">
-                        <NavigationViewItem.Icon>
-                            <SymbolIcon Symbol="Refresh" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                </NavigationView.MenuItems>
-                <Frame x:Name="ContentFrame" NavigationFailed="ContentFrame_NavigationFailed" />
-            </NavigationView>
-        </Border>
-
-
-        <Grid Grid.Row="1" Margin="20,10,20,10">
+        <Grid Grid.Row="1" Margin="12,12,36,12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="7*" />
+                <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
 
-            <Border
-                Grid.Column="0"
-                Margin="0,0,15,0"
-                Background="#10FFFFFF"
-                BorderBrush="#20FFFFFF"
-                BorderThickness="1"
-                CornerRadius="8">
-                <Grid>
-                    <MediaPlayerElement
-                        HorizontalAlignment="Stretch"
-                        AreTransportControlsEnabled="True"
-                        AutoPlay="False"
-                        Source="ms-appx:///Assets/big_buck_bunny_720_10s_2mb.mp4">
-                        <MediaPlayerElement.TransportControls>
-                            <MediaTransportControls
-                                IsCompact="False"
-                                IsNextTrackButtonVisible="True"
-                                IsPreviousTrackButtonVisible="True"
-                                IsRepeatButtonVisible="True"
-                                IsRepeatEnabled="True"
-                                IsSkipBackwardButtonVisible="True"
-                                IsSkipForwardButtonVisible="True"
-                                IsZoomButtonVisible="True" />
-                        </MediaPlayerElement.TransportControls>
-                    </MediaPlayerElement>
-                </Grid>
-            </Border>
+            <Grid Grid.Column="0">
+                <RelativePanel>
+                    <TextBlock
+                        x:Name="Timer_Txt"
+                        Margin="0,6,12,0"
+                        VerticalAlignment="Center"
+                        RelativePanel.AlignLeftWithPanel="True">
+                        00:00
+                    </TextBlock>
 
-            <Border
-                Grid.Column="1"
-                Padding="15"
-                Background="#10FFFFFF"
-                BorderBrush="#20FFFFFF"
-                BorderThickness="1"
-                CornerRadius="8">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+                    <TextBlock
+                        x:Name="MediaLength_Txt"
+                        Margin="12,6,0,0"
+                        VerticalAlignment="Center"
+                        RelativePanel.AlignRightWithPanel="True">
+                        05:00
+                    </TextBlock>
 
-                    <Grid Grid.Row="0" Margin="0,0,0,20">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Border
-                            Width="60"
-                            Height="60"
-                            Background="Gray"
-                            CornerRadius="4" />
-                        <StackPanel
-                            Grid.Column="1"
-                            Margin="10,0,0,0"
-                            VerticalAlignment="Center">
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Foreground="White"
-                                Text="I Ka Barra (Your Work)"
-                                TextTrimming="CharacterEllipsis" />
-                            <TextBlock
-                                Margin="0,2,0,0"
-                                FontSize="12"
-                                Foreground="LightGray"
-                                Text="Habib Koité &amp; Bamada" />
-                            <TextBlock
-                                Margin="0,2,0,0"
-                                FontSize="12"
-                                Foreground="Gray"
-                                Text="Playlist" />
-                        </StackPanel>
-                    </Grid>
+                    <Slider
+                        x:Name="Media_Timeline"
+                        VerticalAlignment="Center"
+                        RelativePanel.LeftOf="MediaLength_Txt"
+                        RelativePanel.RightOf="Timer_Txt" />
 
-                    <Grid Grid.Row="1" Margin="0,0,0,15">
-                        <StackPanel Orientation="Horizontal" Spacing="15">
-                            <FontIcon
-                                FontSize="14"
-                                Foreground="LightGray"
-                                Glyph="&#xE8B1;" />
-                            <FontIcon
-                                FontSize="14"
-                                Foreground="LightGray"
-                                Glyph="&#xE8EE;" />
-                            <FontIcon
-                                FontSize="14"
-                                Foreground="LightGray"
-                                Glyph="&#xE894;" />
-                        </StackPanel>
-                        <FontIcon
-                            HorizontalAlignment="Right"
-                            FontSize="14"
-                            Foreground="LightGray"
-                            Glyph="&#xE74D;" />
-                    </Grid>
+                    <AppBarButton
+                        x:Name="Play_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.AlignHorizontalCenterWithPanel="True"
+                        RelativePanel.Below="Media_Timeline">
+                        <FontIcon Glyph="&#xF5B0;" />
+                    </AppBarButton>
 
-                    <ListView
-                        Grid.Row="2"
-                        Background="Transparent"
-                        SelectionMode="Single">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="30" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Border
-                                        Width="24"
-                                        Height="24"
-                                        HorizontalAlignment="Left"
-                                        Background="DarkGray"
-                                        CornerRadius="2" />
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        Foreground="LightGray"
-                                        Text="Tên bài hát - Nghệ sĩ" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
+                    <AppBarButton
+                        x:Name="Previous_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.Below="Media_Timeline"
+                        RelativePanel.LeftOf="Play_Btn"
+                        ToolTipService.ToolTip="Previous">
+                        <FontIcon Glyph="&#xF8AC;" />
+                    </AppBarButton>
 
-                        <ListViewItem>
-                            <TextBlock Foreground="LightGray" Text="Amanda - Aisha Duo" />
-                        </ListViewItem>
-                    </ListView>
-                </Grid>
-            </Border>
+                    <AppBarButton
+                        x:Name="Shuffle_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.Below="Media_Timeline"
+                        RelativePanel.LeftOf="Previous_Btn"
+                        ToolTipService.ToolTip="Shuffle">
+                        <FontIcon Glyph="&#xE8B1;" />
+                    </AppBarButton>
+
+                    <AppBarButton
+                        x:Name="Next_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.Below="Media_Timeline"
+                        RelativePanel.RightOf="Play_Btn"
+                        ToolTipService.ToolTip="Next">
+                        <FontIcon Glyph="&#xF8AD;" />
+                    </AppBarButton>
+
+                    <AppBarButton
+                        x:Name="Repeat_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.Below="Media_Timeline"
+                        RelativePanel.RightOf="Next_Btn"
+                        ToolTipService.ToolTip="Repeat">
+                        <SymbolIcon Symbol="RepeatAll" />
+                    </AppBarButton>
+                </RelativePanel>
+            </Grid>
+
+            <Grid Grid.Column="1" Margin="36,0,0,0">
+                <RelativePanel>
+                    <FontIcon
+                        x:Name="Volume"
+                        Margin="0,6,12,0"
+                        Glyph="&#xE767;" />
+
+                    <Slider
+                        x:Name="Volume_Slider"
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.RightOf="Volume" />
+
+                    <AppBarButton
+                        x:Name="MiniPlayer_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.AlignRightWithPanel="True"
+                        RelativePanel.Below="Volume_Slider"
+                        ToolTipService.ToolTip="Mini Player">
+                        <FontIcon Glyph="&#xEE49;" />
+                    </AppBarButton>
+
+                    <AppBarButton
+                        x:Name="Queue_Btn"
+                        LabelPosition="Collapsed"
+                        RelativePanel.Below="Volume_Slider"
+                        RelativePanel.LeftOf="MiniPlayer_Btn"
+                        ToolTipService.ToolTip="Queue">
+                        <FontIcon Glyph="&#xEA37;" />
+                    </AppBarButton>
+
+                    <AppBarButton
+                        LabelPosition="Collapsed"
+                        RelativePanel.Below="Volume_Slider"
+                        RelativePanel.LeftOf="Queue_Btn"
+                        ToolTipService.ToolTip="Resize Video">
+                        <AppBarButton.Icon>
+                            <FontIcon Glyph="&#xE799;" />
+                        </AppBarButton.Icon>
+                    </AppBarButton>
+                </RelativePanel>
+            </Grid>
         </Grid>
-
-        <Grid Grid.Row="2" />
     </Grid>
 </Window>

@@ -2,7 +2,10 @@ using DevWinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
+using Novatune.App.Views;
 using System;
+using System.Linq;
 
 namespace Novatune.App;
 
@@ -18,7 +21,7 @@ public sealed partial class MainWindow : Window
     {
         if (args.IsSettingsSelected == true)
         {
-            NavView_Navigate(typeof(Views.SettingPage), args.RecommendedNavigationTransitionInfo);
+            NavView_Navigate(typeof(SettingPage), args.RecommendedNavigationTransitionInfo);
         }
         else if (args.SelectedItemContainer is not null)
         {
@@ -27,7 +30,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void ContentFrame_NavigationFailed(object sender, Microsoft.UI.Xaml.Navigation.NavigationFailedEventArgs e)
+    private void ContentFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
     {
         throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
     }
@@ -38,6 +41,29 @@ public sealed partial class MainWindow : Window
         if (navPageType is not null && !Type.Equals(preNavPageType, navPageType))
         {
             ContentFrame.Navigate(navPageType, null, transitionInfo);
+        }
+    }
+
+    private void NavigationBar_Loaded(object sender, RoutedEventArgs e)
+    {
+        ContentFrame.Navigated += On_Navigated;
+        NavigationBar.SelectedItem = NavigationBar.MenuItems[0];
+        NavView_Navigate(typeof(HomePage), new EntranceNavigationTransitionInfo());
+    }
+
+    private void On_Navigated(object sender, NavigationEventArgs e)
+    {
+        NavigationBar.IsBackEnabled = ContentFrame.CanGoBack;
+
+        if (ContentFrame.SourcePageType == typeof(SettingPage))
+        {
+            NavigationBar.SelectedItem = (NavigationViewItem) NavigationBar.SettingsItem;
+        }
+        else if (ContentFrame.SourcePageType is not null)
+        {
+            NavigationBar.SelectedItem = NavigationBar.MenuItems
+                        .OfType<NavigationViewItem>()
+                        .First(i => i.Tag.Equals(ContentFrame.SourcePageType.FullName!.ToString()));
         }
     }
 }

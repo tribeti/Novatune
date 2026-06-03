@@ -9,6 +9,89 @@
     mc:Ignorable="d">
 
     <Grid>
-        <TextBlock>hi</TextBlock>
+        <Grid Grid.Row="1" Margin="0,0,12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <MediaPlayerElement
+                Grid.Column="0"
+                Margin="0,0,12,0"
+                AreTransportControlsEnabled="False"
+                AutoPlay="False"
+                CornerRadius="200"
+                Source="ms-appx:///Assets/big_buck_bunny_720_10s_2mb.mp4"
+                Stretch="Uniform" />
+
+            <Grid Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid
+                    Grid.Row="0"
+                    Margin="0,0,0,20"
+                    Padding="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border
+                        Width="60"
+                        Height="60"
+                        Background="Gray"
+                        CornerRadius="4" />
+                    <StackPanel
+                        Grid.Column="1"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center">
+                        <TextBlock
+                            FontWeight="SemiBold"
+                            Foreground="White"
+                            Text="I Ka Barra (Your Work)"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="12"
+                            Foreground="LightGray"
+                            Text="Habib Koité &amp; Bamada" />
+                        <MenuFlyoutSeparator />
+                    </StackPanel>
+                </Grid>
+                <ListView
+                    Grid.Row="2"
+                    Background="Transparent"
+                    SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border
+                                    Width="24"
+                                    Height="24"
+                                    HorizontalAlignment="Left"
+                                    Background="DarkGray"
+                                    CornerRadius="2" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Foreground="LightGray"
+                                    Text="Tên bài hát - Nghệ sĩ" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+
+                    <ListViewItem>
+                        <TextBlock Foreground="LightGray" Text="Amanda - Aisha Duo" />
+                    </ListViewItem>
+                </ListView>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>
