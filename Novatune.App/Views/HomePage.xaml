@@ -16,12 +16,10 @@
             </Grid.ColumnDefinitions>
 
             <MediaPlayerElement
+                x:Name="mediaPlayerElement"
                 Grid.Column="0"
                 Margin="0,0,12,0"
                 AreTransportControlsEnabled="False"
-                AutoPlay="False"
-                CornerRadius="200"
-                Source="ms-appx:///Assets/big_buck_bunny_720_10s_2mb.mp4"
                 Stretch="Uniform" />
 
             <Grid Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">

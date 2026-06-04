@@ -1,8 +1,10 @@
 using DevWinUI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using Novatune.App.ViewModels;
 using Novatune.App.Views;
 using System;
 using System.Linq;
@@ -11,10 +13,13 @@ namespace Novatune.App;
 
 public sealed partial class MainWindow : Window
 {
+    public MediaViewModel ViewModel { get; set; }
+
     public MainWindow()
     {
         InitializeComponent();
         DragMoveAndResizeHelper.SetDragMove(this, Root);
+        ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
     }
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

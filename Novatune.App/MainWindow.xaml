@@ -96,6 +96,7 @@
 
                     <AppBarButton
                         x:Name="Play_Btn"
+                        Command="{x:Bind ViewModel.PlayPauseCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.AlignHorizontalCenterWithPanel="True"
                         RelativePanel.Below="Media_Timeline">
