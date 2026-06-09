@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:storage="using:Windows.Storage"
     mc:Ignorable="d">
 
     <Grid>
@@ -22,74 +23,62 @@
                 AreTransportControlsEnabled="False"
                 Stretch="Uniform" />
 
-            <Grid Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <Grid
-                    Grid.Row="0"
-                    Margin="0,0,0,20"
-                    Padding="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Border
-                        Width="60"
-                        Height="60"
-                        Background="Gray"
-                        CornerRadius="4" />
-                    <StackPanel
-                        Grid.Column="1"
-                        Margin="10,0,0,0"
-                        VerticalAlignment="Center">
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Foreground="White"
-                            Text="I Ka Barra (Your Work)"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Margin="0,2,0,0"
-                            FontSize="12"
-                            Foreground="LightGray"
-                            Text="Habib Koité &amp; Bamada" />
-                        <MenuFlyoutSeparator />
-                    </StackPanel>
-                </Grid>
+            <RelativePanel Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                <AppBarButton
+                    x:Name="AddMedia"
+                    Command="{x:Bind ViewModel.AddMediaCommand}"
+                    Icon="Add"
+                    IsCompact="True"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True" />
+                <Image
+                    x:Name="MediaLogo"
+                    MaxHeight="100"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    RelativePanel.Below="AddMedia"
+                    Source="/Assets/LockScreenLogo.png" />
+                <TextBlock
+                    x:Name="MediaTitle"
+                    FontSize="18"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    RelativePanel.Below="MediaLogo">
+                    hi1
+                </TextBlock>
+                <TextBlock
+                    x:Name="MediaCreator"
+                    FontSize="16"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    RelativePanel.Below="MediaTitle">
+                    hio2
+                </TextBlock>
+                <MenuFlyoutSeparator x:Name="sep" />
                 <ListView
-                    Grid.Row="2"
+                    AllowDrop="True"
                     Background="Transparent"
+                    CanDragItems="True"
+                    CanReorderItems="True"
+                    ItemsSource="{x:Bind ViewModel.MediaFiles, Mode=OneWay}"
+                    RelativePanel.Below="sep"
                     SelectionMode="Single">
                     <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Padding="0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border
-                                    Width="24"
-                                    Height="24"
-                                    HorizontalAlignment="Left"
-                                    Background="DarkGray"
-                                    CornerRadius="2" />
+                        <DataTemplate x:DataType="storage:StorageFile">
+                            <StackPanel Margin="0,8" Orientation="Vertical">
                                 <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Foreground="LightGray"
-                                    Text="Tên bài hát - Nghệ sĩ" />
-                            </Grid>
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind Name}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                                <TextBlock
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind Path}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
-
-                    <ListViewItem>
-                        <TextBlock Foreground="LightGray" Text="Amanda - Aisha Duo" />
-                    </ListViewItem>
                 </ListView>
-            </Grid>
+            </RelativePanel>
         </Grid>
     </Grid>
 </Page>

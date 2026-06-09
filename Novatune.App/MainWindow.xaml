@@ -105,6 +105,7 @@
 
                     <AppBarButton
                         x:Name="Previous_Btn"
+                        Command="{x:Bind ViewModel.PreviousCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.LeftOf="Play_Btn"
@@ -114,6 +115,7 @@
 
                     <AppBarButton
                         x:Name="Shuffle_Btn"
+                        Command="{x:Bind ViewModel.ShuffleCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.LeftOf="Previous_Btn"
@@ -123,6 +125,7 @@
 
                     <AppBarButton
                         x:Name="Next_Btn"
+                        Command="{x:Bind ViewModel.NextCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.RightOf="Play_Btn"
@@ -132,6 +135,7 @@
 
                     <AppBarButton
                         x:Name="Repeat_Btn"
+                        Command="{x:Bind ViewModel.RepeatCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.RightOf="Next_Btn"
