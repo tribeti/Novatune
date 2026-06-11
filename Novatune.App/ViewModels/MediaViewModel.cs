@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
-    private readonly MediaPlaybackList mediaPlaybackList = new();
+    private readonly MediaPlaybackList _mediaPlaybackList = new();
     public MediaPlayer mediaPlayer = new();
     public ObservableCollection<StorageFile> MediaFiles { get; } = new();
 
@@ -30,9 +29,14 @@ public partial class MediaViewModel : BaseViewModel
     {
         mediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
+            var playing = s.PlaybackState == MediaPlaybackState.Playing;
+
+            if (playing == IsPlaying)
+                return;
+
             _dispatcherQueue.TryEnqueue(() =>
             {
-                IsPlaying = s.PlaybackState == MediaPlaybackState.Playing;
+                IsPlaying = playing;
                 if (IsPlaying)
                     _positionTimer.Start();
                 else
@@ -47,24 +51,38 @@ public partial class MediaViewModel : BaseViewModel
             MediaPosition = session.Position.TotalSeconds;
         };
 
-        mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
-        mediaPlayer.Source = mediaPlaybackList;
+        _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
+        mediaPlayer.Source = _mediaPlaybackList;
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(PlayIcon))]
+    [NotifyPropertyChangedFor(nameof(PlayGlyph))]
     public partial bool IsPlaying { get; set; } = false;
-    public IconElement PlayIcon => IsPlaying ? new FontIcon { Glyph = "\uF8AE" } : new FontIcon { Glyph = "\uF5B0" };
+    public string PlayGlyph => IsPlaying ? "\uF8AE" : "\uF5B0";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DurationText))]
     public partial double MediaDuration { get; set; } = 0;
-    public string DurationText => TimeSpan.FromSeconds(MediaDuration).ToString(@"mm\:ss");
+    public string DurationText
+    {
+        get
+        {
+            var ts = TimeSpan.FromSeconds(MediaDuration);
+            return ts.TotalHours >= 1 ? ts.ToString(@"h\:mm\:ss") : ts.ToString(@"mm\:ss");
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PositionText))]
     public partial double MediaPosition { get; set; } = 0;
-    public string PositionText => TimeSpan.FromSeconds(MediaPosition).ToString(@"mm\:ss");
+    public string PositionText
+    {
+        get
+        {
+            var ts = TimeSpan.FromSeconds(MediaPosition);
+            return ts.TotalHours >= 1 ? ts.ToString(@"h\:mm\:ss") : ts.ToString(@"mm\:ss");
+        }
+    }
 
     [RelayCommand]
     public void PlayPause()
@@ -96,7 +114,7 @@ public partial class MediaViewModel : BaseViewModel
             foreach (var file in files)
             {
                 var mediaPlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromStorageFile(file));
-                mediaPlaybackList.Items.Add(mediaPlaybackItem);
+                _mediaPlaybackList.Items.Add(mediaPlaybackItem);
                 MediaFiles.Add(file);
             }
         }
@@ -109,10 +127,10 @@ public partial class MediaViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public void Previous() => mediaPlaybackList.MovePrevious();
+    public void Previous() => _mediaPlaybackList.MovePrevious();
 
     [RelayCommand]
-    public void Next() => mediaPlaybackList.MoveNext();
+    public void Next() => _mediaPlaybackList.MoveNext();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShuffleFontWeight))]
@@ -124,7 +142,7 @@ public partial class MediaViewModel : BaseViewModel
     public void Shuffle()
     {
         IsShuffleEnabled = !IsShuffleEnabled;
-        mediaPlaybackList.ShuffleEnabled = IsShuffleEnabled;
+        _mediaPlaybackList.ShuffleEnabled = IsShuffleEnabled;
     }
 
     [ObservableProperty]
@@ -137,6 +155,6 @@ public partial class MediaViewModel : BaseViewModel
     public void Repeat()
     {
         IsRepeatEnabled = !IsRepeatEnabled;
-        mediaPlaybackList.AutoRepeatEnabled = IsRepeatEnabled;
+        _mediaPlaybackList.AutoRepeatEnabled = IsRepeatEnabled;
     }
 }
