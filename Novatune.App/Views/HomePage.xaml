@@ -50,7 +50,7 @@
                     RelativePanel.Below="MediaTitle">
                     hio2
                 </TextBlock>
-                <MenuFlyoutSeparator x:Name="sep" />
+                <MenuFlyoutSeparator x:Name="sep" RelativePanel.Below="MediaCreator" />
                 <ListView
                     AllowDrop="True"
                     Background="Transparent"

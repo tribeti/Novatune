@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -14,14 +16,15 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
-    public MediaSource? mediaSource;
-    MediaPlaybackList mediaPlaybackList = new();
+    private readonly MediaPlaybackList mediaPlaybackList = new();
     public MediaPlayer mediaPlayer = new();
     public ObservableCollection<StorageFile> MediaFiles { get; } = new();
 
-    [ObservableProperty]
-    public partial bool IsPlaying { get; set; } = false;
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+    private readonly DispatcherTimer _positionTimer = new()
+    {
+        Interval = TimeSpan.FromMilliseconds(500)
+    };
 
     public MediaViewModel()
     {
@@ -30,11 +33,38 @@ public partial class MediaViewModel : BaseViewModel
             _dispatcherQueue.TryEnqueue(() =>
             {
                 IsPlaying = s.PlaybackState == MediaPlaybackState.Playing;
+                if (IsPlaying)
+                    _positionTimer.Start();
+                else
+                    _positionTimer.Stop();
             });
         };
+
+        _positionTimer.Tick += (_, _) =>
+        {
+            var session = mediaPlayer.PlaybackSession;
+            MediaDuration = session.NaturalDuration.TotalSeconds;
+            MediaPosition = session.Position.TotalSeconds;
+        };
+
         mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
         mediaPlayer.Source = mediaPlaybackList;
     }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PlayIcon))]
+    public partial bool IsPlaying { get; set; } = false;
+    public IconElement PlayIcon => IsPlaying ? new FontIcon { Glyph = "\uF8AE" } : new FontIcon { Glyph = "\uF5B0" };
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DurationText))]
+    public partial double MediaDuration { get; set; } = 0;
+    public string DurationText => TimeSpan.FromSeconds(MediaDuration).ToString(@"mm\:ss");
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PositionText))]
+    public partial double MediaPosition { get; set; } = 0;
+    public string PositionText => TimeSpan.FromSeconds(MediaPosition).ToString(@"mm\:ss");
 
     [RelayCommand]
     public void PlayPause()
@@ -65,12 +95,17 @@ public partial class MediaViewModel : BaseViewModel
         {
             foreach (var file in files)
             {
-                var storageFile = await StorageFile.GetFileFromPathAsync(file.Path);
-                var mediaPlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromStorageFile(storageFile));
+                var mediaPlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromStorageFile(file));
                 mediaPlaybackList.Items.Add(mediaPlaybackItem);
                 MediaFiles.Add(file);
             }
         }
+    }
+
+    [RelayCommand]
+    public void Seek(double seconds)
+    {
+        mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
     }
 
     [RelayCommand]
@@ -79,26 +114,29 @@ public partial class MediaViewModel : BaseViewModel
     [RelayCommand]
     public void Next() => mediaPlaybackList.MoveNext();
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShuffleFontWeight))]
+    public partial bool IsShuffleEnabled { get; set; } = false;
+    public Windows.UI.Text.FontWeight ShuffleFontWeight =>
+        IsShuffleEnabled ? Microsoft.UI.Text.FontWeights.ExtraBold : Microsoft.UI.Text.FontWeights.ExtraLight;
 
     [RelayCommand]
     public void Shuffle()
     {
-        mediaPlaybackList.ShuffleEnabled = !mediaPlaybackList.ShuffleEnabled;
-
-        //DispatcherQueue.TryEnqueue(() =>
-        //{
-        //    Shuffle_Btn.FontWeight = mediaPlaybackList.ShuffleEnabled ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Light;
-        //});
+        IsShuffleEnabled = !IsShuffleEnabled;
+        mediaPlaybackList.ShuffleEnabled = IsShuffleEnabled;
     }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RepeatFontWeight))]
+    public partial bool IsRepeatEnabled { get; set; } = false;
+    public Windows.UI.Text.FontWeight RepeatFontWeight =>
+        IsRepeatEnabled ? Microsoft.UI.Text.FontWeights.ExtraBold : Microsoft.UI.Text.FontWeights.ExtraLight;
 
     [RelayCommand]
     public void Repeat()
     {
-        mediaPlaybackList.AutoRepeatEnabled = !mediaPlaybackList.AutoRepeatEnabled;
-
-        //DispatcherQueue.TryEnqueue(() =>
-        //{
-        //    autoRepeatButton.FontWeight = mediaPlaybackList.AutoRepeatEnabled ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Light;
-        //});
+        IsRepeatEnabled = !IsRepeatEnabled;
+        mediaPlaybackList.AutoRepeatEnabled = IsRepeatEnabled;
     }
 }
