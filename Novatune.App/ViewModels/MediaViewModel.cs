@@ -48,7 +48,10 @@ public partial class MediaViewModel : BaseViewModel
         {
             var session = mediaPlayer.PlaybackSession;
             MediaDuration = session.NaturalDuration.TotalSeconds;
-            MediaPosition = session.Position.TotalSeconds;
+            PlaybackPosition = session.Position.TotalSeconds;
+
+            if (!IsUserInteracting)
+                TimelinePosition = PlaybackPosition;
         };
 
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
@@ -74,18 +77,31 @@ public partial class MediaViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PositionText))]
-    public partial double MediaPosition { get; set; } = 0;
+    public partial double PlaybackPosition { get; set; } = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PositionText))]
+    public partial double TimelinePosition { get; set; } = 0;
     public string PositionText
     {
         get
         {
-            var ts = TimeSpan.FromSeconds(MediaPosition);
+            var seconds = IsUserInteracting ? TimelinePosition : PlaybackPosition;
+            var ts = TimeSpan.FromSeconds(seconds);
             return ts.TotalHours >= 1 ? ts.ToString(@"h\:mm\:ss") : ts.ToString(@"mm\:ss");
         }
     }
 
     [ObservableProperty]
-    public partial double Volume { get; set; } = 1.0;
+    public partial double Volume { get; set; } = 100.0;
+
+    partial void OnVolumeChanged(double value)
+    {
+        mediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
+    }
+
+    [ObservableProperty]
+    public partial bool IsUserInteracting { get; set; } = false;
 
     [RelayCommand]
     public void PlayPause()
@@ -127,12 +143,15 @@ public partial class MediaViewModel : BaseViewModel
     public void Seek(double seconds)
     {
         mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
+        PlaybackPosition = seconds;
     }
 
     [RelayCommand]
-    public void SeekVolume(double value)
+    public void CommitSeek()
     {
-        mediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
+        mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
+        PlaybackPosition = TimelinePosition;
+        IsUserInteracting = false;
     }
 
     [RelayCommand]

@@ -90,12 +90,11 @@
                         x:Name="Media_Timeline"
                         VerticalAlignment="Center"
                         Maximum="{x:Bind ViewModel.MediaDuration, Mode=OneWay}"
-                        Minimum="0"
                         RelativePanel.LeftOf="Duration_Txt"
                         RelativePanel.RightOf="Position_Txt"
+                        Tapped="Media_Timeline_Tapped"
                         ThumbToolTipValueConverter="{StaticResource TimelineFormatter}"
-                        ValueChanged="Media_Timeline_ValueChanged"
-                        Value="{x:Bind ViewModel.MediaPosition, Mode=TwoWay}" />
+                        Value="{x:Bind ViewModel.TimelinePosition, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <AppBarButton
                         x:Name="Play_Btn"
@@ -159,7 +158,7 @@
                         x:Name="Volume_Slider"
                         RelativePanel.AlignRightWithPanel="True"
                         RelativePanel.RightOf="Volume"
-                        ValueChanged="Volume_Slider_ValueChanged" />
+                        Value="{x:Bind ViewModel.Volume, Mode=TwoWay}" />
 
                     <AppBarButton
                         x:Name="MiniPlayer_Btn"

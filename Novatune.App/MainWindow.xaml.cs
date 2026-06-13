@@ -21,6 +21,21 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         DragMoveAndResizeHelper.SetDragMove(this, Root);
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
+    }
+
+    private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (this.Media_Timeline
+            .FindDescendants()
+            .OfType<Thumb>()
+            .FirstOrDefault(x => x.Name == "HorizontalThumb") is not Thumb thumb)
+        {
+            return;
+        }
+
+        thumb.DragStarted += Thumb_DragStarted;
+        thumb.DragCompleted += Thumb_DragCompleted;
     }
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -73,15 +88,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void Media_Timeline_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-    {
-        if (sender is Slider slider)
-            ViewModel.SeekCommand.Execute(slider.Value);
-    }
-
-    private void Volume_Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-    {
-        if (sender is Slider slider)
-            ViewModel.SeekVolumeCommand.Execute(slider.Value);
-    }
+    private void Thumb_DragStarted(object sender, DragStartedEventArgs e) => ViewModel.IsUserInteracting = true;
+    private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
+    private void Media_Timeline_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
 }
