@@ -73,26 +73,28 @@
             <Grid Grid.Column="0">
                 <RelativePanel>
                     <TextBlock
-                        x:Name="Timer_Txt"
+                        x:Name="Position_Txt"
                         Margin="0,6,12,0"
                         VerticalAlignment="Center"
-                        RelativePanel.AlignLeftWithPanel="True">
-                        00:00
-                    </TextBlock>
+                        RelativePanel.AlignLeftWithPanel="True"
+                        Text="{x:Bind ViewModel.PositionText, Mode=OneWay}" />
 
                     <TextBlock
-                        x:Name="MediaLength_Txt"
+                        x:Name="Duration_Txt"
                         Margin="12,6,0,0"
                         VerticalAlignment="Center"
-                        RelativePanel.AlignRightWithPanel="True">
-                        05:00
-                    </TextBlock>
+                        RelativePanel.AlignRightWithPanel="True"
+                        Text="{x:Bind ViewModel.DurationText, Mode=OneWay}" />
 
                     <Slider
                         x:Name="Media_Timeline"
                         VerticalAlignment="Center"
-                        RelativePanel.LeftOf="MediaLength_Txt"
-                        RelativePanel.RightOf="Timer_Txt" />
+                        Maximum="{x:Bind ViewModel.MediaDuration, Mode=OneWay}"
+                        RelativePanel.LeftOf="Duration_Txt"
+                        RelativePanel.RightOf="Position_Txt"
+                        Tapped="Media_Timeline_Tapped"
+                        ThumbToolTipValueConverter="{StaticResource TimelineFormatter}"
+                        Value="{x:Bind ViewModel.TimelinePosition, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <AppBarButton
                         x:Name="Play_Btn"
@@ -100,11 +102,12 @@
                         LabelPosition="Collapsed"
                         RelativePanel.AlignHorizontalCenterWithPanel="True"
                         RelativePanel.Below="Media_Timeline">
-                        <FontIcon Glyph="&#xF5B0;" />
+                        <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
                     </AppBarButton>
 
                     <AppBarButton
                         x:Name="Previous_Btn"
+                        Command="{x:Bind ViewModel.PreviousCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.LeftOf="Play_Btn"
@@ -114,15 +117,17 @@
 
                     <AppBarButton
                         x:Name="Shuffle_Btn"
+                        Command="{x:Bind ViewModel.ShuffleCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.LeftOf="Previous_Btn"
                         ToolTipService.ToolTip="Shuffle">
-                        <FontIcon Glyph="&#xE8B1;" />
+                        <FontIcon FontWeight="{x:Bind ViewModel.ShuffleFontWeight, Mode=OneWay}" Glyph="&#xE8B1;" />
                     </AppBarButton>
 
                     <AppBarButton
                         x:Name="Next_Btn"
+                        Command="{x:Bind ViewModel.NextCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.RightOf="Play_Btn"
@@ -132,11 +137,12 @@
 
                     <AppBarButton
                         x:Name="Repeat_Btn"
+                        Command="{x:Bind ViewModel.RepeatCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Media_Timeline"
                         RelativePanel.RightOf="Next_Btn"
                         ToolTipService.ToolTip="Repeat">
-                        <SymbolIcon Symbol="RepeatAll" />
+                        <FontIcon FontWeight="{x:Bind ViewModel.RepeatFontWeight, Mode=OneWay}" Glyph="&#xE8EE;" />
                     </AppBarButton>
                 </RelativePanel>
             </Grid>
@@ -151,7 +157,8 @@
                     <Slider
                         x:Name="Volume_Slider"
                         RelativePanel.AlignRightWithPanel="True"
-                        RelativePanel.RightOf="Volume" />
+                        RelativePanel.RightOf="Volume"
+                        Value="{x:Bind ViewModel.Volume, Mode=TwoWay}" />
 
                     <AppBarButton
                         x:Name="MiniPlayer_Btn"

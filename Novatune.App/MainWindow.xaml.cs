@@ -2,6 +2,7 @@ using DevWinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.ViewModels;
@@ -20,6 +21,24 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         DragMoveAndResizeHelper.SetDragMove(this, Root);
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
+    }
+
+    private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (this.Media_Timeline
+            .FindDescendants()
+            .OfType<Thumb>()
+            .FirstOrDefault(x => x.Name == "HorizontalThumb") is not Thumb thumb)
+        {
+            return;
+        }
+
+        thumb.DragStarted -= Thumb_DragStarted;
+        thumb.DragCompleted -= Thumb_DragCompleted;
+
+        thumb.DragStarted += Thumb_DragStarted;
+        thumb.DragCompleted += Thumb_DragCompleted;
     }
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -71,4 +90,8 @@ public sealed partial class MainWindow : Window
                         .First(i => i.Tag.Equals(ContentFrame.SourcePageType.FullName!.ToString()));
         }
     }
+
+    private void Thumb_DragStarted(object sender, DragStartedEventArgs e) => ViewModel.IsUserInteracting = true;
+    private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
+    private void Media_Timeline_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
 }

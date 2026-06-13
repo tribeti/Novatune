@@ -10,7 +10,7 @@ namespace Novatune.App;
 /// </summary>
 public partial class App : Application
 {
-    private Window? _window;
+    public Window? MainWindow { get; private set; }
     public IServiceProvider Services { get; }
     public new static App Current => (App) Application.Current;
     /// <summary>
@@ -29,8 +29,8 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        _window = new MainWindow();
-        _window.Activate();
+        MainWindow = new MainWindow();
+        MainWindow.Activate();
     }
 
     private static ServiceProvider ConfigureServices()
