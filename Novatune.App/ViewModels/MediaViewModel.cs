@@ -17,7 +17,7 @@ public partial class MediaViewModel : BaseViewModel
 {
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public MediaPlayer mediaPlayer = new();
-    public ObservableCollection<StorageFile> MediaFiles { get; } = new();
+    public ObservableCollection<StorageFile> MediaFiles { get; } = [];
 
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
@@ -130,7 +130,7 @@ public partial class MediaViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public void SeekVolume(int value)
+    public void SeekVolume(double value)
     {
         mediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
     }

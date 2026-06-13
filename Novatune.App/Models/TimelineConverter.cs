@@ -12,7 +12,8 @@ public partial class TimelineConverter : IValueConverter
             TimeSpan time = TimeSpan.FromSeconds(totalSeconds);
             if (time.TotalHours >= 1)
             {
-                return time.ToString(@"hh\:mm\:ss");
+                int hours = (int)time.TotalHours;
+                return $"{hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}";
             }
             else
             {

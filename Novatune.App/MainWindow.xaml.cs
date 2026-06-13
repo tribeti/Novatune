@@ -82,6 +82,6 @@ public sealed partial class MainWindow : Window
     private void Volume_Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (sender is Slider slider)
-            ViewModel.SeekVolumeCommand.Execute((int) slider.Value);
+            ViewModel.SeekVolumeCommand.Execute(slider.Value);
     }
 }
