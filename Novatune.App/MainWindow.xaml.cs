@@ -2,6 +2,7 @@ using DevWinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.ViewModels;
@@ -70,5 +71,17 @@ public sealed partial class MainWindow : Window
                         .OfType<NavigationViewItem>()
                         .First(i => i.Tag.Equals(ContentFrame.SourcePageType.FullName!.ToString()));
         }
+    }
+
+    private void Media_Timeline_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (sender is Slider slider)
+            ViewModel.SeekCommand.Execute(slider.Value);
+    }
+
+    private void Volume_Slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (sender is Slider slider)
+            ViewModel.SeekVolumeCommand.Execute((int) slider.Value);
     }
 }

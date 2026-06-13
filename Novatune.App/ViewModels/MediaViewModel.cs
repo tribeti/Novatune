@@ -84,6 +84,9 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
+    [ObservableProperty]
+    public partial double Volume { get; set; } = 1.0;
+
     [RelayCommand]
     public void PlayPause()
     {
@@ -124,6 +127,12 @@ public partial class MediaViewModel : BaseViewModel
     public void Seek(double seconds)
     {
         mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
+    }
+
+    [RelayCommand]
+    public void SeekVolume(int value)
+    {
+        mediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
     }
 
     [RelayCommand]
