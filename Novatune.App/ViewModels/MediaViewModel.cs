@@ -31,11 +31,11 @@ public partial class MediaViewModel : BaseViewModel
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
 
-            if (playing == IsPlaying)
-                return;
-
             _dispatcherQueue.TryEnqueue(() =>
             {
+                if (playing == IsPlaying)
+                    return;
+
                 IsPlaying = playing;
                 if (IsPlaying)
                     _positionTimer.Start();

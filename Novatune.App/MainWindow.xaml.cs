@@ -34,6 +34,9 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        thumb.DragStarted -= Thumb_DragStarted;
+        thumb.DragCompleted -= Thumb_DragCompleted;
+
         thumb.DragStarted += Thumb_DragStarted;
         thumb.DragCompleted += Thumb_DragCompleted;
     }
