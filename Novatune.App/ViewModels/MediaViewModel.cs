@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Media.Core;
 using Windows.Media.Playback;
@@ -55,8 +56,12 @@ public partial class MediaViewModel : BaseViewModel
         };
 
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
+        _mediaPlaybackList.CurrentItemChanged += MediaPlaybackList_CurrentItemChanged;
+        _mediaPlaybackList.ItemFailed += MediaPlaybackList_ItemFailed;
         mediaPlayer.Source = _mediaPlaybackList;
     }
+
+    #region Media buttons controls
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlayGlyph))]
@@ -113,33 +118,6 @@ public partial class MediaViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task AddMedia()
-    {
-        var picker = new FileOpenPicker
-        {
-            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-            ViewMode = PickerViewMode.List,
-            FileTypeFilter = { ".wmv", ".mp4", ".mkv", ".mp3", ".flac" },
-        };
-
-        var mainWindow = (App.Current as App)!.MainWindow;
-        var hwnd = WindowNative.GetWindowHandle(mainWindow);
-        InitializeWithWindow.Initialize(picker, hwnd);
-
-        var files = await picker.PickMultipleFilesAsync();
-
-        if (files is not null)
-        {
-            foreach (var file in files)
-            {
-                var mediaPlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromStorageFile(file));
-                _mediaPlaybackList.Items.Add(mediaPlaybackItem);
-                MediaFiles.Add(file);
-            }
-        }
-    }
-
-    [RelayCommand]
     public void Seek(double seconds)
     {
         mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
@@ -185,4 +163,110 @@ public partial class MediaViewModel : BaseViewModel
         IsRepeatEnabled = !IsRepeatEnabled;
         _mediaPlaybackList.AutoRepeatEnabled = IsRepeatEnabled;
     }
+
+    #endregion
+
+    #region Media playlist controls
+
+    [ObservableProperty]
+    public partial string? Title { get; set; } = string.Empty;
+
+    [RelayCommand]
+    public async Task AddMedia()
+    {
+        var picker = new FileOpenPicker
+        {
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+            ViewMode = PickerViewMode.List,
+            FileTypeFilter = { ".wmv", ".mp4", ".mkv", ".mp3", ".flac" },
+        };
+
+        var mainWindow = (App.Current as App)!.MainWindow;
+        var hwnd = WindowNative.GetWindowHandle(mainWindow);
+        InitializeWithWindow.Initialize(picker, hwnd);
+
+        var files = await picker.PickMultipleFilesAsync();
+
+        if (files is not null)
+        {
+            foreach (var file in files)
+            {
+                var mediaPlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromStorageFile(file));
+                _mediaPlaybackList.Items.Add(mediaPlaybackItem);
+                MediaFiles.Add(file);
+            }
+
+            if (_mediaPlaybackList.Items.Count == files.Count)
+            {
+                mediaPlayer.Play();
+            }
+        }
+    }
+
+    private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
+    {
+        var failedItem = args.Item;
+        var error = args.Error;
+
+        switch (error.ErrorCode)
+        {
+            case MediaPlaybackItemErrorCode.NetworkError:
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine($"Network error: {error.ExtendedError.Message}");
+            });
+            break;
+
+            case MediaPlaybackItemErrorCode.DecodeError:
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine("Cannot decode this media file.");
+            });
+            break;
+
+            case MediaPlaybackItemErrorCode.EncryptionError:
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine("Decryption/DRM error for this item.");
+            });
+            break;
+
+            case MediaPlaybackItemErrorCode.SourceNotSupportedError:
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine("File format is not supported.");
+            });
+            break;
+            default:
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine($"[MediaPlaybackList] ItemFailed: {error.ErrorCode}, HResult: 0x{error.ExtendedError?.HResult:X8}");
+            });
+            break;
+        }
+
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            if (sender.Items.Count > 1)
+            {
+                sender.MoveNext();
+            }
+        });
+    }
+
+    private void MediaPlaybackList_CurrentItemChanged(MediaPlaybackList sender, CurrentMediaPlaybackItemChangedEventArgs args)
+    {
+        if (args.NewItem is null)
+            return;
+
+        var index = (int) sender.CurrentItemIndex;
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            Title = index >= 0 && index < MediaFiles.Count
+                ? MediaFiles[index].DisplayName
+                : string.Empty;
+        });
+    }
+
+    #endregion
 }
