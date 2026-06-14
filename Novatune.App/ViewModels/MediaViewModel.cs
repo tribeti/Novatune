@@ -169,7 +169,7 @@ public partial class MediaViewModel : BaseViewModel
     #region Media playlist controls
 
     [ObservableProperty]
-    public partial string? Title { get; set; } = string.Empty;
+    public partial string Title { get; set; } = string.Empty;
 
     [RelayCommand]
     public async Task AddMedia()
@@ -196,7 +196,7 @@ public partial class MediaViewModel : BaseViewModel
                 MediaFiles.Add(file);
             }
 
-            if (_mediaPlaybackList.Items.Count == files.Count)
+            if (files.Count > 0 && _mediaPlaybackList.Items.Count == files.Count)
             {
                 mediaPlayer.Play();
             }
@@ -256,10 +256,7 @@ public partial class MediaViewModel : BaseViewModel
 
     private void MediaPlaybackList_CurrentItemChanged(MediaPlaybackList sender, CurrentMediaPlaybackItemChangedEventArgs args)
     {
-        if (args.NewItem is null)
-            return;
-
-        var index = (int) sender.CurrentItemIndex;
+        var index = args.NewItem is null ? -1 : (int) sender.CurrentItemIndex;
         _dispatcherQueue.TryEnqueue(() =>
         {
             Title = index >= 0 && index < MediaFiles.Count
