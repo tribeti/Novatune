@@ -199,25 +199,26 @@ public partial class MediaViewModel : BaseViewModel
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
                 StorageItemThumbnail thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
 
+                var item = new MediaItem
+                {
+                    PlaybackItem = playbackItem,
+                    DisplayName = file.DisplayName,
+                    FilePath = file.Path,
+                    Title = string.IsNullOrWhiteSpace(musicProps.Title)
+                        ? file.DisplayName
+                        : musicProps.Title,
+                    Artist = musicProps.Artist
+                };
+
                 if (thumbnail is not null)
                 {
                     var bitmap = new BitmapImage();
                     await bitmap.SetSourceAsync(thumbnail);
-                    var item = new MediaItem
-                    {
-                        PlaybackItem = playbackItem,
-                        DisplayName = file.DisplayName,
-                        FilePath = file.Path,
-                        Title = string.IsNullOrWhiteSpace(musicProps.Title)
-                            ? file.DisplayName
-                            : musicProps.Title,
-                        Artist = musicProps.Artist,
-                        Img = bitmap
-                    };
-                    Playlist.Add(item);
-                    _mediaPlaybackList.Items.Add(playbackItem);
+                    item.Img = bitmap;
                 }
 
+                Playlist.Add(item);
+                _mediaPlaybackList.Items.Add(playbackItem);
             }
 
             if (files.Count > 0 && _mediaPlaybackList.Items.Count == files.Count)
@@ -228,7 +229,19 @@ public partial class MediaViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public void JumpTo(int index) => _mediaPlaybackList.MoveTo((uint) index);
+    public void JumpTo(int index)
+    {
+        if (index < 0 || index >= Playlist.Count)
+            return;
+
+        var selectedItem = Playlist[index];
+        var playbackItemIndex = _mediaPlaybackList.Items.IndexOf(selectedItem.PlaybackItem);
+
+        if (playbackItemIndex >= 0)
+        {
+            _mediaPlaybackList.MoveTo((uint)playbackItemIndex);
+        }
+    }
 
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
     {
