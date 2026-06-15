@@ -212,16 +212,19 @@ public partial class MediaViewModel : BaseViewModel
 
                 if (thumbnail is not null)
                 {
-                    var bitmap = new BitmapImage();
-                    await bitmap.SetSourceAsync(thumbnail);
-                    item.Img = bitmap;
+                    using (thumbnail)
+                    {
+                        var bitmap = new BitmapImage();
+                        await bitmap.SetSourceAsync(thumbnail);
+                        item.Img = bitmap;
+                    }
                 }
 
                 Playlist.Add(item);
                 _mediaPlaybackList.Items.Add(playbackItem);
             }
 
-            if (files.Count > 0 && _mediaPlaybackList.Items.Count == files.Count)
+            if (files.Count > 0)
             {
                 mediaPlayer.Play();
             }
