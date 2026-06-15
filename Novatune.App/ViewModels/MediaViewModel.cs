@@ -2,13 +2,16 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Novatune.App.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Media.Core;
 using Windows.Media.Playback;
-using Windows.Storage;
+using Windows.Storage.FileProperties;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
@@ -16,10 +19,9 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
-    private readonly MediaPlaybackList _mediaPlaybackList = new();
     public MediaPlayer mediaPlayer = new();
-    public ObservableCollection<StorageFile> MediaFiles { get; } = [];
-
+    private readonly MediaPlaybackList _mediaPlaybackList = new();
+    public ObservableCollection<MediaItem> Playlist { get; } = [];
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
     {
@@ -191,9 +193,31 @@ public partial class MediaViewModel : BaseViewModel
         {
             foreach (var file in files)
             {
-                var mediaPlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromStorageFile(file));
-                _mediaPlaybackList.Items.Add(mediaPlaybackItem);
-                MediaFiles.Add(file);
+                var source = MediaSource.CreateFromStorageFile(file);
+                var playbackItem = new MediaPlaybackItem(source);
+
+                var musicProps = await file.Properties.GetMusicPropertiesAsync();
+                StorageItemThumbnail thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+
+                if (thumbnail is not null)
+                {
+                    var bitmap = new BitmapImage();
+                    await bitmap.SetSourceAsync(thumbnail);
+                    var item = new MediaItem
+                    {
+                        PlaybackItem = playbackItem,
+                        DisplayName = file.DisplayName,
+                        FilePath = file.Path,
+                        Title = string.IsNullOrWhiteSpace(musicProps.Title)
+                            ? file.DisplayName
+                            : musicProps.Title,
+                        Artist = musicProps.Artist,
+                        Img = bitmap
+                    };
+                    Playlist.Add(item);
+                    _mediaPlaybackList.Items.Add(playbackItem);
+                }
+
             }
 
             if (files.Count > 0 && _mediaPlaybackList.Items.Count == files.Count)
@@ -202,6 +226,9 @@ public partial class MediaViewModel : BaseViewModel
             }
         }
     }
+
+    [RelayCommand]
+    public void JumpTo(int index) => _mediaPlaybackList.MoveTo((uint) index);
 
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
     {
@@ -256,12 +283,15 @@ public partial class MediaViewModel : BaseViewModel
 
     private void MediaPlaybackList_CurrentItemChanged(MediaPlaybackList sender, CurrentMediaPlaybackItemChangedEventArgs args)
     {
-        var index = args.NewItem is null ? -1 : (int) sender.CurrentItemIndex;
         _dispatcherQueue.TryEnqueue(() =>
         {
-            Title = index >= 0 && index < MediaFiles.Count
-                ? MediaFiles[index].DisplayName
-                : string.Empty;
+            foreach (var item in Playlist)
+            {
+                item.IsCurrent = item.PlaybackItem == args.NewItem;
+            }
+
+            var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
+            Title = current?.Title ?? string.Empty;
         });
     }
 

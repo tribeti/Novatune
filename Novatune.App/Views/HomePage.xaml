@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:storage="using:Windows.Storage"
+    xmlns:models="using:Novatune.App.Models"
     mc:Ignorable="d">
 
     <Grid>
@@ -42,27 +42,28 @@
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}" />
             <MenuFlyoutSeparator x:Name="sep" RelativePanel.Below="MediaTitle" />
             <ListView
+                x:Name="Queue"
                 AllowDrop="True"
                 Background="Transparent"
                 CanDragItems="True"
                 CanReorderItems="True"
-                ItemsSource="{x:Bind ViewModel.MediaFiles, Mode=OneWay}"
+                ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
                 RelativePanel.Below="sep"
+                SelectionChanged="ListView_SelectionChanged"
                 SelectionMode="Single">
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="storage:StorageFile">
+                    <DataTemplate x:DataType="models:MediaItem">
                         <StackPanel Margin="0,8" Orientation="Vertical">
                             <TextBlock
                                 FontSize="16"
                                 FontWeight="SemiBold"
-                                Text="{x:Bind Name}"
+                                Text="{x:Bind Title}"
                                 TextTrimming="CharacterEllipsis" />
-
                             <TextBlock
                                 Margin="0,4,0,0"
                                 FontSize="12"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind Path}"
+                                Text="{x:Bind Artist}"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </DataTemplate>
