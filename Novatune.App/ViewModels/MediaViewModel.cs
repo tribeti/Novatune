@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -110,6 +110,14 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsUserInteracting { get; set; } = false;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(QueueVisibility))]
+    public partial bool IsQueueVisible { get; set; } = true;
+    public Visibility QueueVisibility => IsQueueVisible ? Visibility.Visible : Visibility.Collapsed;
+
+    [RelayCommand]
+    public void ToggleQueue() => IsQueueVisible = !IsQueueVisible;
+
     [RelayCommand]
     public void PlayPause()
     {
@@ -172,6 +180,9 @@ public partial class MediaViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial BitmapImage? CurrentImage { get; set; }
 
     [RelayCommand]
     public async Task AddMedia()
@@ -242,7 +253,7 @@ public partial class MediaViewModel : BaseViewModel
 
         if (playbackItemIndex >= 0)
         {
-            _mediaPlaybackList.MoveTo((uint)playbackItemIndex);
+            _mediaPlaybackList.MoveTo((uint) playbackItemIndex);
         }
     }
 
@@ -308,6 +319,7 @@ public partial class MediaViewModel : BaseViewModel
 
             var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
             Title = current?.Title ?? string.Empty;
+            CurrentImage = current?.Img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
         });
     }
 

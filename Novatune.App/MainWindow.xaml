@@ -171,21 +171,12 @@
 
                     <AppBarButton
                         x:Name="Queue_Btn"
+                        Command="{x:Bind ViewModel.ToggleQueueCommand}"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Volume_Slider"
                         RelativePanel.LeftOf="MiniPlayer_Btn"
                         ToolTipService.ToolTip="Queue">
                         <FontIcon Glyph="&#xEA37;" />
-                    </AppBarButton>
-
-                    <AppBarButton
-                        LabelPosition="Collapsed"
-                        RelativePanel.Below="Volume_Slider"
-                        RelativePanel.LeftOf="Queue_Btn"
-                        ToolTipService.ToolTip="Resize Video">
-                        <AppBarButton.Icon>
-                            <FontIcon Glyph="&#xE799;" />
-                        </AppBarButton.Icon>
                     </AppBarButton>
                 </RelativePanel>
             </Grid>
