@@ -17,7 +17,7 @@ public sealed partial class HomePage : Page
 
     private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (Queue.SelectedIndex >= 0)
+        if (Queue.SelectedIndex >= 0 && Queue.SelectedIndex != ViewModel.PlaylistIndex)
         {
             ViewModel.JumpTo(Queue.SelectedIndex);
             ViewModel.mediaPlayer.Play();

@@ -187,6 +187,8 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial int PlaylistIndex { get; set; } = 0;
 
+    private readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+
     [RelayCommand]
     public async Task AddMedia()
     {
@@ -203,45 +205,42 @@ public partial class MediaViewModel : BaseViewModel
 
         var files = await picker.PickMultipleFilesAsync();
 
-        if (files is not null)
+        if (files is not null && files.Count > 0)
         {
-            foreach (var file in files)
+            var tasks = files.Select(async file =>
             {
                 var source = MediaSource.CreateFromStorageFile(file);
                 var playbackItem = new MediaPlaybackItem(source);
-
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
-                StorageItemThumbnail thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+                using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
 
                 var item = new MediaItem
                 {
                     PlaybackItem = playbackItem,
                     DisplayName = file.DisplayName,
                     FilePath = file.Path,
-                    Title = string.IsNullOrWhiteSpace(musicProps.Title)
-                        ? file.DisplayName
-                        : musicProps.Title,
+                    Title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title,
                     Artist = musicProps.Artist
                 };
 
                 if (thumbnail is not null)
                 {
-                    using (thumbnail)
-                    {
-                        var bitmap = new BitmapImage();
-                        await bitmap.SetSourceAsync(thumbnail);
-                        item.Img = bitmap;
-                    }
+                    var bitmap = new BitmapImage();
+                    await bitmap.SetSourceAsync(thumbnail);
+                    item.Img = bitmap;
                 }
+                return item;
+            });
 
-                Playlist.Add(item);
-                _mediaPlaybackList.Items.Add(playbackItem);
-            }
+            var items = await Task.WhenAll(tasks);
 
-            if (files.Count > 0)
+            foreach (var item in items)
             {
-                mediaPlayer.Play();
+                Playlist.Add(item);
+                _mediaPlaybackList.Items.Add(item.PlaybackItem);
             }
+
+            mediaPlayer.Play();
         }
     }
 
@@ -311,18 +310,19 @@ public partial class MediaViewModel : BaseViewModel
         });
     }
 
+    private MediaItem? _currentMediaItem;
     private void MediaPlaybackList_CurrentItemChanged(MediaPlaybackList sender, CurrentMediaPlaybackItemChangedEventArgs args)
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
-            foreach (var item in Playlist)
-            {
-                item.IsCurrent = item.PlaybackItem == args.NewItem;
-            }
-
+            _currentMediaItem?.IsCurrent = false;
             var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
+            current?.IsCurrent = true;
+
+            _currentMediaItem = current;
+
             Title = current?.Title ?? string.Empty;
-            CurrentImage = current?.Img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+            CurrentImage = current?.Img ?? _defaultImage;
             var newIndex = current is not null ? Playlist.IndexOf(current) : -1;
             if (newIndex >= 0 && newIndex != PlaylistIndex)
                 PlaylistIndex = newIndex;

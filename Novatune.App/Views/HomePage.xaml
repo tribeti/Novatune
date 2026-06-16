@@ -52,7 +52,7 @@
                 Background="Transparent"
                 ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
                 RelativePanel.Below="sep"
-                SelectedIndex="{x:Bind ViewModel.PlaylistIndex, Mode=TwoWay}"
+                SelectedIndex="{x:Bind ViewModel.PlaylistIndex, Mode=OneWay}"
                 SelectionChanged="ListView_SelectionChanged"
                 SelectionMode="Single">
                 <ListView.ItemTemplate>
