@@ -184,6 +184,9 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial BitmapImage? CurrentImage { get; set; }
 
+    [ObservableProperty]
+    public partial int PlaylistIndex { get; set; } = 0;
+
     [RelayCommand]
     public async Task AddMedia()
     {
@@ -320,6 +323,9 @@ public partial class MediaViewModel : BaseViewModel
             var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
             Title = current?.Title ?? string.Empty;
             CurrentImage = current?.Img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+            var newIndex = current is not null ? Playlist.IndexOf(current) : -1;
+            if (newIndex >= 0 && newIndex != PlaylistIndex)
+                PlaylistIndex = newIndex;
         });
     }
 
