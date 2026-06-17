@@ -6,79 +6,73 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:storage="using:Windows.Storage"
+    xmlns:models="using:Novatune.App.Models"
+    NavigationCacheMode="Required"
     mc:Ignorable="d">
 
     <Grid>
-        <Grid Grid.Row="1" Margin="0,0,12,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
 
-            <MediaPlayerElement
-                x:Name="mediaPlayerElement"
-                Grid.Column="0"
-                Margin="0,0,12,0"
-                AreTransportControlsEnabled="False"
-                Stretch="Uniform" />
+        <MediaPlayerElement
+            x:Name="mediaPlayerElement"
+            Grid.Column="0"
+            AreTransportControlsEnabled="False"
+            Stretch="Uniform" />
 
-            <RelativePanel Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                <AppBarButton
-                    x:Name="AddMedia"
-                    Command="{x:Bind ViewModel.AddMediaCommand}"
-                    Icon="Add"
-                    IsCompact="True"
-                    RelativePanel.AlignHorizontalCenterWithPanel="True" />
-                <Image
-                    x:Name="MediaLogo"
-                    MaxHeight="100"
-                    RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    RelativePanel.Below="AddMedia"
-                    Source="/Assets/LockScreenLogo.png" />
-                <TextBlock
-                    x:Name="MediaTitle"
-                    FontSize="18"
-                    RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    RelativePanel.Below="MediaLogo">
-                    hi1
-                </TextBlock>
-                <TextBlock
-                    x:Name="MediaCreator"
-                    FontSize="16"
-                    RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    RelativePanel.Below="MediaTitle">
-                    hio2
-                </TextBlock>
-                <MenuFlyoutSeparator x:Name="sep" RelativePanel.Below="MediaCreator" />
-                <ListView
-                    AllowDrop="True"
-                    Background="Transparent"
-                    CanDragItems="True"
-                    CanReorderItems="True"
-                    ItemsSource="{x:Bind ViewModel.MediaFiles, Mode=OneWay}"
-                    RelativePanel.Below="sep"
-                    SelectionMode="Single">
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="storage:StorageFile">
-                            <StackPanel Margin="0,8" Orientation="Vertical">
-                                <TextBlock
-                                    FontSize="16"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind Name}"
-                                    TextTrimming="CharacterEllipsis" />
-
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Path}"
-                                    TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </RelativePanel>
-        </Grid>
+        <RelativePanel
+            Grid.Column="1"
+            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+            Visibility="{x:Bind ViewModel.QueueVisibility, Mode=OneWay}">
+            <AppBarButton
+                x:Name="AddMedia"
+                Command="{x:Bind ViewModel.AddMediaCommand}"
+                Icon="Add"
+                IsCompact="True"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignTopWithPanel="True" />
+            <Image
+                x:Name="MediaLogo"
+                MaxHeight="100"
+                RelativePanel.AlignHorizontalCenterWithPanel="True"
+                RelativePanel.Below="AddMedia"
+                Source="{x:Bind ViewModel.CurrentImage, Mode=OneWay}" />
+            <TextBlock
+                x:Name="MediaTitle"
+                FontSize="18"
+                RelativePanel.AlignHorizontalCenterWithPanel="True"
+                RelativePanel.Below="MediaLogo"
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}" />
+            <MenuFlyoutSeparator x:Name="sep" RelativePanel.Below="MediaTitle" />
+            <ListView
+                x:Name="Queue"
+                AllowDrop="True"
+                Background="Transparent"
+                ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
+                RelativePanel.Below="sep"
+                SelectedIndex="{x:Bind ViewModel.PlaylistIndex, Mode=OneWay}"
+                SelectionChanged="ListView_SelectionChanged"
+                SelectionMode="Single">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:MediaItem">
+                        <StackPanel Margin="0,8" Orientation="Vertical">
+                            <TextBlock
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Text="{x:Bind Title}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Artist}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </RelativePanel>
     </Grid>
 </Page>

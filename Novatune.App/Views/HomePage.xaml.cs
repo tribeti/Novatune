@@ -14,4 +14,13 @@ public sealed partial class HomePage : Page
         DataContext = ViewModel;
         mediaPlayerElement.SetMediaPlayer(ViewModel.mediaPlayer);
     }
+
+    private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (Queue.SelectedIndex >= 0 && Queue.SelectedIndex != ViewModel.PlaylistIndex)
+        {
+            ViewModel.JumpTo(Queue.SelectedIndex);
+            ViewModel.mediaPlayer.Play();
+        }
+    }
 }
