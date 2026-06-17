@@ -19,7 +19,6 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DragMoveAndResizeHelper.SetDragMove(this, Root);
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
         this.Media_Timeline.Loaded += Media_Timeline_Loaded;
     }

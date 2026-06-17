@@ -49,14 +49,6 @@
                         <SymbolIcon Symbol="Library" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem
-                    x:Name="OnlinePage"
-                    Content="Online"
-                    Tag="Novatune.App.Views.OnlinePage">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="Globe" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
             </NavigationView.MenuItems>
             <Frame
                 x:Name="ContentFrame"
