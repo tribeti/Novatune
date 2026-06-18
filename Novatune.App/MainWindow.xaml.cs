@@ -1,5 +1,6 @@
 using DevWinUI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -19,6 +20,9 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        this.ExtendsContentIntoTitleBar = true;
+        AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+        this.SetTitleBar(titleBar);
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
         this.Media_Timeline.Loaded += Media_Timeline_Loaded;
     }
