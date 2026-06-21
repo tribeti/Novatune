@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Novatune.App.Models"
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>
@@ -25,9 +26,30 @@
             Grid.Row="0">
             <TitleBar.Content>
                 <AutoSuggestBox
+                    x:Name="SearchBox"
+                    MinWidth="500"
                     VerticalAlignment="Center"
-                    PlaceholderText="Search for audios and videos"
-                    QueryIcon="Find" />
+                    PlaceholderText="Search for radio stations"
+                    QueryIcon="Find"
+                    QuerySubmitted="SearchBox_QuerySubmitted"
+                    TextChanged="SearchBox_TextChanged">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:RadioItem">
+                            <StackPanel
+                                Margin="0,4"
+                                Orientation="Horizontal"
+                                Spacing="12">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock
+                                        MaxWidth="300"
+                                        FontWeight="SemiBold"
+                                        Text="{x:Bind Name, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
             </TitleBar.Content>
         </TitleBar>
 

@@ -189,8 +189,10 @@ public partial class MediaViewModel : BaseViewModel
 
     private readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
+    public void AddMedia(MediaPlaybackItem playbackItem) => _mediaPlaybackList.Items.Add(playbackItem);
+
     [RelayCommand]
-    public async Task AddMedia()
+    public async Task AddLocalMedia()
     {
         var picker = new FileOpenPicker
         {

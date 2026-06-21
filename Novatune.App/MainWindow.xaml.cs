@@ -6,10 +6,16 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using Novatune.App.Models;
 using Novatune.App.ViewModels;
 using Novatune.App.Views;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.Media.Core;
+using Windows.Media.Playback;
 
 namespace Novatune.App;
 
@@ -97,4 +103,46 @@ public sealed partial class MainWindow : Window
     private void Thumb_DragStarted(object sender, DragStartedEventArgs e) => ViewModel.IsUserInteracting = true;
     private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
     private void Media_Timeline_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
+
+    private CancellationTokenSource? _searchCts;
+    private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+            return;
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(350, token);
+            var stations = await RadioViewModel.SearchStationsAsync(sender.Text, token);
+
+            sender.ItemsSource = stations.Count > 0
+                ? stations
+                : (object) new List<string> { "No results found" };
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is RadioItem station)
+        {
+            var mediaSource = MediaSource.CreateFromUri(new Uri(station.UrlResolved));
+            var playbackItem = new MediaPlaybackItem(mediaSource);
+
+            var item = new MediaItem
+            {
+                PlaybackItem = playbackItem,
+                DisplayName = station.Name,
+                Title = station.Name,
+            };
+
+            ViewModel.Playlist.Add(item);
+            ViewModel.AddMedia(playbackItem);
+            ViewModel.mediaPlayer.Play();
+        }
+    }
 }

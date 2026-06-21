@@ -28,7 +28,7 @@
             Visibility="{x:Bind ViewModel.QueueVisibility, Mode=OneWay}">
             <AppBarButton
                 x:Name="AddMedia"
-                Command="{x:Bind ViewModel.AddMediaCommand}"
+                Command="{x:Bind ViewModel.AddLocalMediaCommand}"
                 Icon="Add"
                 IsCompact="True"
                 RelativePanel.AlignRightWithPanel="True"
