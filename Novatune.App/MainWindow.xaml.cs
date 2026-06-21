@@ -121,16 +121,20 @@ public sealed partial class MainWindow : Window
 
             sender.ItemsSource = stations.Count > 0
                 ? stations
-                : (object) new List<string> { "No results found" };
+                : new List<RadioItem> { new RadioItem { Name = "No results found" } };
         }
         catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            sender.ItemsSource = Array.Empty<RadioItem>();
+        }
     }
 
     private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (args.ChosenSuggestion is RadioItem station)
+        if (args.ChosenSuggestion is RadioItem station && Uri.TryCreate(station.UrlResolved,UriKind.Absolute,out var uri))
         {
-            var mediaSource = MediaSource.CreateFromUri(new Uri(station.UrlResolved));
+            var mediaSource = MediaSource.CreateFromUri(uri);
             var playbackItem = new MediaPlaybackItem(mediaSource);
 
             var item = new MediaItem

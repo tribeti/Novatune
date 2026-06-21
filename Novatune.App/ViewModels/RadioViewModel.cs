@@ -9,9 +9,6 @@ using System.Net.Http.Json;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Media.Core;
-using Windows.Media.Playback;
-using Windows.Media.Streaming.Adaptive;
 
 namespace Novatune.App.ViewModels;
 
@@ -74,11 +71,11 @@ public class RadioViewModel
 
                 Debug.WriteLine($"Trying: {server}");
                 var stations = await _http.GetFromJsonAsync<List<RadioItem>>(
-                    $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true&limit=15?hls=0",
+                    $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true&limit=15&hls=0",
                     cancellationToken
                 );
 
-                if (stations is not null)
+                if (stations is not null && stations.Count > 0)
                 {
                     Debug.WriteLine($"OK: {server}, found {stations.Count} stations");
                     return stations;
