@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,52 +17,60 @@ public class RadioViewModel
     private static List<string> _cachedServers = [];
     private static DateTime _cacheExpiry = DateTime.MinValue;
 
-    private async static Task<List<string>> GetRadioBrowserServers(CancellationToken ct = default)
+    private static async Task<List<string>> GetRadioBrowserServers(CancellationToken ct = default)
     {
-        if (_cachedServers is not null && DateTime.Now < _cacheExpiry)
-        {
+        if (_cachedServers.Count > 0 && DateTime.Now < _cacheExpiry)
             return _cachedServers;
-        }
 
         IPAddress[] ips;
         try
         {
             ips = await Dns.GetHostAddressesAsync("all.api.radio-browser.info", ct);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.WriteLine($"DNS failed: {ex.Message}");
             return [];
         }
 
-        var servers = new List<(string HostName, long RoundTripTime)>();
-        using var ping = new Ping();
-
-        foreach (var ip in ips)
+        var tasks = ips.Select(async ip =>
         {
-            if (ct.IsCancellationRequested)
-                break;
+            string? hostName = null;
             try
             {
-                var reply = await ping.SendPingAsync(ip, 2000);
-                long rtt = (reply?.Status == IPStatus.Success) ? reply.RoundtripTime : long.MaxValue;
                 var hostEntry = await Dns.GetHostEntryAsync(ip.ToString(), ct);
-                string hostName = !string.IsNullOrEmpty(hostEntry.HostName) ? hostEntry.HostName : ip.ToString();
-
-                servers.Add((hostName, rtt));
+                if (!string.IsNullOrEmpty(hostEntry.HostName))
+                    hostName = hostEntry.HostName;
             }
             catch { }
-        }
 
+            if (hostName is null)
+            {
+                Debug.WriteLine($"Skipping {ip}: reverse DNS failed");
+                return (hostName: (string?) null, rtt: long.MaxValue);
+            }
+
+            Debug.WriteLine($"Server: {hostName}");
+            return (hostName, rtt: 0L);
+        }).ToList();
+
+        var results = await Task.WhenAll(tasks);
         var rng = new Random();
-        var result = servers
-            .OrderBy(s => s.RoundTripTime)
-            .ThenBy(_ => rng.Next())
-            .Select(s => s.HostName)
+
+        var result = results
+            .Where(s => s.hostName is not null)
+            .OrderBy(_ => rng.Next())
+            .Select(s => s.hostName!)
+            .Distinct()
             .ToList();
 
-        _cachedServers = result;
-        _cacheExpiry = DateTime.Now.AddHours(1);
+        if (result.Count > 0)
+        {
+            _cachedServers = result;
+            _cacheExpiry = DateTime.Now.AddMinutes(15);
+        }
 
+        Debug.WriteLine($"Total servers found: {result.Count}");
         return result;
     }
 

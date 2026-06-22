@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
 using Novatune.App.ViewModels;
@@ -121,7 +122,7 @@ public sealed partial class MainWindow : Window
 
             sender.ItemsSource = stations.Count > 0
                 ? stations
-                : new List<RadioItem> { new RadioItem { Name = "No results found" } };
+                : new List<RadioItem> { new() { Name = "No results found" } };
         }
         catch (OperationCanceledException) { }
         catch (Exception)
@@ -130,23 +131,39 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (args.ChosenSuggestion is RadioItem station && Uri.TryCreate(station.UrlResolved,UriKind.Absolute,out var uri))
+        if (args.ChosenSuggestion is not RadioItem station || string.IsNullOrWhiteSpace(station.UrlResolved))
+            return;
+
+        string UpgradeToHttps(string url) =>
+            url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
+
+        if (!Uri.TryCreate(UpgradeToHttps(station.UrlResolved), UriKind.Absolute, out var streamUri))
+            return;
+
+        var playbackItem = new MediaPlaybackItem(MediaSource.CreateFromUri(streamUri));
+        var img = ViewModel._defaultImage;
+
+        if (!string.IsNullOrWhiteSpace(station.Favicon))
         {
-            var mediaSource = MediaSource.CreateFromUri(uri);
-            var playbackItem = new MediaPlaybackItem(mediaSource);
-
-            var item = new MediaItem
+            if (Uri.TryCreate(UpgradeToHttps(station.Favicon), UriKind.Absolute, out var faviconUri))
             {
-                PlaybackItem = playbackItem,
-                DisplayName = station.Name,
-                Title = station.Name,
-            };
-
-            ViewModel.Playlist.Add(item);
-            ViewModel.AddMedia(playbackItem);
-            ViewModel.mediaPlayer.Play();
+                try
+                { img = new BitmapImage(faviconUri); }
+                catch { }
+            }
         }
+
+        ViewModel.Playlist.Add(new MediaItem
+        {
+            PlaybackItem = playbackItem,
+            DisplayName = station.Name,
+            Title = station.Name,
+            Img = img
+        });
+
+        ViewModel.AddMedia(playbackItem);
+        ViewModel.mediaPlayer.Play();
     }
 }

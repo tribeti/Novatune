@@ -187,7 +187,7 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial int PlaylistIndex { get; set; } = 0;
 
-    private readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+    public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
     public void AddMedia(MediaPlaybackItem playbackItem) => _mediaPlaybackList.Items.Add(playbackItem);
 
