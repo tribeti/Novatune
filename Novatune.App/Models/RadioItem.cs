@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+using Windows.Media.Playback;
 
 namespace Novatune.App.Models;
 
@@ -11,6 +12,8 @@ public partial class RadioItem
     public string UrlResolved { get; init; } = string.Empty;
     public string Favicon { get; init; } = string.Empty;
     public string Tags { get; init; } = string.Empty;
+
+    public MediaPlaybackItem? PlaybackItem { get; set; }
 
     public override string ToString() => Name;
 }

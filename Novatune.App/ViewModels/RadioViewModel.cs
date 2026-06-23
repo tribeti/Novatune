@@ -11,15 +11,24 @@ using System.Threading.Tasks;
 
 namespace Novatune.App.ViewModels;
 
-public class RadioViewModel
+public partial class RadioViewModel : BaseViewModel
 {
-    private static readonly HttpClient _http = new();
+    private static readonly HttpClient _http = new()
+    {
+        Timeout = TimeSpan.FromSeconds(15)
+    };
+    private static readonly Lock _cacheLock = new();
     private static List<string> _cachedServers = [];
     private static DateTime _cacheExpiry = DateTime.MinValue;
 
+    static RadioViewModel()
+    {
+        _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Novatune/1.0");
+    }
+
     private static async Task<List<string>> GetRadioBrowserServers(CancellationToken ct = default)
     {
-        if (_cachedServers.Count > 0 && DateTime.Now < _cacheExpiry)
+        if (_cachedServers.Count > 0 && DateTime.UtcNow < _cacheExpiry)
             return _cachedServers;
 
         IPAddress[] ips;
@@ -33,41 +42,37 @@ public class RadioViewModel
             return [];
         }
 
-        var tasks = ips.Select(async ip =>
+        var hostNames = await Task.WhenAll(ips.Select(async ip =>
         {
-            string? hostName = null;
             try
             {
                 var hostEntry = await Dns.GetHostEntryAsync(ip.ToString(), ct);
                 if (!string.IsNullOrEmpty(hostEntry.HostName))
-                    hostName = hostEntry.HostName;
+                    return hostEntry.HostName;
             }
+            catch (OperationCanceledException) { throw; }
             catch { }
 
-            if (hostName is null)
-            {
-                Debug.WriteLine($"Skipping {ip}: reverse DNS failed");
-                return (hostName: (string?) null, rtt: long.MaxValue);
-            }
+            return (string?) null;
+        }));
 
-            Debug.WriteLine($"Server: {hostName}");
-            return (hostName, rtt: 0L);
-        }).ToList();
-
-        var results = await Task.WhenAll(tasks);
-        var rng = new Random();
-
-        var result = results
-            .Where(s => s.hostName is not null)
-            .OrderBy(_ => rng.Next())
-            .Select(s => s.hostName!)
-            .Distinct()
-            .ToList();
+        var result = hostNames
+           .Where(name => name is not null)
+           .Select(name => name!)
+           .Distinct()
+           .OrderBy(_ => Random.Shared.Next())
+           .ToList();
 
         if (result.Count > 0)
         {
-            _cachedServers = result;
-            _cacheExpiry = DateTime.Now.AddMinutes(15);
+            lock (_cacheLock)
+            {
+                if (_cachedServers.Count == 0 || DateTime.UtcNow >= _cacheExpiry)
+                {
+                    _cachedServers = result;
+                    _cacheExpiry = DateTime.UtcNow.AddMinutes(15);
+                }
+            }
         }
 
         Debug.WriteLine($"Total servers found: {result.Count}");
@@ -76,7 +81,9 @@ public class RadioViewModel
 
     public static async Task<List<RadioItem>> SearchStationsAsync(string keyword, CancellationToken cancellationToken = default)
     {
-        _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Novatune/1.0");
+        if (string.IsNullOrWhiteSpace(keyword))
+            return [];
+
         var servers = await GetRadioBrowserServers(cancellationToken);
 
         if (servers.Count == 0)
@@ -87,14 +94,18 @@ public class RadioViewModel
 
         foreach (var server in servers)
         {
+            if (cancellationToken.IsCancellationRequested)
+                break;
+
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-                Debug.WriteLine($"Trying: {server}");
                 var stations = await _http.GetFromJsonAsync<List<RadioItem>>(
                     $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true&limit=15&hls=0",
-                    cancellationToken
+                    cts.Token
                 );
 
                 if (stations is not null && stations.Count > 0)
@@ -105,8 +116,10 @@ public class RadioViewModel
             }
             catch (OperationCanceledException)
             {
-                Debug.WriteLine("Search cancelled");
-                throw;
+                if (cancellationToken.IsCancellationRequested)
+                    throw;
+
+                Debug.WriteLine($"Timeout: {server}");
             }
             catch (Exception ex)
             {

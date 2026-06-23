@@ -22,11 +22,13 @@ public partial class MediaViewModel : BaseViewModel
     public MediaPlayer mediaPlayer = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
+    public ObservableCollection<RadioItem> RadioPlaylist { get; } = [];
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
     {
         Interval = TimeSpan.FromMilliseconds(500)
     };
+    private bool _isPlayingRadio = false;
 
     public MediaViewModel()
     {
@@ -185,11 +187,12 @@ public partial class MediaViewModel : BaseViewModel
     public partial BitmapImage? CurrentImage { get; set; }
 
     [ObservableProperty]
-    public partial int PlaylistIndex { get; set; } = 0;
+    public partial int LocalPlaylistIndex { get; set; } = -1;
+
+    [ObservableProperty]
+    public partial int RadioPlaylistIndex { get; set; } = -1;
 
     public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
-
-    public void AddMedia(MediaPlaybackItem playbackItem) => _mediaPlaybackList.Items.Add(playbackItem);
 
     [RelayCommand]
     public async Task AddLocalMedia()
@@ -246,11 +249,16 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
-    public void JumpTo(int index)
+    public void PlayLocal(int index)
     {
         if (index < 0 || index >= Playlist.Count)
             return;
+
+        _isPlayingRadio = false;
+        RadioPlaylistIndex = -1;
+
+        if (!ReferenceEquals(mediaPlayer.Source, _mediaPlaybackList))
+            mediaPlayer.Source = _mediaPlaybackList;
 
         var selectedItem = Playlist[index];
         var playbackItemIndex = _mediaPlaybackList.Items.IndexOf(selectedItem.PlaybackItem);
@@ -258,7 +266,51 @@ public partial class MediaViewModel : BaseViewModel
         if (playbackItemIndex >= 0)
         {
             _mediaPlaybackList.MoveTo((uint) playbackItemIndex);
+            mediaPlayer.Play();
         }
+    }
+
+    public void PlayRadio(int index)
+    {
+        if (index < 0 || index >= RadioPlaylist.Count)
+            return;
+
+        var station = RadioPlaylist[index];
+        if (station.PlaybackItem is null)
+            return;
+
+        _isPlayingRadio = true;
+        LocalPlaylistIndex = -1;
+
+        _currentMediaItem?.IsCurrent = false;
+        _currentMediaItem = null;
+
+        RadioPlaylistIndex = index;
+        Title = station.Name;
+
+        BitmapImage img = _defaultImage;
+        if (!string.IsNullOrWhiteSpace(station.Favicon))
+        {
+            static string UpgradeToHttps(string url) =>
+                url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
+
+            if (Uri.TryCreate(UpgradeToHttps(station.Favicon), UriKind.Absolute, out var faviconUri))
+            {
+                try
+                { img = new BitmapImage(faviconUri); }
+                catch { }
+            }
+        }
+        CurrentImage = img;
+
+        mediaPlayer.Source = station.PlaybackItem;
+        mediaPlayer.Play();
+    }
+
+    public void AddRadioStation(RadioItem station)
+    {
+        RadioPlaylist.Add(station);
+        PlayRadio(RadioPlaylist.Count - 1);
     }
 
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
@@ -317,6 +369,9 @@ public partial class MediaViewModel : BaseViewModel
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (_isPlayingRadio)
+                return;
+
             _currentMediaItem?.IsCurrent = false;
             var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
             current?.IsCurrent = true;
@@ -326,8 +381,8 @@ public partial class MediaViewModel : BaseViewModel
             Title = current?.Title ?? string.Empty;
             CurrentImage = current?.Img ?? _defaultImage;
             var newIndex = current is not null ? Playlist.IndexOf(current) : -1;
-            if (newIndex >= 0 && newIndex != PlaylistIndex)
-                PlaylistIndex = newIndex;
+            if (newIndex >= 0 && newIndex != LocalPlaylistIndex)
+                LocalPlaylistIndex = newIndex;
         });
     }
 

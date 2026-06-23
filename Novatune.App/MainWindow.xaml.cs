@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
 using Novatune.App.ViewModels;
@@ -136,34 +135,13 @@ public sealed partial class MainWindow : Window
         if (args.ChosenSuggestion is not RadioItem station || string.IsNullOrWhiteSpace(station.UrlResolved))
             return;
 
-        string UpgradeToHttps(string url) =>
+        static string UpgradeToHttps(string url) =>
             url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
 
         if (!Uri.TryCreate(UpgradeToHttps(station.UrlResolved), UriKind.Absolute, out var streamUri))
             return;
 
-        var playbackItem = new MediaPlaybackItem(MediaSource.CreateFromUri(streamUri));
-        var img = ViewModel._defaultImage;
-
-        if (!string.IsNullOrWhiteSpace(station.Favicon))
-        {
-            if (Uri.TryCreate(UpgradeToHttps(station.Favicon), UriKind.Absolute, out var faviconUri))
-            {
-                try
-                { img = new BitmapImage(faviconUri); }
-                catch { }
-            }
-        }
-
-        ViewModel.Playlist.Add(new MediaItem
-        {
-            PlaybackItem = playbackItem,
-            DisplayName = station.Name,
-            Title = station.Name,
-            Img = img
-        });
-
-        ViewModel.AddMedia(playbackItem);
-        ViewModel.mediaPlayer.Play();
+        station.PlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromUri(streamUri));
+        ViewModel.AddRadioStation(station);
     }
 }
