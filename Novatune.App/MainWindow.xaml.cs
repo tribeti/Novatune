@@ -112,6 +112,15 @@ public sealed partial class MainWindow : Window
             return;
 
         _searchCts?.Cancel();
+        _searchCts?.Dispose();
+
+        if (string.IsNullOrWhiteSpace(sender.Text))
+        {
+            _searchCts = null;
+            sender.ItemsSource = Array.Empty<RadioItem>();
+            return;
+        }
+
         _searchCts = new CancellationTokenSource();
         var token = _searchCts.Token;
 
@@ -128,6 +137,14 @@ public sealed partial class MainWindow : Window
         catch (Exception)
         {
             sender.ItemsSource = Array.Empty<RadioItem>();
+        }
+        finally
+        {
+            if (_searchCts?.Token == token)
+            {
+                _searchCts.Dispose();
+                _searchCts = null;
+            }
         }
     }
 

@@ -65,6 +65,13 @@ public partial class MediaViewModel : BaseViewModel
         _mediaPlaybackList.CurrentItemChanged += MediaPlaybackList_CurrentItemChanged;
         _mediaPlaybackList.ItemFailed += MediaPlaybackList_ItemFailed;
         MediaPlayer.Source = _mediaPlaybackList;
+        MediaPlayer.MediaFailed += (s, e) =>
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine($"MediaPlayer failed: {e.Error}, HResult: 0x{e.ExtendedErrorCode?.HResult:X8}, Message: {e.ErrorMessage}");
+            });
+        };
     }
 
     #region Media buttons controls
@@ -339,7 +346,7 @@ public partial class MediaViewModel : BaseViewModel
             case MediaPlaybackItemErrorCode.EncryptionError:
             _dispatcherQueue.TryEnqueue(() =>
             {
-                Debug.WriteLine("Decryption/DRM error for this item.");
+                Debug.WriteLine("Media is encrypted.");
             });
             break;
 
