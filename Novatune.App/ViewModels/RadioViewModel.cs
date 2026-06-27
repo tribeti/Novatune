@@ -110,7 +110,7 @@ public partial class RadioViewModel : BaseViewModel
                     cts.Token
                 );
 
-                if (stations is not null && stations.Count > 0)
+                if (stations is not null)
                 {
                     Debug.WriteLine($"OK: {server}, found {stations.Count} stations");
                     return stations;
