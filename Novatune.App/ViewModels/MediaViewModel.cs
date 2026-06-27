@@ -19,18 +19,22 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
-    public MediaPlayer mediaPlayer = new();
+    public MediaPlayer MediaPlayer { get; } = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
+    public ObservableCollection<RadioItem> RadioPlaylist { get; } = [];
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
     {
         Interval = TimeSpan.FromMilliseconds(500)
     };
 
+    [ObservableProperty]
+    public partial bool IsPlayingRadio { get; set; } = false;
+
     public MediaViewModel()
     {
-        mediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
+        MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
 
@@ -49,7 +53,7 @@ public partial class MediaViewModel : BaseViewModel
 
         _positionTimer.Tick += (_, _) =>
         {
-            var session = mediaPlayer.PlaybackSession;
+            var session = MediaPlayer.PlaybackSession;
             MediaDuration = session.NaturalDuration.TotalSeconds;
             PlaybackPosition = session.Position.TotalSeconds;
 
@@ -60,7 +64,14 @@ public partial class MediaViewModel : BaseViewModel
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
         _mediaPlaybackList.CurrentItemChanged += MediaPlaybackList_CurrentItemChanged;
         _mediaPlaybackList.ItemFailed += MediaPlaybackList_ItemFailed;
-        mediaPlayer.Source = _mediaPlaybackList;
+        MediaPlayer.Source = _mediaPlaybackList;
+        MediaPlayer.MediaFailed += (s, e) =>
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.WriteLine($"MediaPlayer failed: {e.Error}, HResult: 0x{e.ExtendedErrorCode?.HResult:X8}, Message: {e.ErrorMessage}");
+            });
+        };
     }
 
     #region Media buttons controls
@@ -104,7 +115,7 @@ public partial class MediaViewModel : BaseViewModel
 
     partial void OnVolumeChanged(double value)
     {
-        mediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
+        MediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
     }
 
     [ObservableProperty]
@@ -122,22 +133,22 @@ public partial class MediaViewModel : BaseViewModel
     public void PlayPause()
     {
         if (IsPlaying)
-            mediaPlayer.Pause();
+            MediaPlayer.Pause();
         else
-            mediaPlayer.Play();
+            MediaPlayer.Play();
     }
 
     [RelayCommand]
     public void Seek(double seconds)
     {
-        mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
+        MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
         PlaybackPosition = seconds;
     }
 
     [RelayCommand]
     public void CommitSeek()
     {
-        mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
+        MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
         PlaybackPosition = TimelinePosition;
         IsUserInteracting = false;
     }
@@ -185,12 +196,15 @@ public partial class MediaViewModel : BaseViewModel
     public partial BitmapImage? CurrentImage { get; set; }
 
     [ObservableProperty]
-    public partial int PlaylistIndex { get; set; } = 0;
+    public partial int LocalPlaylistIndex { get; set; } = -1;
 
-    private readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+    [ObservableProperty]
+    public partial int RadioPlaylistIndex { get; set; } = -1;
+
+    public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
     [RelayCommand]
-    public async Task AddMedia()
+    public async Task AddLocalMedia()
     {
         var picker = new FileOpenPicker
         {
@@ -240,15 +254,20 @@ public partial class MediaViewModel : BaseViewModel
                 _mediaPlaybackList.Items.Add(item.PlaybackItem);
             }
 
-            mediaPlayer.Play();
+            MediaPlayer.Play();
         }
     }
 
-    [RelayCommand]
-    public void JumpTo(int index)
+    public void PlayLocal(int index)
     {
         if (index < 0 || index >= Playlist.Count)
             return;
+
+        IsPlayingRadio = false;
+        RadioPlaylistIndex = -1;
+
+        if (!ReferenceEquals(MediaPlayer.Source, _mediaPlaybackList))
+            MediaPlayer.Source = _mediaPlaybackList;
 
         var selectedItem = Playlist[index];
         var playbackItemIndex = _mediaPlaybackList.Items.IndexOf(selectedItem.PlaybackItem);
@@ -256,7 +275,51 @@ public partial class MediaViewModel : BaseViewModel
         if (playbackItemIndex >= 0)
         {
             _mediaPlaybackList.MoveTo((uint) playbackItemIndex);
+            MediaPlayer.Play();
         }
+    }
+
+    public void PlayRadio(int index)
+    {
+        if (index < 0 || index >= RadioPlaylist.Count)
+            return;
+
+        var station = RadioPlaylist[index];
+        if (station.PlaybackItem is null)
+            return;
+
+        IsPlayingRadio = true;
+        LocalPlaylistIndex = -1;
+
+        _currentMediaItem?.IsCurrent = false;
+        _currentMediaItem = null;
+
+        RadioPlaylistIndex = index;
+        Title = station.Name;
+
+        BitmapImage img = _defaultImage;
+        if (!string.IsNullOrWhiteSpace(station.Favicon))
+        {
+            static string UpgradeToHttps(string url) =>
+                url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
+
+            if (Uri.TryCreate(UpgradeToHttps(station.Favicon), UriKind.Absolute, out var faviconUri))
+            {
+                try
+                { img = new BitmapImage(faviconUri); }
+                catch { }
+            }
+        }
+        CurrentImage = img;
+
+        MediaPlayer.Source = station.PlaybackItem;
+        MediaPlayer.Play();
+    }
+
+    public void AddRadioStation(RadioItem station)
+    {
+        RadioPlaylist.Add(station);
+        PlayRadio(RadioPlaylist.Count - 1);
     }
 
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
@@ -283,7 +346,7 @@ public partial class MediaViewModel : BaseViewModel
             case MediaPlaybackItemErrorCode.EncryptionError:
             _dispatcherQueue.TryEnqueue(() =>
             {
-                Debug.WriteLine("Decryption/DRM error for this item.");
+                Debug.WriteLine("Media is encrypted.");
             });
             break;
 
@@ -315,6 +378,9 @@ public partial class MediaViewModel : BaseViewModel
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (IsPlayingRadio)
+                return;
+
             _currentMediaItem?.IsCurrent = false;
             var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
             current?.IsCurrent = true;
@@ -324,8 +390,8 @@ public partial class MediaViewModel : BaseViewModel
             Title = current?.Title ?? string.Empty;
             CurrentImage = current?.Img ?? _defaultImage;
             var newIndex = current is not null ? Playlist.IndexOf(current) : -1;
-            if (newIndex >= 0 && newIndex != PlaylistIndex)
-                PlaylistIndex = newIndex;
+            if (newIndex >= 0 && newIndex != LocalPlaylistIndex)
+                LocalPlaylistIndex = newIndex;
         });
     }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Novatune.App.ViewModels;
 using System;
@@ -37,6 +37,7 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
         services.AddSingleton<MediaViewModel>();
+        services.AddSingleton<RadioViewModel>();
         return services.BuildServiceProvider();
     }
 }

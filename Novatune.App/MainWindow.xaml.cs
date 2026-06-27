@@ -6,16 +6,22 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using Novatune.App.Models;
 using Novatune.App.ViewModels;
 using Novatune.App.Views;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.Media.Core;
+using Windows.Media.Playback;
 
 namespace Novatune.App;
 
 public sealed partial class MainWindow : Window
 {
-    public MediaViewModel ViewModel { get; set; }
+    public MediaViewModel ViewModel { get; }
 
     public MainWindow()
     {
@@ -24,12 +30,13 @@ public sealed partial class MainWindow : Window
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
-        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
     }
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
     {
-        if (this.Media_Timeline
+        if (sender is not Slider slider) return;
+
+        if (slider
             .FindDescendants()
             .OfType<Thumb>()
             .FirstOrDefault(x => x.Name == "HorizontalThumb") is not Thumb thumb)
@@ -97,4 +104,62 @@ public sealed partial class MainWindow : Window
     private void Thumb_DragStarted(object sender, DragStartedEventArgs e) => ViewModel.IsUserInteracting = true;
     private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
     private void Media_Timeline_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
+
+    private CancellationTokenSource? _searchCts;
+    private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+            return;
+
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+
+        if (string.IsNullOrWhiteSpace(sender.Text))
+        {
+            _searchCts = null;
+            sender.ItemsSource = Array.Empty<RadioItem>();
+            return;
+        }
+
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(350, token);
+            var stations = await RadioViewModel.SearchStationsAsync(sender.Text, token);
+
+            sender.ItemsSource = stations.Count > 0
+                ? stations
+                : new List<RadioItem> { new() { Name = "No results found" } };
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            sender.ItemsSource = Array.Empty<RadioItem>();
+        }
+        finally
+        {
+            if (_searchCts?.Token == token)
+            {
+                _searchCts.Dispose();
+                _searchCts = null;
+            }
+        }
+    }
+
+    private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is not RadioItem station || string.IsNullOrWhiteSpace(station.UrlResolved))
+            return;
+
+        static string UpgradeToHttps(string url) =>
+            url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
+
+        if (!Uri.TryCreate(UpgradeToHttps(station.UrlResolved), UriKind.Absolute, out var streamUri))
+            return;
+
+        station.PlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromUri(streamUri));
+        ViewModel.AddRadioStation(station);
+    }
 }

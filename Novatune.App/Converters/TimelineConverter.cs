@@ -1,7 +1,7 @@
-﻿using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace Novatune.App.Models;
+namespace Novatune.App.Converters;
 
 public partial class TimelineConverter : IValueConverter
 {
