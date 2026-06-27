@@ -19,7 +19,7 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
-    public MediaPlayer mediaPlayer = new();
+    public MediaPlayer MediaPlayer { get; } = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
     public ObservableCollection<RadioItem> RadioPlaylist { get; } = [];
@@ -28,11 +28,13 @@ public partial class MediaViewModel : BaseViewModel
     {
         Interval = TimeSpan.FromMilliseconds(500)
     };
-    private bool _isPlayingRadio = false;
+
+    [ObservableProperty]
+    public partial bool IsPlayingRadio { get; set; } = false;
 
     public MediaViewModel()
     {
-        mediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
+        MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
 
@@ -51,7 +53,7 @@ public partial class MediaViewModel : BaseViewModel
 
         _positionTimer.Tick += (_, _) =>
         {
-            var session = mediaPlayer.PlaybackSession;
+            var session = MediaPlayer.PlaybackSession;
             MediaDuration = session.NaturalDuration.TotalSeconds;
             PlaybackPosition = session.Position.TotalSeconds;
 
@@ -62,7 +64,7 @@ public partial class MediaViewModel : BaseViewModel
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
         _mediaPlaybackList.CurrentItemChanged += MediaPlaybackList_CurrentItemChanged;
         _mediaPlaybackList.ItemFailed += MediaPlaybackList_ItemFailed;
-        mediaPlayer.Source = _mediaPlaybackList;
+        MediaPlayer.Source = _mediaPlaybackList;
     }
 
     #region Media buttons controls
@@ -106,7 +108,7 @@ public partial class MediaViewModel : BaseViewModel
 
     partial void OnVolumeChanged(double value)
     {
-        mediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
+        MediaPlayer.Volume = Math.Clamp(value / 100.0, 0.0, 1.0);
     }
 
     [ObservableProperty]
@@ -124,22 +126,22 @@ public partial class MediaViewModel : BaseViewModel
     public void PlayPause()
     {
         if (IsPlaying)
-            mediaPlayer.Pause();
+            MediaPlayer.Pause();
         else
-            mediaPlayer.Play();
+            MediaPlayer.Play();
     }
 
     [RelayCommand]
     public void Seek(double seconds)
     {
-        mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
+        MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
         PlaybackPosition = seconds;
     }
 
     [RelayCommand]
     public void CommitSeek()
     {
-        mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
+        MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
         PlaybackPosition = TimelinePosition;
         IsUserInteracting = false;
     }
@@ -245,7 +247,7 @@ public partial class MediaViewModel : BaseViewModel
                 _mediaPlaybackList.Items.Add(item.PlaybackItem);
             }
 
-            mediaPlayer.Play();
+            MediaPlayer.Play();
         }
     }
 
@@ -254,11 +256,11 @@ public partial class MediaViewModel : BaseViewModel
         if (index < 0 || index >= Playlist.Count)
             return;
 
-        _isPlayingRadio = false;
+        IsPlayingRadio = false;
         RadioPlaylistIndex = -1;
 
-        if (!ReferenceEquals(mediaPlayer.Source, _mediaPlaybackList))
-            mediaPlayer.Source = _mediaPlaybackList;
+        if (!ReferenceEquals(MediaPlayer.Source, _mediaPlaybackList))
+            MediaPlayer.Source = _mediaPlaybackList;
 
         var selectedItem = Playlist[index];
         var playbackItemIndex = _mediaPlaybackList.Items.IndexOf(selectedItem.PlaybackItem);
@@ -266,7 +268,7 @@ public partial class MediaViewModel : BaseViewModel
         if (playbackItemIndex >= 0)
         {
             _mediaPlaybackList.MoveTo((uint) playbackItemIndex);
-            mediaPlayer.Play();
+            MediaPlayer.Play();
         }
     }
 
@@ -279,7 +281,7 @@ public partial class MediaViewModel : BaseViewModel
         if (station.PlaybackItem is null)
             return;
 
-        _isPlayingRadio = true;
+        IsPlayingRadio = true;
         LocalPlaylistIndex = -1;
 
         _currentMediaItem?.IsCurrent = false;
@@ -303,8 +305,8 @@ public partial class MediaViewModel : BaseViewModel
         }
         CurrentImage = img;
 
-        mediaPlayer.Source = station.PlaybackItem;
-        mediaPlayer.Play();
+        MediaPlayer.Source = station.PlaybackItem;
+        MediaPlayer.Play();
     }
 
     public void AddRadioStation(RadioItem station)
@@ -369,7 +371,7 @@ public partial class MediaViewModel : BaseViewModel
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
-            if (_isPlayingRadio)
+            if (IsPlayingRadio)
                 return;
 
             _currentMediaItem?.IsCurrent = false;

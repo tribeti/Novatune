@@ -3,7 +3,7 @@
     x:Class="Novatune.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:control="using:Novatune.App.Models"
+    xmlns:converters="using:Novatune.App.Converters"
     xmlns:local="using:Novatune.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -12,7 +12,7 @@
                 <ResourceDictionary Source="ms-appx:///DevWinUI/Themes/Generic.xaml" />
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
-            <control:TimelineConverter x:Key="TimelineFormatter" />
+            <converters:TimelineConverter x:Key="TimelineFormatter" />
             <!--  Other app resources here  -->
         </ResourceDictionary>
     </Application.Resources>

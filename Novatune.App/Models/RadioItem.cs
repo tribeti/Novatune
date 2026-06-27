@@ -13,6 +13,7 @@ public partial class RadioItem
     public string Favicon { get; init; } = string.Empty;
     public string Tags { get; init; } = string.Empty;
 
+    [JsonIgnore]
     public MediaPlaybackItem? PlaybackItem { get; set; }
 
     public override string ToString() => Name;

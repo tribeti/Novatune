@@ -21,7 +21,7 @@ namespace Novatune.App;
 
 public sealed partial class MainWindow : Window
 {
-    public MediaViewModel ViewModel { get; set; }
+    public MediaViewModel ViewModel { get; }
 
     public MainWindow()
     {
@@ -30,12 +30,13 @@ public sealed partial class MainWindow : Window
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
-        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
     }
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
     {
-        if (this.Media_Timeline
+        if (sender is not Slider slider) return;
+
+        if (slider
             .FindDescendants()
             .OfType<Thumb>()
             .FirstOrDefault(x => x.Name == "HorizontalThumb") is not Thumb thumb)

@@ -17,7 +17,7 @@ public partial class RadioViewModel : BaseViewModel
     {
         Timeout = TimeSpan.FromSeconds(15)
     };
-    private static readonly Lock _cacheLock = new();
+    private static readonly SemaphoreSlim _cacheSemaphore = new(1, 1);
     private static List<string> _cachedServers = [];
     private static DateTime _cacheExpiry = DateTime.MinValue;
 
@@ -28,55 +28,57 @@ public partial class RadioViewModel : BaseViewModel
 
     private static async Task<List<string>> GetRadioBrowserServers(CancellationToken ct = default)
     {
-        if (_cachedServers.Count > 0 && DateTime.UtcNow < _cacheExpiry)
-            return _cachedServers;
-
-        IPAddress[] ips;
+        await _cacheSemaphore.WaitAsync(ct);
         try
         {
-            ips = await Dns.GetHostAddressesAsync("all.api.radio-browser.info", ct);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"DNS failed: {ex.Message}");
-            return [];
-        }
+            if (_cachedServers.Count > 0 && DateTime.UtcNow < _cacheExpiry)
+                return _cachedServers;
 
-        var hostNames = await Task.WhenAll(ips.Select(async ip =>
-        {
+            IPAddress[] ips;
             try
             {
-                var hostEntry = await Dns.GetHostEntryAsync(ip.ToString(), ct);
-                if (!string.IsNullOrEmpty(hostEntry.HostName))
-                    return hostEntry.HostName;
+                ips = await Dns.GetHostAddressesAsync("all.api.radio-browser.info", ct);
             }
-            catch (OperationCanceledException) { throw; }
-            catch { }
-
-            return (string?) null;
-        }));
-
-        var result = hostNames
-           .Where(name => name is not null)
-           .Select(name => name!)
-           .Distinct()
-           .OrderBy(_ => Random.Shared.Next())
-           .ToList();
-
-        if (result.Count > 0)
-        {
-            lock (_cacheLock)
+            catch (Exception ex)
             {
-                if (_cachedServers.Count == 0 || DateTime.UtcNow >= _cacheExpiry)
-                {
-                    _cachedServers = result;
-                    _cacheExpiry = DateTime.UtcNow.AddMinutes(15);
-                }
+                Debug.WriteLine($"DNS failed: {ex.Message}");
+                return [];
             }
-        }
 
-        Debug.WriteLine($"Total servers found: {result.Count}");
-        return result;
+            var hostNames = await Task.WhenAll(ips.Select(async ip =>
+            {
+                try
+                {
+                    var hostEntry = await Dns.GetHostEntryAsync(ip.ToString(), ct);
+                    if (!string.IsNullOrEmpty(hostEntry.HostName))
+                        return hostEntry.HostName;
+                }
+                catch (OperationCanceledException) { throw; }
+                catch { }
+
+                return (string?) null;
+            }));
+
+            var result = hostNames
+               .Where(name => name is not null)
+               .Select(name => name!)
+               .Distinct()
+               .OrderBy(_ => Random.Shared.Next())
+               .ToList();
+
+            if (result.Count > 0)
+            {
+                _cachedServers = result;
+                _cacheExpiry = DateTime.UtcNow.AddMinutes(15);
+            }
+
+            Debug.WriteLine($"Total servers found: {result.Count}");
+            return result;
+        }
+        finally
+        {
+            _cacheSemaphore.Release();
+        }
     }
 
     public static async Task<List<RadioItem>> SearchStationsAsync(string keyword, CancellationToken cancellationToken = default)

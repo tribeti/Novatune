@@ -3,6 +3,7 @@
     x:Class="Novatune.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -43,7 +44,7 @@
                                     <TextBlock
                                         MaxWidth="300"
                                         FontWeight="SemiBold"
-                                        Text="{x:Bind Name, Mode=OneWay}"
+                                        Text="{x:Bind Name}"
                                         TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </StackPanel>
@@ -98,80 +99,103 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <RelativePanel>
-                    <TextBlock
-                        x:Name="Position_Txt"
-                        Margin="0,6,12,0"
-                        VerticalAlignment="Center"
-                        RelativePanel.AlignLeftWithPanel="True"
-                        Text="{x:Bind ViewModel.PositionText, Mode=OneWay}" />
+                <controls:SwitchPresenter Value="{x:Bind ViewModel.IsPlayingRadio, Mode=OneWay}">
+                    <controls:Case>
+                        <controls:Case.Value>
+                            <x:Boolean>False</x:Boolean>
+                        </controls:Case.Value>
+                        <RelativePanel>
+                            <TextBlock
+                                x:Name="Position_Txt"
+                                Margin="0,6,12,0"
+                                VerticalAlignment="Center"
+                                RelativePanel.AlignLeftWithPanel="True"
+                                Text="{x:Bind ViewModel.PositionText, Mode=OneWay}" />
 
-                    <TextBlock
-                        x:Name="Duration_Txt"
-                        Margin="12,6,0,0"
-                        VerticalAlignment="Center"
-                        RelativePanel.AlignRightWithPanel="True"
-                        Text="{x:Bind ViewModel.DurationText, Mode=OneWay}" />
+                            <TextBlock
+                                x:Name="Duration_Txt"
+                                Margin="12,6,0,0"
+                                VerticalAlignment="Center"
+                                RelativePanel.AlignRightWithPanel="True"
+                                Text="{x:Bind ViewModel.DurationText, Mode=OneWay}" />
 
-                    <Slider
-                        x:Name="Media_Timeline"
-                        VerticalAlignment="Center"
-                        Maximum="{x:Bind ViewModel.MediaDuration, Mode=OneWay}"
-                        RelativePanel.LeftOf="Duration_Txt"
-                        RelativePanel.RightOf="Position_Txt"
-                        Tapped="Media_Timeline_Tapped"
-                        ThumbToolTipValueConverter="{StaticResource TimelineFormatter}"
-                        Value="{x:Bind ViewModel.TimelinePosition, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Slider
+                                x:Name="Media_Timeline"
+                                VerticalAlignment="Center"
+                                Loaded="Media_Timeline_Loaded"
+                                Maximum="{x:Bind ViewModel.MediaDuration, Mode=OneWay}"
+                                RelativePanel.LeftOf="Duration_Txt"
+                                RelativePanel.RightOf="Position_Txt"
+                                Tapped="Media_Timeline_Tapped"
+                                ThumbToolTipValueConverter="{StaticResource TimelineFormatter}"
+                                Value="{x:Bind ViewModel.TimelinePosition, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <AppBarButton
-                        x:Name="Play_Btn"
-                        Command="{x:Bind ViewModel.PlayPauseCommand}"
-                        LabelPosition="Collapsed"
-                        RelativePanel.AlignHorizontalCenterWithPanel="True"
-                        RelativePanel.Below="Media_Timeline">
-                        <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
-                    </AppBarButton>
+                            <AppBarButton
+                                x:Name="Play_Btn"
+                                Command="{x:Bind ViewModel.PlayPauseCommand}"
+                                LabelPosition="Collapsed"
+                                RelativePanel.AlignHorizontalCenterWithPanel="True"
+                                RelativePanel.Below="Media_Timeline">
+                                <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                            </AppBarButton>
 
-                    <AppBarButton
-                        x:Name="Previous_Btn"
-                        Command="{x:Bind ViewModel.PreviousCommand}"
-                        LabelPosition="Collapsed"
-                        RelativePanel.Below="Media_Timeline"
-                        RelativePanel.LeftOf="Play_Btn"
-                        ToolTipService.ToolTip="Previous">
-                        <FontIcon Glyph="&#xF8AC;" />
-                    </AppBarButton>
+                            <AppBarButton
+                                x:Name="Previous_Btn"
+                                Command="{x:Bind ViewModel.PreviousCommand}"
+                                LabelPosition="Collapsed"
+                                RelativePanel.Below="Media_Timeline"
+                                RelativePanel.LeftOf="Play_Btn"
+                                ToolTipService.ToolTip="Previous">
+                                <FontIcon Glyph="&#xF8AC;" />
+                            </AppBarButton>
 
-                    <AppBarButton
-                        x:Name="Shuffle_Btn"
-                        Command="{x:Bind ViewModel.ShuffleCommand}"
-                        LabelPosition="Collapsed"
-                        RelativePanel.Below="Media_Timeline"
-                        RelativePanel.LeftOf="Previous_Btn"
-                        ToolTipService.ToolTip="Shuffle">
-                        <FontIcon FontWeight="{x:Bind ViewModel.ShuffleFontWeight, Mode=OneWay}" Glyph="&#xE8B1;" />
-                    </AppBarButton>
+                            <AppBarButton
+                                x:Name="Shuffle_Btn"
+                                Command="{x:Bind ViewModel.ShuffleCommand}"
+                                LabelPosition="Collapsed"
+                                RelativePanel.Below="Media_Timeline"
+                                RelativePanel.LeftOf="Previous_Btn"
+                                ToolTipService.ToolTip="Shuffle">
+                                <FontIcon FontWeight="{x:Bind ViewModel.ShuffleFontWeight, Mode=OneWay}" Glyph="&#xE8B1;" />
+                            </AppBarButton>
 
-                    <AppBarButton
-                        x:Name="Next_Btn"
-                        Command="{x:Bind ViewModel.NextCommand}"
-                        LabelPosition="Collapsed"
-                        RelativePanel.Below="Media_Timeline"
-                        RelativePanel.RightOf="Play_Btn"
-                        ToolTipService.ToolTip="Next">
-                        <FontIcon Glyph="&#xF8AD;" />
-                    </AppBarButton>
+                            <AppBarButton
+                                x:Name="Next_Btn"
+                                Command="{x:Bind ViewModel.NextCommand}"
+                                LabelPosition="Collapsed"
+                                RelativePanel.Below="Media_Timeline"
+                                RelativePanel.RightOf="Play_Btn"
+                                ToolTipService.ToolTip="Next">
+                                <FontIcon Glyph="&#xF8AD;" />
+                            </AppBarButton>
 
-                    <AppBarButton
-                        x:Name="Repeat_Btn"
-                        Command="{x:Bind ViewModel.RepeatCommand}"
-                        LabelPosition="Collapsed"
-                        RelativePanel.Below="Media_Timeline"
-                        RelativePanel.RightOf="Next_Btn"
-                        ToolTipService.ToolTip="Repeat">
-                        <FontIcon FontWeight="{x:Bind ViewModel.RepeatFontWeight, Mode=OneWay}" Glyph="&#xE8EE;" />
-                    </AppBarButton>
-                </RelativePanel>
+                            <AppBarButton
+                                x:Name="Repeat_Btn"
+                                Command="{x:Bind ViewModel.RepeatCommand}"
+                                LabelPosition="Collapsed"
+                                RelativePanel.Below="Media_Timeline"
+                                RelativePanel.RightOf="Next_Btn"
+                                ToolTipService.ToolTip="Repeat">
+                                <FontIcon FontWeight="{x:Bind ViewModel.RepeatFontWeight, Mode=OneWay}" Glyph="&#xE8EE;" />
+                            </AppBarButton>
+                        </RelativePanel>
+                    </controls:Case>
+                    <controls:Case>
+                        <controls:Case.Value>
+                            <x:Boolean>True</x:Boolean>
+                        </controls:Case.Value>
+                        <RelativePanel>
+                            <AppBarButton
+                                x:Name="Radio_Play_Btn"
+                                Command="{x:Bind ViewModel.PlayPauseCommand}"
+                                LabelPosition="Collapsed"
+                                RelativePanel.AlignHorizontalCenterWithPanel="True"
+                                RelativePanel.AlignVerticalCenterWithPanel="True">
+                                <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                            </AppBarButton>
+                        </RelativePanel>
+                    </controls:Case>
+                </controls:SwitchPresenter>
             </Grid>
 
             <Grid Grid.Column="1" Margin="36,0,0,0">
