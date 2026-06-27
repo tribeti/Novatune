@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,49 +28,46 @@ public partial class RadioViewModel : BaseViewModel
 
     private static async Task<List<string>> GetRadioBrowserServers(CancellationToken ct = default)
     {
-        await _cacheSemaphore.WaitAsync(ct);
+        if (_cachedServers.Count > 0 && DateTime.UtcNow < _cacheExpiry)
+            return _cachedServers;
+
+        await _cacheSemaphore.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             if (_cachedServers.Count > 0 && DateTime.UtcNow < _cacheExpiry)
                 return _cachedServers;
 
-            IPAddress[] ips;
+            var result = new List<string>();
+
             try
             {
-                ips = await Dns.GetHostAddressesAsync("all.api.radio-browser.info", ct);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+                var json = await _http.GetStringAsync("https://de1.api.radio-browser.info/json/servers", cts.Token).ConfigureAwait(false);
+                var servers = JsonSerializer.Deserialize<List<RadioItem>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                result = servers?
+                    .Where(s => !string.IsNullOrWhiteSpace(s.Name))
+                    .Select(s => s.Name!)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList() ?? [];
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
-                Debug.WriteLine($"DNS failed: {ex.Message}");
-                return [];
+                Debug.WriteLine($"API failed: {ex.Message}");
             }
 
-            var hostNames = await Task.WhenAll(ips.Select(async ip =>
+            if (result.Count == 0)
             {
-                try
-                {
-                    var hostEntry = await Dns.GetHostEntryAsync(ip.ToString(), ct);
-                    if (!string.IsNullOrEmpty(hostEntry.HostName))
-                        return hostEntry.HostName;
-                }
-                catch (OperationCanceledException) { throw; }
-                catch { }
-
-                return (string?) null;
-            }));
-
-            var result = hostNames
-               .Where(name => name is not null)
-               .Select(name => name!)
-               .Distinct()
-               .OrderBy(_ => Random.Shared.Next())
-               .ToList();
-
-            if (result.Count > 0)
-            {
-                _cachedServers = result;
-                _cacheExpiry = DateTime.UtcNow.AddMinutes(15);
+                result = ["de1.api.radio-browser.info", "de2.api.radio-browser.info", "at1.api.radio-browser.info"];
             }
+
+            Shuffle(result, Random.Shared);
+
+            _cachedServers = result;
+            _cacheExpiry = DateTime.UtcNow.AddMinutes(15);
 
             Debug.WriteLine($"Total servers found: {result.Count}");
             return result;
@@ -131,5 +128,16 @@ public partial class RadioViewModel : BaseViewModel
 
         Debug.WriteLine("All servers failed!");
         return [];
+    }
+
+    private static void Shuffle<T>(List<T> list, Random random)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = random.Next(n + 1);
+            (list[n], list[k]) = (list[k], list[n]);
+        }
     }
 }
