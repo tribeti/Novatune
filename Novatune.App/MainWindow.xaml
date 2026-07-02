@@ -99,7 +99,7 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <controls:SwitchPresenter Value="{x:Bind ViewModel.IsPlayingRadio, Mode=OneWay}">
+                <controls:SwitchPresenter Value="{x:Bind ViewModel.IsLive, Mode=OneWay}">
                     <controls:Case>
                         <controls:Case.Value>
                             <x:Boolean>False</x:Boolean>

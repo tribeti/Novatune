@@ -14,8 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Media.Core;
-using Windows.Media.Playback;
 
 namespace Novatune.App;
 
@@ -34,7 +32,8 @@ public sealed partial class MainWindow : Window
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
     {
-        if (sender is not Slider slider) return;
+        if (sender is not Slider slider)
+            return;
 
         if (slider
             .FindDescendants()
@@ -148,18 +147,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    private void SearchBox_QuerySubmitted(AutoSuggestBox _, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
         if (args.ChosenSuggestion is not RadioItem station || string.IsNullOrWhiteSpace(station.UrlResolved))
             return;
 
-        static string UpgradeToHttps(string url) =>
-            url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
-
-        if (!Uri.TryCreate(UpgradeToHttps(station.UrlResolved), UriKind.Absolute, out var streamUri))
-            return;
-
-        station.PlaybackItem = new MediaPlaybackItem(MediaSource.CreateFromUri(streamUri));
-        ViewModel.AddRadioStation(station);
+        ViewModel.AddAndPlayRadio(station);
     }
 }

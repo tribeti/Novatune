@@ -52,84 +52,33 @@
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.Below="MediaTitle" />
-            <Expander
-                x:Name="LocalExpander"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom"
-                ExpandDirection="Down"
-                Header="Local Playlist"
-                IsExpanded="False"
-                RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.Below="sep">
-                <Expander.Content>
-                <ListView
-                        x:Name="Queue"
-                        AllowDrop="True"
-                        Background="Transparent"
-                        ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
-                        SelectedIndex="{x:Bind ViewModel.LocalPlaylistIndex, Mode=OneWay}"
-                        SelectionChanged="LocalList_SelectionChanged"
-                        SelectionMode="Single">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="models:MediaItem">
-                                <StackPanel Margin="0,8" Orientation="Vertical">
-                                    <TextBlock
-                                        FontSize="16"
-                                        FontWeight="SemiBold"
-                                        Text="{x:Bind Title}"
-                                        TextTrimming="CharacterEllipsis" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind Artist}"
-                                        TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Expander.Content>
-            </Expander>
-            <Expander
-                x:Name="RadioExpander"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom"
-                ExpandDirection="Down"
-                Header="Radio Playlist"
-                IsExpanded="False"
-                RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.Below="LocalExpander">
-                <Expander.Content>
-                    <ListView
-                        x:Name="RadioList"
-                        AllowDrop="True"
-                        Background="Transparent"
-                        ItemsSource="{x:Bind ViewModel.RadioPlaylist, Mode=OneWay}"
-                        SelectedIndex="{x:Bind ViewModel.RadioPlaylistIndex, Mode=OneWay}"
-                        SelectionChanged="RadioList_SelectionChanged"
-                        SelectionMode="Single">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="models:RadioItem">
-                                <StackPanel Margin="0,8" Orientation="Vertical">
-                                    <TextBlock
-                                        FontSize="16"
-                                        FontWeight="SemiBold"
-                                        Text="{x:Bind Name}"
-                                        TextTrimming="CharacterEllipsis" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        FontSize="12"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind Tags}"
-                                        TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Expander.Content>
-            </Expander>
+            <ListView
+                x:Name="Queue"
+                AllowDrop="True"
+                Background="Transparent"
+                ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
+                RelativePanel.Below="sep"
+                SelectedIndex="{x:Bind ViewModel.LocalPlaylistIndex, Mode=OneWay}"
+                SelectionChanged="LocalList_SelectionChanged"
+                SelectionMode="Single">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:MediaItem">
+                        <StackPanel Margin="0,8" Orientation="Vertical">
+                            <TextBlock
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Text="{x:Bind Title}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Subtitle}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </RelativePanel>
     </Grid>
 </Page>
