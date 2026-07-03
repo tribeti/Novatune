@@ -26,9 +26,9 @@ public partial class RadioViewModel : BaseViewModel
         _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Novatune/1.0");
     }
 
-    private static JsonSerializerOptions GetOptions() => new() { PropertyNameCaseInsensitive = true };
+    private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    private static async Task<List<string>> GetRadioBrowserServers(JsonSerializerOptions options, CancellationToken ct = default)
+    private static async Task<List<string>> GetRadioBrowserServers(CancellationToken ct = default)
     {
         if (_cachedServers.Count > 0 && DateTime.UtcNow < _cacheExpiry)
             return _cachedServers;
@@ -47,7 +47,7 @@ public partial class RadioViewModel : BaseViewModel
                 cts.CancelAfter(TimeSpan.FromSeconds(10));
 
                 var json = await _http.GetStringAsync("https://de1.api.radio-browser.info/json/servers", cts.Token).ConfigureAwait(false);
-                var servers = JsonSerializer.Deserialize<List<RadioItem>>(json, options);
+                var servers = JsonSerializer.Deserialize<List<RadioItem>>(json, _jsonOptions);
 
                 result = servers?
                     .Where(s => !string.IsNullOrWhiteSpace(s.Name))
@@ -85,7 +85,7 @@ public partial class RadioViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(keyword))
             return [];
 
-        var servers = await GetRadioBrowserServers(GetOptions(), cancellationToken);
+        var servers = await GetRadioBrowserServers(cancellationToken);
 
         if (servers.Count == 0)
         {
@@ -106,6 +106,7 @@ public partial class RadioViewModel : BaseViewModel
 
                 var stations = await _http.GetFromJsonAsync<List<RadioItem>>(
                     $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true&limit=15",
+                    _jsonOptions,
                     cts.Token
                 );
 

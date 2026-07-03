@@ -198,10 +198,7 @@ public partial class MediaViewModel : BaseViewModel
     public partial BitmapImage? CurrentImage { get; set; }
 
     [ObservableProperty]
-    public partial int LocalPlaylistIndex { get; set; } = -1;
-
-    [ObservableProperty]
-    public partial int RadioPlaylistIndex { get; set; } = -1;
+    public partial int PlaylistIndex { get; set; } = -1;
 
     public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
@@ -217,15 +214,20 @@ public partial class MediaViewModel : BaseViewModel
         if (files is null || files.Count == 0)
             return;
 
-        foreach (var file in files)
+        var tasks = files.Select(async file =>
         {
             var source = MediaSource.CreateFromStorageFile(file);
             bool isVideo = file.FileType.ToLower() is ".mp4" or ".mkv" or ".wmv";
             source.CustomProperties["Kind"] = SourceKind.Local.ToString();
             source.CustomProperties["IsVideo"] = isVideo;
 
-            var musicProps = await file.Properties.GetMusicPropertiesAsync();
-            using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+            var musicPropsTask = file.Properties.GetMusicPropertiesAsync();
+            var thumbnailTask = file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+
+            await Task.WhenAll(musicPropsTask.AsTask(), thumbnailTask.AsTask());
+
+            var musicProps = musicPropsTask.GetResults();
+            using var thumbnail = thumbnailTask.GetResults();
 
             BitmapImage? bitmap = null;
             if (thumbnail is not null)
@@ -248,14 +250,24 @@ public partial class MediaViewModel : BaseViewModel
             playbackItem.ApplyDisplayProperties(props);
 
             var title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
-            var track = MediaItem.FromLocal(file.Path, title, musicProps.Artist, bitmap, playbackItem);
 
-            Playlist.Add(track);
-            _mediaPlaybackList.Items.Add(track.PlaybackItem);
-        }
+            return MediaItem.FromLocal(file.Path, title, musicProps.Artist, bitmap, playbackItem);
+        }).ToList();
 
-        if (MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
-            MediaPlayer.Play();
+
+        var tracks = await Task.WhenAll(tasks);
+
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            foreach (var track in tracks)
+            {
+                Playlist.Add(track);
+                _mediaPlaybackList.Items.Add(track.PlaybackItem);
+            }
+
+            if (MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
+                MediaPlayer.Play();
+        });
     }
 
     public void AddAndPlayRadio(RadioItem station)
@@ -337,6 +349,9 @@ public partial class MediaViewModel : BaseViewModel
         if (track?.PlaybackItem is null)
             return;
 
+        if (_mediaPlaybackList.CurrentItem == track.PlaybackItem)
+            return;
+
         var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
 
         if (index >= 0)
@@ -354,11 +369,15 @@ public partial class MediaViewModel : BaseViewModel
             prev?.IsCurrent = false;
 
             if (args.NewItem is null)
+            {
+                Title = string.Empty;
+                CurrentImage = _defaultImage;
+                PlaylistIndex = -1;
+                IsLive = false;
                 return;
+            }
 
             var kind = args.NewItem.Source.CustomProperties["Kind"] as string ?? "Unknown";
-            var isVideo = args.NewItem.Source.CustomProperties["IsVideo"] as bool? ?? false;
-
             IsLive = (kind == SourceKind.Radio.ToString());
 
             var currentTrack = Playlist.FirstOrDefault(t => t.PlaybackItem == args.NewItem);
@@ -367,6 +386,11 @@ public partial class MediaViewModel : BaseViewModel
                 currentTrack.IsCurrent = true;
                 Title = currentTrack.Title;
                 CurrentImage = currentTrack.Thumbnail ?? _defaultImage;
+                PlaylistIndex = Playlist.IndexOf(currentTrack);
+            }
+            else
+            {
+                PlaylistIndex = -1;
             }
         });
     }

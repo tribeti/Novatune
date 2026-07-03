@@ -23,7 +23,7 @@ public sealed partial class HomePage : Page
 
     private void OnUnloaded(object sender, RoutedEventArgs e) => mediaPlayerElement.SetMediaPlayer(null);
 
-    private void LocalList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void Queue_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (sender is ListView listView && listView.SelectedItem is MediaItem selectedTrack)
         {
