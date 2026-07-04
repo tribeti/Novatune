@@ -275,36 +275,31 @@ public partial class MediaViewModel : BaseViewModel
         if (item is null)
             return;
 
-        var playlistIndex = Playlist.IndexOf(item);
-        if (playlistIndex < 0)
+        var index = Playlist.IndexOf(item);
+        if (index < 0)
             return;
 
-        var playbackIndex = _mediaPlaybackList.Items.IndexOf(item.PlaybackItem);
+        bool wasCurrent = item.IsCurrent;
 
-        Playlist.RemoveAt(playlistIndex);
-
-        if (playbackIndex >= 0)
-            _mediaPlaybackList.Items.RemoveAt(playbackIndex);
+        Playlist.RemoveAt(index);
+        _mediaPlaybackList.Items.RemoveAt(index);
 
         if (Playlist.Count == 0)
         {
+            MediaPlayer.Pause();
             PlaylistIndex = -1;
             Title = string.Empty;
             CurrentImage = _defaultImage;
             return;
         }
 
-        if (item.IsCurrent)
+        if (wasCurrent)
         {
-            var nextIndex = Math.Min(playlistIndex, Playlist.Count - 1);
-            PlaylistIndex = nextIndex;
-
-            if (_mediaPlaybackList.Items.Count > 0)
-            {
-                _mediaPlaybackList.MoveTo((uint) nextIndex);
-            }
+            var nextIndex = Math.Min(index, Playlist.Count - 1);
+            _mediaPlaybackList.MoveTo((uint) nextIndex);
         }
-        else if (PlaylistIndex > playlistIndex)
+
+        else if (PlaylistIndex > index)
         {
             PlaylistIndex--;
         }

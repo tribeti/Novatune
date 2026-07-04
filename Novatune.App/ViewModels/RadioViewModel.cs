@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Media.Streaming.Adaptive;
 
 namespace Novatune.App.ViewModels;
 

@@ -30,4 +30,13 @@ public sealed partial class HomePage : Page
             ViewModel.PlayTrack(selectedTrack);
         }
     }
+
+    private void RemoveItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: MediaItem item })
+        {
+            ViewModel.RemoveMediaCommand.Execute(item);
+            Queue.SelectedIndex = ViewModel.PlaylistIndex;
+        }
+    }
 }

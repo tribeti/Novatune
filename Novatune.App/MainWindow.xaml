@@ -28,7 +28,7 @@
             <TitleBar.Content>
                 <AutoSuggestBox
                     x:Name="SearchBox"
-                    MinWidth="500"
+                    MinWidth="400"
                     VerticalAlignment="Center"
                     PlaceholderText="Search for radio stations"
                     QueryIcon="Find"
