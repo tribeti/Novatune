@@ -297,11 +297,16 @@ public partial class MediaViewModel : BaseViewModel
         {
             var nextIndex = Math.Min(index, Playlist.Count - 1);
             _mediaPlaybackList.MoveTo((uint) nextIndex);
+            PlaylistIndex = nextIndex;
         }
 
         else if (PlaylistIndex > index)
         {
             PlaylistIndex--;
+        }
+        else if (PlaylistIndex == index)
+        {
+            PlaylistIndex = Math.Min(index, Playlist.Count - 1);
         }
     }
 

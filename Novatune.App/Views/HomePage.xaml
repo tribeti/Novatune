@@ -7,7 +7,6 @@
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Novatune.App.Models"
-    x:Name="RootPage"
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
@@ -54,13 +53,17 @@
                 RelativePanel.Below="MediaTitle" />
             <ListView
                 x:Name="Queue"
+                HorizontalAlignment="Stretch"
                 AllowDrop="True"
                 Background="Transparent"
                 ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.Below="sep"
                 SelectedIndex="{x:Bind ViewModel.PlaylistIndex, Mode=OneWay}"
                 SelectionChanged="Queue_SelectionChanged"
                 SelectionMode="Single">
+
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="models:MediaItem">
                         <Grid Margin="0,8">
