@@ -152,6 +152,6 @@ public sealed partial class MainWindow : Window
         if (args.ChosenSuggestion is not RadioItem station || string.IsNullOrWhiteSpace(station.UrlResolved))
             return;
 
-        ViewModel.AddAndPlayRadio(station);
+        ViewModel.AddRadio(station);
     }
 }

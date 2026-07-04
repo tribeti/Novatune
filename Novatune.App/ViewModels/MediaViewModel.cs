@@ -219,7 +219,6 @@ public partial class MediaViewModel : BaseViewModel
             var source = MediaSource.CreateFromStorageFile(file);
             bool isVideo = file.FileType.ToLower() is ".mp4" or ".mkv" or ".wmv";
             source.CustomProperties["Kind"] = SourceKind.Local.ToString();
-            source.CustomProperties["IsVideo"] = isVideo;
 
             var musicPropsTask = file.Properties.GetMusicPropertiesAsync();
             var thumbnailTask = file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
@@ -270,14 +269,54 @@ public partial class MediaViewModel : BaseViewModel
         });
     }
 
-    public void AddAndPlayRadio(RadioItem station)
+    [RelayCommand]
+    public void RemoveMedia(MediaItem? item)
     {
-        var binder = new MediaBinder { Token = $"Radio|{station.UrlResolved}" };
+        if (item is null)
+            return;
+
+        var playlistIndex = Playlist.IndexOf(item);
+        if (playlistIndex < 0)
+            return;
+
+        var playbackIndex = _mediaPlaybackList.Items.IndexOf(item.PlaybackItem);
+
+        Playlist.RemoveAt(playlistIndex);
+
+        if (playbackIndex >= 0)
+            _mediaPlaybackList.Items.RemoveAt(playbackIndex);
+
+        if (Playlist.Count == 0)
+        {
+            PlaylistIndex = -1;
+            Title = string.Empty;
+            CurrentImage = _defaultImage;
+            return;
+        }
+
+        if (item.IsCurrent)
+        {
+            var nextIndex = Math.Min(playlistIndex, Playlist.Count - 1);
+            PlaylistIndex = nextIndex;
+
+            if (_mediaPlaybackList.Items.Count > 0)
+            {
+                _mediaPlaybackList.MoveTo((uint) nextIndex);
+            }
+        }
+        else if (PlaylistIndex > playlistIndex)
+        {
+            PlaylistIndex--;
+        }
+    }
+
+    public void AddRadio(RadioItem station)
+    {
+        var binder = new MediaBinder { Token = $"{station.UrlResolved}" };
         binder.Binding += Binder_Binding;
 
         var source = MediaSource.CreateFromMediaBinder(binder);
         source.CustomProperties["Kind"] = SourceKind.Radio.ToString();
-        source.CustomProperties["IsVideo"] = false;
 
         var playbackItem = new MediaPlaybackItem(source);
 
@@ -300,41 +339,37 @@ public partial class MediaViewModel : BaseViewModel
     private async void Binder_Binding(MediaBinder sender, MediaBindingEventArgs args)
     {
         var deferral = args.GetDeferral();
-        var parts = sender.Token.Split('|');
-        var kind = parts[0];
-        var url = parts[1];
+        var url = sender.Token;
 
         try
         {
-            if (kind == "Radio")
+            bool isHls = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase);
+
+            if (isHls)
             {
-                bool isHls = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase);
+                using var httpClient = new Windows.Web.Http.HttpClient();
+                httpClient.DefaultRequestHeaders.TryAppendWithoutValidation("User-Agent", "Novatune/1.0");
 
-                if (isHls)
+                var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), httpClient);
+                if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
                 {
-                    using var httpClient = new Windows.Web.Http.HttpClient();
-                    httpClient.DefaultRequestHeaders.TryAppendWithoutValidation("User-Agent", "Novatune/1.0");
-
-                    var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), httpClient);
-                    if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
-                    {
-                        args.SetAdaptiveMediaSource(amsResult.MediaSource);
-                    }
-                    else
-                    {
-                        args.SetUri(new Uri(url));
-                    }
+                    args.SetAdaptiveMediaSource(amsResult.MediaSource);
                 }
                 else
                 {
                     args.SetUri(new Uri(url));
                 }
             }
-            else if (kind == "YouTube")
+            else
             {
-                // var ytUrl = await YoutubeExplode.GetMuxedUrl(url);
-                // args.SetUri(new Uri(ytUrl));
+                args.SetUri(new Uri(url));
             }
+
+            //else if (kind == "YouTube")
+            //{
+            //    // var ytUrl = await YoutubeExplode.GetMuxedUrl(url);
+            //    // args.SetUri(new Uri(ytUrl));
+            //}
         }
         catch (Exception ex)
         {
@@ -350,7 +385,13 @@ public partial class MediaViewModel : BaseViewModel
             return;
 
         if (_mediaPlaybackList.CurrentItem == track.PlaybackItem)
+        {
+            if (MediaPlayer.PlaybackSession.PlaybackState != MediaPlaybackState.Playing)
+            {
+                MediaPlayer.Play();
+            }
             return;
+        }
 
         var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
 
