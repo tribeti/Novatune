@@ -22,6 +22,13 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
+    private static readonly Windows.Web.Http.HttpClient _winHttpClient = CreateHttpClient();
+    private static Windows.Web.Http.HttpClient CreateHttpClient()
+    {
+        var client = new Windows.Web.Http.HttpClient();
+        client.DefaultRequestHeaders.TryAppendWithoutValidation("User-Agent", "Novatune/1.0");
+        return client;
+    }
     public MediaPlayer MediaPlayer { get; } = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
@@ -216,56 +223,85 @@ public partial class MediaViewModel : BaseViewModel
 
         var tasks = files.Select(async file =>
         {
-            var source = MediaSource.CreateFromStorageFile(file);
-            bool isVideo = file.FileType.ToLower() is ".mp4" or ".mkv" or ".wmv";
-            source.CustomProperties["Kind"] = SourceKind.Local.ToString();
-
-            var musicPropsTask = file.Properties.GetMusicPropertiesAsync();
-            var thumbnailTask = file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
-
-            await Task.WhenAll(musicPropsTask.AsTask(), thumbnailTask.AsTask());
-
-            var musicProps = musicPropsTask.GetResults();
-            using var thumbnail = thumbnailTask.GetResults();
-
-            BitmapImage? bitmap = null;
-            if (thumbnail is not null)
+            try
             {
-                bitmap = new BitmapImage();
-                await bitmap.SetSourceAsync(thumbnail);
+                var source = MediaSource.CreateFromStorageFile(file);
+
+                bool isVideo = file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                               file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase) ||
+                               file.FileType.Equals(".wmv", StringComparison.OrdinalIgnoreCase);
+
+                source.CustomProperties["Kind"] = SourceKind.Local.ToString();
+
+                var musicProps = await file.Properties.GetMusicPropertiesAsync();
+                var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+
+                var playbackItem = new MediaPlaybackItem(source);
+
+                var props = playbackItem.GetDisplayProperties();
+                props.Type = isVideo ? MediaPlaybackType.Video : MediaPlaybackType.Music;
+
+                string title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
+                string artist = musicProps.Artist;
+
+                if (isVideo)
+                {
+                    props.VideoProperties.Title = file.DisplayName;
+                }
+                else
+                {
+                    props.MusicProperties.Title = title;
+                    props.MusicProperties.Artist = artist;
+                }
+                playbackItem.ApplyDisplayProperties(props);
+
+                return new
+                {
+                    File = file,
+                    Title = title,
+                    Artist = artist,
+                    Thumbnail = thumbnail,
+                    PlaybackItem = playbackItem
+                };
             }
-
-            var playbackItem = new MediaPlaybackItem(source);
-
-            var props = playbackItem.GetDisplayProperties();
-            props.Type = isVideo ? MediaPlaybackType.Video : MediaPlaybackType.Music;
-            if (isVideo)
-                props.VideoProperties.Title = file.DisplayName;
-            else
+            catch (Exception ex)
             {
-                props.MusicProperties.Title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
-                props.MusicProperties.Artist = musicProps.Artist;
+                Debug.WriteLine($"Failed to process file {file.Name}: {ex.Message}");
+                return null;
             }
-            playbackItem.ApplyDisplayProperties(props);
+        });
 
-            var title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
+        var results = await Task.WhenAll(tasks);
 
-            return MediaItem.FromLocal(file.Path, title, musicProps.Artist, bitmap, playbackItem);
-        }).ToList();
-
-
-        var tracks = await Task.WhenAll(tasks);
-
-        _dispatcherQueue.TryEnqueue(() =>
+        _dispatcherQueue.TryEnqueue(async () =>
         {
-            foreach (var track in tracks)
+            try
             {
-                Playlist.Add(track);
-                _mediaPlaybackList.Items.Add(track.PlaybackItem);
-            }
+                var validResults = results.Where(r => r is not null);
 
-            if (MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
-                MediaPlayer.Play();
+                foreach (var res in validResults)
+                {
+                    BitmapImage? bitmap = null;
+                    if (res!.Thumbnail is not null)
+                    {
+                        bitmap = new BitmapImage();
+                        await bitmap.SetSourceAsync(res.Thumbnail);
+                        res.Thumbnail.Dispose();
+                    }
+
+                    var track = MediaItem.FromLocal(res.File.Path, res.Title, res.Artist, bitmap, res.PlaybackItem);
+
+                    Playlist.Add(track);
+                    _mediaPlaybackList.Items.Add(track.PlaybackItem);
+                }
+
+                if (validResults.Any() && MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
+                    MediaPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing media on UI thread: {ex.Message}");
+            }
         });
     }
 
@@ -347,10 +383,7 @@ public partial class MediaViewModel : BaseViewModel
 
             if (isHls)
             {
-                using var httpClient = new Windows.Web.Http.HttpClient();
-                httpClient.DefaultRequestHeaders.TryAppendWithoutValidation("User-Agent", "Novatune/1.0");
-
-                var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), httpClient);
+                var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
                 if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
                 {
                     args.SetAdaptiveMediaSource(amsResult.MediaSource);
