@@ -205,7 +205,7 @@ public partial class MediaViewModel : BaseViewModel
     public partial BitmapImage? CurrentImage { get; set; }
 
     [ObservableProperty]
-    public partial int PlaylistIndex { get; set; } = -1;
+    public partial MediaItem? CurrentTrack { get; set; }
 
     public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
@@ -223,6 +223,7 @@ public partial class MediaViewModel : BaseViewModel
 
         var tasks = files.Select(async file =>
         {
+            StorageItemThumbnail? thumbnail = null;
             try
             {
                 var source = MediaSource.CreateFromStorageFile(file);
@@ -234,7 +235,7 @@ public partial class MediaViewModel : BaseViewModel
                 source.CustomProperties["Kind"] = SourceKind.Local.ToString();
 
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
-                var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+                thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
 
                 var playbackItem = new MediaPlaybackItem(source);
 
@@ -267,42 +268,46 @@ public partial class MediaViewModel : BaseViewModel
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to process file {file.Name}: {ex.Message}");
+                thumbnail?.Dispose();
                 return null;
             }
         });
 
         var results = await Task.WhenAll(tasks);
 
-        _dispatcherQueue.TryEnqueue(async () =>
+        try
         {
-            try
-            {
-                var validResults = results.Where(r => r is not null);
+            var validResults = results.Where(r => r is not null);
 
-                foreach (var res in validResults)
+            foreach (var res in validResults)
+            {
+                BitmapImage? bitmap = null;
+                try
                 {
-                    BitmapImage? bitmap = null;
                     if (res!.Thumbnail is not null)
                     {
                         bitmap = new BitmapImage();
                         await bitmap.SetSourceAsync(res.Thumbnail);
-                        res.Thumbnail.Dispose();
                     }
-
-                    var track = MediaItem.FromLocal(res.File.Path, res.Title, res.Artist, bitmap, res.PlaybackItem);
-
-                    Playlist.Add(track);
-                    _mediaPlaybackList.Items.Add(track.PlaybackItem);
+                }
+                finally
+                {
+                    res!.Thumbnail?.Dispose();
                 }
 
-                if (validResults.Any() && MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
-                    MediaPlayer.Play();
+                var track = MediaItem.FromLocal(res.File.Path, res.Title, res.Artist, bitmap, res.PlaybackItem);
+
+                Playlist.Add(track);
+                _mediaPlaybackList.Items.Add(track.PlaybackItem);
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error processing media on UI thread: {ex.Message}");
-            }
-        });
+
+            if (validResults.Any() && MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
+                MediaPlayer.Play();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error processing media on UI thread: {ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -317,32 +322,20 @@ public partial class MediaViewModel : BaseViewModel
 
         bool wasCurrent = item.IsCurrent;
 
+        if (wasCurrent && Playlist.Count > 1)
+        {
+            if (index == Playlist.Count - 1)
+                _mediaPlaybackList.MovePrevious();
+            else
+                _mediaPlaybackList.MoveNext();
+        }
+
         Playlist.RemoveAt(index);
         _mediaPlaybackList.Items.RemoveAt(index);
 
         if (Playlist.Count == 0)
         {
             MediaPlayer.Pause();
-            PlaylistIndex = -1;
-            Title = string.Empty;
-            CurrentImage = _defaultImage;
-            return;
-        }
-
-        if (wasCurrent)
-        {
-            var nextIndex = Math.Min(index, Playlist.Count - 1);
-            _mediaPlaybackList.MoveTo((uint) nextIndex);
-            PlaylistIndex = nextIndex;
-        }
-
-        else if (PlaylistIndex > index)
-        {
-            PlaylistIndex--;
-        }
-        else if (PlaylistIndex == index)
-        {
-            PlaylistIndex = Math.Min(index, Playlist.Count - 1);
         }
     }
 
@@ -446,7 +439,7 @@ public partial class MediaViewModel : BaseViewModel
             {
                 Title = string.Empty;
                 CurrentImage = _defaultImage;
-                PlaylistIndex = -1;
+                CurrentTrack = null;
                 IsLive = false;
                 return;
             }
@@ -460,11 +453,11 @@ public partial class MediaViewModel : BaseViewModel
                 currentTrack.IsCurrent = true;
                 Title = currentTrack.Title;
                 CurrentImage = currentTrack.Thumbnail ?? _defaultImage;
-                PlaylistIndex = Playlist.IndexOf(currentTrack);
+                CurrentTrack = currentTrack;
             }
             else
             {
-                PlaylistIndex = -1;
+                CurrentTrack = null;
             }
         });
     }

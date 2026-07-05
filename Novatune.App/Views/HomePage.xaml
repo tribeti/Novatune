@@ -60,7 +60,7 @@
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.Below="sep"
-                SelectedIndex="{x:Bind ViewModel.PlaylistIndex, Mode=OneWay}"
+                SelectedItem="{x:Bind ViewModel.CurrentTrack, Mode=OneWay}"
                 SelectionChanged="Queue_SelectionChanged"
                 SelectionMode="Single">
 

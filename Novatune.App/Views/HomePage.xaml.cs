@@ -36,14 +36,6 @@ public sealed partial class HomePage : Page
         if (sender is FrameworkElement { DataContext: MediaItem item })
         {
             ViewModel.RemoveMediaCommand.Execute(item);
-            if (ViewModel.PlaylistIndex >= 0 && ViewModel.PlaylistIndex < Queue.Items.Count)
-            {
-                Queue.SelectedIndex = ViewModel.PlaylistIndex;
-            }
-            else
-            {
-                Queue.SelectedIndex = -1;
-            }
         }
     }
 }
