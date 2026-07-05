@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevWinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -9,8 +10,10 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Media;
 using Windows.Media.Core;
 using Windows.Media.Playback;
+using Windows.Media.Streaming.Adaptive;
 using Windows.Storage.FileProperties;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -19,10 +22,16 @@ namespace Novatune.App.ViewModels;
 
 public partial class MediaViewModel : BaseViewModel
 {
+    private static readonly Windows.Web.Http.HttpClient _winHttpClient = CreateHttpClient();
+    private static Windows.Web.Http.HttpClient CreateHttpClient()
+    {
+        var client = new Windows.Web.Http.HttpClient();
+        client.DefaultRequestHeaders.TryAppendWithoutValidation("User-Agent", "Novatune/1.0");
+        return client;
+    }
     public MediaPlayer MediaPlayer { get; } = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
-    public ObservableCollection<RadioItem> RadioPlaylist { get; } = [];
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
     {
@@ -30,7 +39,7 @@ public partial class MediaViewModel : BaseViewModel
     };
 
     [ObservableProperty]
-    public partial bool IsPlayingRadio { get; set; } = false;
+    public partial bool IsLive { get; set; } = false;
 
     public MediaViewModel()
     {
@@ -196,203 +205,267 @@ public partial class MediaViewModel : BaseViewModel
     public partial BitmapImage? CurrentImage { get; set; }
 
     [ObservableProperty]
-    public partial int LocalPlaylistIndex { get; set; } = -1;
-
-    [ObservableProperty]
-    public partial int RadioPlaylistIndex { get; set; } = -1;
+    public partial MediaItem? CurrentTrack { get; set; }
 
     public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
     [RelayCommand]
     public async Task AddLocalMedia()
     {
-        var picker = new FileOpenPicker
-        {
-            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-            ViewMode = PickerViewMode.List,
-            FileTypeFilter = { ".wmv", ".mp4", ".mkv", ".mp3", ".flac" },
-        };
-
-        var mainWindow = (App.Current as App)!.MainWindow;
-        var hwnd = WindowNative.GetWindowHandle(mainWindow);
+        var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary, ViewMode = PickerViewMode.List };
+        picker.FileTypeFilter.AddRange([".wmv", ".mp4", ".mkv", ".mp3", ".flac"]);
+        var hwnd = WindowNative.GetWindowHandle((App.Current as App)!.MainWindow);
         InitializeWithWindow.Initialize(picker, hwnd);
 
         var files = await picker.PickMultipleFilesAsync();
+        if (files is null || files.Count == 0)
+            return;
 
-        if (files is not null && files.Count > 0)
+        var tasks = files.Select(async file =>
         {
-            var tasks = files.Select(async file =>
+            StorageItemThumbnail? thumbnail = null;
+            try
             {
                 var source = MediaSource.CreateFromStorageFile(file);
-                var playbackItem = new MediaPlaybackItem(source);
+
+                bool isVideo = file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                               file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase) ||
+                               file.FileType.Equals(".wmv", StringComparison.OrdinalIgnoreCase);
+
+                source.CustomProperties["Kind"] = SourceKind.Local.ToString();
+
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
-                using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+                thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
 
-                var item = new MediaItem
-                {
-                    PlaybackItem = playbackItem,
-                    DisplayName = file.DisplayName,
-                    FilePath = file.Path,
-                    Title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title,
-                    Artist = musicProps.Artist
-                };
+                var playbackItem = new MediaPlaybackItem(source);
 
-                if (thumbnail is not null)
+                var props = playbackItem.GetDisplayProperties();
+                props.Type = isVideo ? MediaPlaybackType.Video : MediaPlaybackType.Music;
+
+                string title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
+                string artist = musicProps.Artist;
+
+                if (isVideo)
                 {
-                    var bitmap = new BitmapImage();
-                    await bitmap.SetSourceAsync(thumbnail);
-                    item.Img = bitmap;
+                    props.VideoProperties.Title = file.DisplayName;
                 }
-                return item;
-            });
+                else
+                {
+                    props.MusicProperties.Title = title;
+                    props.MusicProperties.Artist = artist;
+                }
+                playbackItem.ApplyDisplayProperties(props);
 
-            var items = await Task.WhenAll(tasks);
-
-            foreach (var item in items)
-            {
-                Playlist.Add(item);
-                _mediaPlaybackList.Items.Add(item.PlaybackItem);
+                return new
+                {
+                    File = file,
+                    Title = title,
+                    Artist = artist,
+                    Thumbnail = thumbnail,
+                    PlaybackItem = playbackItem
+                };
             }
-
-            MediaPlayer.Play();
-        }
-    }
-
-    public void PlayLocal(int index)
-    {
-        if (index < 0 || index >= Playlist.Count)
-            return;
-
-        IsPlayingRadio = false;
-        RadioPlaylistIndex = -1;
-
-        if (!ReferenceEquals(MediaPlayer.Source, _mediaPlaybackList))
-            MediaPlayer.Source = _mediaPlaybackList;
-
-        var selectedItem = Playlist[index];
-        var playbackItemIndex = _mediaPlaybackList.Items.IndexOf(selectedItem.PlaybackItem);
-
-        if (playbackItemIndex >= 0)
-        {
-            _mediaPlaybackList.MoveTo((uint) playbackItemIndex);
-            MediaPlayer.Play();
-        }
-    }
-
-    public void PlayRadio(int index)
-    {
-        if (index < 0 || index >= RadioPlaylist.Count)
-            return;
-
-        var station = RadioPlaylist[index];
-        if (station.PlaybackItem is null)
-            return;
-
-        IsPlayingRadio = true;
-        LocalPlaylistIndex = -1;
-
-        _currentMediaItem?.IsCurrent = false;
-        _currentMediaItem = null;
-
-        RadioPlaylistIndex = index;
-        Title = station.Name;
-
-        BitmapImage img = _defaultImage;
-        if (!string.IsNullOrWhiteSpace(station.Favicon))
-        {
-            static string UpgradeToHttps(string url) =>
-                url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + url[7..] : url;
-
-            if (Uri.TryCreate(UpgradeToHttps(station.Favicon), UriKind.Absolute, out var faviconUri))
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Failed to process file {file.Name}: {ex.Message}");
+                thumbnail?.Dispose();
+                return null;
+            }
+        });
+
+        var results = await Task.WhenAll(tasks);
+
+        try
+        {
+            var validResults = results.Where(r => r is not null);
+
+            foreach (var res in validResults)
+            {
+                BitmapImage? bitmap = null;
                 try
-                { img = new BitmapImage(faviconUri); }
-                catch { }
-            }
-        }
-        CurrentImage = img;
+                {
+                    if (res!.Thumbnail is not null)
+                    {
+                        bitmap = new BitmapImage();
+                        await bitmap.SetSourceAsync(res.Thumbnail);
+                    }
+                }
+                finally
+                {
+                    res!.Thumbnail?.Dispose();
+                }
 
-        MediaPlayer.Source = station.PlaybackItem;
+                var track = MediaItem.FromLocal(res.File.Path, res.Title, res.Artist, bitmap, res.PlaybackItem);
+
+                Playlist.Add(track);
+                _mediaPlaybackList.Items.Add(track.PlaybackItem);
+            }
+
+            if (validResults.Any() && MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None)
+                MediaPlayer.Play();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error processing media on UI thread: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    public void RemoveMedia(MediaItem? item)
+    {
+        if (item is null)
+            return;
+
+        var index = Playlist.IndexOf(item);
+        if (index < 0)
+            return;
+
+        bool wasCurrent = item.IsCurrent;
+
+        if (wasCurrent && Playlist.Count > 1)
+        {
+            if (index == Playlist.Count - 1)
+                _mediaPlaybackList.MovePrevious();
+            else
+                _mediaPlaybackList.MoveNext();
+        }
+
+        Playlist.RemoveAt(index);
+        _mediaPlaybackList.Items.RemoveAt(index);
+
+        if (Playlist.Count == 0)
+        {
+            MediaPlayer.Pause();
+        }
+    }
+
+    public void AddRadio(RadioItem station)
+    {
+        var binder = new MediaBinder { Token = $"{station.UrlResolved}" };
+        binder.Binding += Binder_Binding;
+
+        var source = MediaSource.CreateFromMediaBinder(binder);
+        source.CustomProperties["Kind"] = SourceKind.Radio.ToString();
+
+        var playbackItem = new MediaPlaybackItem(source);
+
+        var props = playbackItem.GetDisplayProperties();
+        props.Type = MediaPlaybackType.Music;
+        props.MusicProperties.Title = station.Name;
+        props.MusicProperties.Artist = "Radio";
+        playbackItem.ApplyDisplayProperties(props);
+
+        var track = MediaItem.FromRadio(station, playbackItem);
+
+        Playlist.Add(track);
+        _mediaPlaybackList.Items.Add(track.PlaybackItem);
+
+        var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
+        _mediaPlaybackList.MoveTo((uint) index);
         MediaPlayer.Play();
     }
 
-    public void AddRadioStation(RadioItem station)
+    private async void Binder_Binding(MediaBinder sender, MediaBindingEventArgs args)
     {
-        RadioPlaylist.Add(station);
-        PlayRadio(RadioPlaylist.Count - 1);
-    }
+        var deferral = args.GetDeferral();
+        var url = sender.Token;
 
-    private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
-    {
-        var failedItem = args.Item;
-        var error = args.Error;
-
-        switch (error.ErrorCode)
+        try
         {
-            case MediaPlaybackItemErrorCode.NetworkError:
-            _dispatcherQueue.TryEnqueue(() =>
-            {
-                Debug.WriteLine($"Network error: {error.ExtendedError.Message}");
-            });
-            break;
+            bool isHls = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase);
 
-            case MediaPlaybackItemErrorCode.DecodeError:
-            _dispatcherQueue.TryEnqueue(() =>
+            if (isHls)
             {
-                Debug.WriteLine("Cannot decode this media file.");
-            });
-            break;
+                var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
+                if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
+                {
+                    args.SetAdaptiveMediaSource(amsResult.MediaSource);
+                }
+                else
+                {
+                    args.SetUri(new Uri(url));
+                }
+            }
+            else
+            {
+                args.SetUri(new Uri(url));
+            }
 
-            case MediaPlaybackItemErrorCode.EncryptionError:
-            _dispatcherQueue.TryEnqueue(() =>
-            {
-                Debug.WriteLine("Media is encrypted.");
-            });
-            break;
-
-            case MediaPlaybackItemErrorCode.SourceNotSupportedError:
-            _dispatcherQueue.TryEnqueue(() =>
-            {
-                Debug.WriteLine("File format is not supported.");
-            });
-            break;
-            default:
-            _dispatcherQueue.TryEnqueue(() =>
-            {
-                Debug.WriteLine($"[MediaPlaybackList] ItemFailed: {error.ErrorCode}, HResult: 0x{error.ExtendedError?.HResult:X8}");
-            });
-            break;
+            //else if (kind == "YouTube")
+            //{
+            //    // var ytUrl = await YoutubeExplode.GetMuxedUrl(url);
+            //    // args.SetUri(new Uri(ytUrl));
+            //}
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Binding failed: {ex.Message}");
         }
 
-        _dispatcherQueue.TryEnqueue(() =>
-        {
-            if (sender.Items.Count > 1)
-            {
-                sender.MoveNext();
-            }
-        });
+        deferral.Complete();
     }
 
-    private MediaItem? _currentMediaItem;
+    public void PlayTrack(MediaItem track)
+    {
+        if (track?.PlaybackItem is null)
+            return;
+
+        if (_mediaPlaybackList.CurrentItem == track.PlaybackItem)
+        {
+            if (MediaPlayer.PlaybackSession.PlaybackState != MediaPlaybackState.Playing)
+            {
+                MediaPlayer.Play();
+            }
+            return;
+        }
+
+        var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
+
+        if (index >= 0)
+        {
+            _mediaPlaybackList.MoveTo((uint) index);
+            MediaPlayer.Play();
+        }
+    }
+
     private void MediaPlaybackList_CurrentItemChanged(MediaPlaybackList sender, CurrentMediaPlaybackItemChangedEventArgs args)
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
-            if (IsPlayingRadio)
+            var prev = Playlist.FirstOrDefault(t => t.IsCurrent);
+            prev?.IsCurrent = false;
+
+            if (args.NewItem is null)
+            {
+                Title = string.Empty;
+                CurrentImage = _defaultImage;
+                CurrentTrack = null;
+                IsLive = false;
                 return;
+            }
 
-            _currentMediaItem?.IsCurrent = false;
-            var current = Playlist.FirstOrDefault(x => x.PlaybackItem == args.NewItem);
-            current?.IsCurrent = true;
+            var kind = args.NewItem.Source.CustomProperties["Kind"] as string ?? "Unknown";
+            IsLive = (kind == SourceKind.Radio.ToString());
 
-            _currentMediaItem = current;
-
-            Title = current?.Title ?? string.Empty;
-            CurrentImage = current?.Img ?? _defaultImage;
-            var newIndex = current is not null ? Playlist.IndexOf(current) : -1;
-            if (newIndex >= 0 && newIndex != LocalPlaylistIndex)
-                LocalPlaylistIndex = newIndex;
+            var currentTrack = Playlist.FirstOrDefault(t => t.PlaybackItem == args.NewItem);
+            if (currentTrack is not null)
+            {
+                currentTrack.IsCurrent = true;
+                Title = currentTrack.Title;
+                CurrentImage = currentTrack.Thumbnail ?? _defaultImage;
+                CurrentTrack = currentTrack;
+            }
+            else
+            {
+                CurrentTrack = null;
+            }
         });
+    }
+
+    private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
+    {
+        Debug.WriteLine($"ItemFailed: {args.Error.ErrorCode}");
+        _dispatcherQueue.TryEnqueue(() => { if (sender.Items.Count > 1) sender.MoveNext(); });
     }
 
     #endregion

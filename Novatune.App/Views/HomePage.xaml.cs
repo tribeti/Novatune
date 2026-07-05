@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Novatune.App.Models;
 using Novatune.App.ViewModels;
 
 namespace Novatune.App.Views;
@@ -22,21 +23,19 @@ public sealed partial class HomePage : Page
 
     private void OnUnloaded(object sender, RoutedEventArgs e) => mediaPlayerElement.SetMediaPlayer(null);
 
-    private void LocalList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void Queue_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (Queue.SelectedIndex >= 0 && Queue.SelectedIndex != ViewModel.LocalPlaylistIndex)
+        if (sender is ListView listView && listView.SelectedItem is MediaItem selectedTrack)
         {
-            ViewModel.PlayLocal(Queue.SelectedIndex);
-            RadioList.SelectedIndex = -1;
+            ViewModel.PlayTrack(selectedTrack);
         }
     }
 
-    private void RadioList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void RemoveItem_Click(object sender, RoutedEventArgs e)
     {
-        if (RadioList.SelectedIndex >= 0 && RadioList.SelectedIndex != ViewModel.RadioPlaylistIndex)
+        if (sender is FrameworkElement { DataContext: MediaItem item })
         {
-            ViewModel.PlayRadio(RadioList.SelectedIndex);
-            Queue.SelectedIndex = -1;
+            ViewModel.RemoveMediaCommand.Execute(item);
         }
     }
 }
