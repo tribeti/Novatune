@@ -21,10 +21,12 @@ namespace Novatune.App;
 public sealed partial class MainWindow : Window
 {
     public MediaViewModel ViewModel { get; }
-    private bool _isExiting = false;
 
     public MainWindow()
     {
+        // services
+        ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+
         InitializeComponent();
         // title bar
         this.ExtendsContentIntoTitleBar = true;
@@ -43,7 +45,7 @@ public sealed partial class MainWindow : Window
         {
             var flyout = new MenuFlyout();
             flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
-            flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit App" });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
             ((MenuFlyoutItem) flyout.Items[0]).Click += (s, args) =>
             {
                 this.Show();
@@ -52,22 +54,15 @@ public sealed partial class MainWindow : Window
 
             ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
             {
-                _isExiting = true;
                 this.Close();
             };
             e.Flyout = flyout;
         };
 
-        // services
-        ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
-
         this.AppWindow.Closing += (s, e) =>
         {
-            if (!_isExiting)
-            {
-                e.Cancel = true;
-                this.Hide();
-            }
+            e.Cancel = true;
+            this.Hide();
         };
     }
 
