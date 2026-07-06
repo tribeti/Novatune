@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Novatune.App.ViewModels;
 using System;
+using WinUIEx;
 
 namespace Novatune.App;
 
@@ -30,7 +31,15 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new MainWindow();
-        MainWindow.Activate();
+        var wm = WindowManager.Get(MainWindow);
+        wm.WindowStateChanged += (s, state) => wm.AppWindow.IsShownInSwitchers = state != WindowState.Minimized;
+
+        bool launchToTray = false;
+
+        if (launchToTray)
+            wm.WindowState = WindowState.Minimized;
+        else
+            MainWindow.Activate();
     }
 
     private static ServiceProvider ConfigureServices()

@@ -14,20 +14,61 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using WinUIEx;
 
 namespace Novatune.App;
 
 public sealed partial class MainWindow : Window
 {
     public MediaViewModel ViewModel { get; }
+    private bool _isExiting = false;
 
     public MainWindow()
     {
         InitializeComponent();
+        // title bar
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
+        // window
+        this.CenterOnScreen();
+        var manager = WinUIEx.WindowManager.Get(this);
+        manager.MinWidth = 800;
+        manager.MinHeight = 600;
+        manager.Width = 1000;
+        manager.Height = 800;
+        //tray icon
+        manager.IsVisibleInTray = true;
+        manager.TrayIconContextMenu += (w, e) =>
+        {
+            var flyout = new MenuFlyout();
+            flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit App" });
+            ((MenuFlyoutItem) flyout.Items[0]).Click += (s, args) =>
+            {
+                this.Show();
+                this.Activate();
+            };
+
+            ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
+            {
+                _isExiting = true;
+                this.Close();
+            };
+            e.Flyout = flyout;
+        };
+
+        // services
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+
+        this.AppWindow.Closing += (s, e) =>
+        {
+            if (!_isExiting)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
+        };
     }
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
