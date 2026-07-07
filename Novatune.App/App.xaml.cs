@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Novatune.App.Services;
 using Novatune.App.ViewModels;
 using System;
 using WinUIEx;
@@ -32,7 +33,6 @@ public partial class App : Application
     {
         MainWindow = new MainWindow();
         var wm = WindowManager.Get(MainWindow);
-        wm.WindowStateChanged += (s, state) => wm.AppWindow.IsShownInSwitchers = state != WindowState.Minimized;
 
         bool launchToTray = false;
 
@@ -47,6 +47,7 @@ public partial class App : Application
         var services = new ServiceCollection();
         services.AddSingleton<MediaViewModel>();
         services.AddSingleton<RadioViewModel>();
+        services.AddSingleton<SettingsService>();
         return services.BuildServiceProvider();
     }
 }

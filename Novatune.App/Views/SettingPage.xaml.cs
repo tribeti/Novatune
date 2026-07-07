@@ -1,31 +1,25 @@
-using Microsoft.UI.Xaml;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using Novatune.App.Services;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+namespace Novatune.App.Views;
 
-namespace Novatune.App.Views
+public sealed partial class SettingPage : Page
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    public sealed partial class SettingPage : Page
+    private readonly SettingsService _settingsService;
+    public SettingPage()
     {
-        public SettingPage()
+        _settingsService = App.Current.Services.GetService<SettingsService>()!;
+        InitializeComponent();
+        TraySwitch.IsOn = _settingsService.Settings.MinimizeOnClose;
+    }
+
+    private void TraySwitch_Toggled(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (this.IsLoaded)
         {
-            InitializeComponent();
+            _settingsService.Settings.MinimizeOnClose = TraySwitch.IsOn;
+            _settingsService.Save();
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
+using Novatune.App.Services;
 using Novatune.App.ViewModels;
 using Novatune.App.Views;
 using System;
@@ -26,6 +27,7 @@ public sealed partial class MainWindow : Window
     {
         // services
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+        var settingsService = App.Current.Services.GetService<SettingsService>()!;
 
         InitializeComponent();
         // title bar
@@ -61,8 +63,11 @@ public sealed partial class MainWindow : Window
 
         this.AppWindow.Closing += (s, e) =>
         {
-            e.Cancel = true;
-            this.Hide();
+            if (settingsService.Settings.MinimizeOnClose)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
         };
     }
 
