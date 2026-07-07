@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml;
 using Novatune.App.Services;
 using Novatune.App.ViewModels;
 using System;
-using WinUIEx;
 
 namespace Novatune.App;
 
@@ -32,14 +31,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new MainWindow();
-        var wm = WindowManager.Get(MainWindow);
-
-        bool launchToTray = false;
-
-        if (launchToTray)
-            wm.WindowState = WindowState.Minimized;
-        else
-            MainWindow.Activate();
+        MainWindow.Activate();
     }
 
     private static ServiceProvider ConfigureServices()

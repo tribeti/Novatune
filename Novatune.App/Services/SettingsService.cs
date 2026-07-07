@@ -31,7 +31,7 @@ public class SettingsService
             try
             {
                 string json = File.ReadAllText(_settingsPath);
-                Settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
             }
             catch
             {
