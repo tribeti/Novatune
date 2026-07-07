@@ -9,6 +9,23 @@
     mc:Ignorable="d">
 
     <Grid>
-        <TextBlock>setting</TextBlock>
+        <RelativePanel
+            Margin="24"
+            Padding="24"
+            Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
+            CornerRadius="8">
+            <TextBlock
+                x:Name="Header"
+                Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                Text="Close behavior" />
+            <TextBlock
+                x:Name="Description"
+                RelativePanel.Below="Header"
+                Text="Close button should minimize app" />
+            <ToggleSwitch
+                x:Name="TraySwitch"
+                RelativePanel.Below="Description"
+                Toggled="TraySwitch_Toggled" />
+        </RelativePanel>
     </Grid>
 </Page>

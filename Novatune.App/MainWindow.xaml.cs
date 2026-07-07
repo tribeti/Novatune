@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
+using Novatune.App.Services;
 using Novatune.App.ViewModels;
 using Novatune.App.Views;
 using System;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using WinUIEx;
 
 namespace Novatune.App;
 
@@ -23,11 +25,50 @@ public sealed partial class MainWindow : Window
 
     public MainWindow()
     {
+        // services
+        ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+        var settingsService = App.Current.Services.GetService<SettingsService>()!;
+
         InitializeComponent();
+        // title bar
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
-        ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+        // window
+        this.CenterOnScreen();
+        var manager = WinUIEx.WindowManager.Get(this);
+        manager.MinWidth = 800;
+        manager.MinHeight = 600;
+        manager.Width = 1000;
+        manager.Height = 800;
+        //tray icon
+        manager.IsVisibleInTray = true;
+        manager.TrayIconContextMenu += (w, e) =>
+        {
+            var flyout = new MenuFlyout();
+            flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
+            ((MenuFlyoutItem) flyout.Items[0]).Click += (s, args) =>
+            {
+                this.Show();
+                this.Activate();
+            };
+
+            ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
+            {
+                this.Close();
+            };
+            e.Flyout = flyout;
+        };
+
+        this.AppWindow.Closing += (s, e) =>
+        {
+            if (settingsService.Settings.MinimizeOnClose)
+            {
+                e.Cancel = true;
+                this.Hide();
+            }
+        };
     }
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
