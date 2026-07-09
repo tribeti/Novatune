@@ -1,4 +1,4 @@
-using Novatune.App.Models;
+﻿using Novatune.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,9 +9,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Novatune.App.ViewModels;
+namespace Novatune.App.Services;
 
-public partial class RadioViewModel : BaseViewModel
+public class RadioService
 {
     private static readonly HttpClient _http = new()
     {
@@ -21,7 +21,7 @@ public partial class RadioViewModel : BaseViewModel
     private static List<string> _cachedServers = [];
     private static DateTime _cacheExpiry = DateTime.MinValue;
 
-    static RadioViewModel()
+    static RadioService()
     {
         _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Novatune/1.0");
     }

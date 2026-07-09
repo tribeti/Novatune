@@ -169,8 +169,8 @@ public sealed partial class MainWindow : Window
         {
             await Task.Delay(350, token);
 
-            var stationsTask = RadioViewModel.SearchStationsAsync(sender.Text, token);
-            var videosTask = YoutubeViewModel.SearchVideosAsync(sender.Text, token);
+            var stationsTask = RadioService.SearchStationsAsync(sender.Text, token);
+            var videosTask = YoutubeService.SearchVideosAsync(sender.Text, token);
             
             await Task.WhenAll(stationsTask, videosTask);
             if (token.IsCancellationRequested)

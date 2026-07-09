@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 
-namespace Novatune.App.ViewModels;
+namespace Novatune.App.Services;
 
-public partial class YoutubeViewModel : BaseViewModel
+public class YoutubeService
 {
     private static readonly YoutubeClient _youtube = new();
 

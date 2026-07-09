@@ -38,8 +38,9 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
         services.AddSingleton<MediaViewModel>();
-        services.AddSingleton<RadioViewModel>();
         services.AddSingleton<SettingsService>();
+        services.AddSingleton<RadioService>();
+        services.AddSingleton<YoutubeService>();
         return services.BuildServiceProvider();
     }
 }
