@@ -30,12 +30,12 @@
                     x:Name="SearchBox"
                     MinWidth="400"
                     VerticalAlignment="Center"
-                    PlaceholderText="Search for radio stations"
+                    PlaceholderText="Search for online media"
                     QueryIcon="Find"
                     QuerySubmitted="SearchBox_QuerySubmitted"
                     TextChanged="SearchBox_TextChanged">
                     <AutoSuggestBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:RadioItem">
+                        <DataTemplate x:DataType="models:MediaItem">
                             <StackPanel
                                 Margin="0,4"
                                 Orientation="Horizontal"
@@ -44,7 +44,7 @@
                                     <TextBlock
                                         MaxWidth="300"
                                         FontWeight="SemiBold"
-                                        Text="{x:Bind Name}"
+                                        Text="{x:Bind Title}"
                                         TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </StackPanel>

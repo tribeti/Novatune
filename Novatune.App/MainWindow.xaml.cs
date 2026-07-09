@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
 using Novatune.App.Services;
@@ -157,7 +158,7 @@ public sealed partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(sender.Text))
         {
             _searchCts = null;
-            sender.ItemsSource = Array.Empty<RadioItem>();
+            sender.ItemsSource = Array.Empty<MediaItem>();
             return;
         }
 
@@ -167,16 +168,60 @@ public sealed partial class MainWindow : Window
         try
         {
             await Task.Delay(350, token);
-            var stations = await RadioViewModel.SearchStationsAsync(sender.Text, token);
 
-            sender.ItemsSource = stations.Count > 0
-                ? stations
-                : new List<RadioItem> { new() { Name = "No results found" } };
+            var stations = await RadioViewModel.SearchStationsAsync(sender.Text, token);
+            var videos = await YoutubeViewModel.SearchVideosAsync(sender.Text);
+
+            var unifiedResults = new List<MediaItem>();
+
+            foreach (var s in stations)
+            {
+                BitmapImage? img = null;
+                if (!string.IsNullOrWhiteSpace(s.Favicon))
+                {
+                    var url = s.Favicon.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + s.Favicon[7..] : s.Favicon;
+                    if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                        img = new BitmapImage(uri);
+                }
+                unifiedResults.Add(new MediaItem
+                {
+                    Kind = SourceKind.Radio,
+                    Title = s.Name,
+                    Subtitle = string.IsNullOrWhiteSpace(s.Tags) ? "Radio Station" : s.Tags,
+                    Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+                    SourceItem = s
+                });
+            }
+
+            if (videos is not null)
+            {
+                foreach (var v in videos)
+                {
+                    BitmapImage? img = null;
+                    if (!string.IsNullOrWhiteSpace(v.ThumbnailUrl))
+                    {
+                        if (Uri.TryCreate(v.ThumbnailUrl, UriKind.Absolute, out var uri))
+                            img = new BitmapImage(uri);
+                    }
+                    unifiedResults.Add(new MediaItem
+                    {
+                        Kind = SourceKind.Youtube,
+                        Title = v.Title,
+                        Subtitle = v.Author,
+                        Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+                        SourceItem = v
+                    });
+                }
+            }
+
+            sender.ItemsSource = unifiedResults.Count > 0
+                ? unifiedResults
+                : new List<MediaItem> { new() { Title = "No results found", Subtitle = "Try different keywords", Kind = SourceKind.Local } };
         }
         catch (OperationCanceledException) { }
         catch (Exception)
         {
-            sender.ItemsSource = Array.Empty<RadioItem>();
+            sender.ItemsSource = Array.Empty<MediaItem>();
         }
         finally
         {
@@ -188,11 +233,21 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void SearchBox_QuerySubmitted(AutoSuggestBox _, AutoSuggestBoxQuerySubmittedEventArgs args)
+    private void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (args.ChosenSuggestion is not RadioItem station || string.IsNullOrWhiteSpace(station.UrlResolved))
-            return;
+        if (args.ChosenSuggestion is MediaItem item)
+        {
+            if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
+            {
+                ViewModel.AddRadio(radio);
+            }
+            else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
+            {
+                ViewModel.AddYoutube(youtube);
+            }
 
-        ViewModel.AddRadio(station);
+            sender.Text = string.Empty;
+            sender.ItemsSource = Array.Empty<MediaItem>();
+        }
     }
 }

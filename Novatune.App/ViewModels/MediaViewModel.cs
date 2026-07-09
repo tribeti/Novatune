@@ -17,6 +17,8 @@ using Windows.Media.Streaming.Adaptive;
 using Windows.Storage.FileProperties;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace Novatune.App.ViewModels;
 
@@ -37,6 +39,7 @@ public partial class MediaViewModel : BaseViewModel
     {
         Interval = TimeSpan.FromMilliseconds(500)
     };
+    private static readonly YoutubeClient _youtube = new();
 
     [ObservableProperty]
     public partial bool IsLive { get; set; } = false;
@@ -365,6 +368,32 @@ public partial class MediaViewModel : BaseViewModel
         MediaPlayer.Play();
     }
 
+    public void AddYoutube(YoutubeItem item)
+    {
+        var binder = new MediaBinder { Token = item.VideoUrl };
+        binder.Binding += Binder_Binding;
+
+        var source = MediaSource.CreateFromMediaBinder(binder);
+        source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
+
+        var playbackItem = new MediaPlaybackItem(source);
+
+        var props = playbackItem.GetDisplayProperties();
+        props.Type = MediaPlaybackType.Video;
+        props.VideoProperties.Title = item.Title;
+        props.VideoProperties.Subtitle = item.Author;
+        playbackItem.ApplyDisplayProperties(props);
+
+        var track = MediaItem.FromYoutube(item, playbackItem);
+
+        Playlist.Add(track);
+        _mediaPlaybackList.Items.Add(track.PlaybackItem);
+
+        var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
+        _mediaPlaybackList.MoveTo((uint) index);
+        MediaPlayer.Play();
+    }
+
     private async void Binder_Binding(MediaBinder sender, MediaBindingEventArgs args)
     {
         var deferral = args.GetDeferral();
@@ -372,6 +401,8 @@ public partial class MediaViewModel : BaseViewModel
 
         try
         {
+            var host = new Uri(url).Host.ToLowerInvariant();
+            bool isYoutube = host.Contains("youtube.com") || host.Contains("youtu.be");
             bool isHls = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase);
 
             if (isHls)
@@ -386,16 +417,23 @@ public partial class MediaViewModel : BaseViewModel
                     args.SetUri(new Uri(url));
                 }
             }
+            if (isYoutube)
+            {
+                var manifest = await _youtube.Videos.Streams.GetManifestAsync(url);
+
+                var streamInfo = manifest.GetMuxedStreams()
+                    .Where(s => s.Container == Container.Mp4)
+                    .GetWithHighestVideoQuality();
+
+                if (streamInfo is not null)
+                    args.SetUri(new Uri(streamInfo.Url));
+                else
+                    Debug.WriteLine("No compatible muxed stream found for this video.");
+            }
             else
             {
                 args.SetUri(new Uri(url));
             }
-
-            //else if (kind == "YouTube")
-            //{
-            //    // var ytUrl = await YoutubeExplode.GetMuxedUrl(url);
-            //    // args.SetUri(new Uri(ytUrl));
-            //}
         }
         catch (Exception ex)
         {
