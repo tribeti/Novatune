@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Common;
@@ -12,7 +13,7 @@ public partial class YoutubeViewModel : BaseViewModel
 {
     private static readonly YoutubeClient _youtube = new();
 
-    public static async Task<List<YoutubeItem>> SearchVideosAsync(string keyword)
+    public static async Task<List<YoutubeItem>> SearchVideosAsync(string keyword, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(keyword))
         {
@@ -20,11 +21,14 @@ public partial class YoutubeViewModel : BaseViewModel
         }
 
         var results = new List<YoutubeItem>();
+        const int maxResults = 20;
 
         try
         {
-            await foreach (var video in _youtube.Search.GetVideosAsync(keyword))
+            await foreach (var video in _youtube.Search.GetVideosAsync(keyword, cancellationToken))
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 results.Add(new YoutubeItem
                 {
                     Title = video.Title,
@@ -32,9 +36,18 @@ public partial class YoutubeViewModel : BaseViewModel
                     VideoUrl = video.Url,
                     ThumbnailUrl = video.Thumbnails.Count > 0 ? video.Thumbnails.GetWithHighestResolution().Url : string.Empty
                 });
+
+                if (results.Count >= maxResults)
+                {
+                    break;
+                }
             }
 
             return results;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
