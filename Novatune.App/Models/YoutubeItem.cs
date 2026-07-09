@@ -8,5 +8,4 @@ public class YoutubeItem
     public string Author { get; init; } = string.Empty;
     public string VideoUrl { get; init; } = string.Empty;
     public string ThumbnailUrl { get; init; } = string.Empty;
-    public TimeSpan Duration;
 }

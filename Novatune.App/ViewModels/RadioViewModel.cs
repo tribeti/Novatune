@@ -105,7 +105,7 @@ public partial class RadioViewModel : BaseViewModel
                 cts.CancelAfter(TimeSpan.FromSeconds(10));
 
                 var stations = await _http.GetFromJsonAsync<List<RadioItem>>(
-                    $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true",
+                    $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true&limit=30",
                     _jsonOptions,
                     cts.Token
                 );

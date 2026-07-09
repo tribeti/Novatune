@@ -417,7 +417,7 @@ public partial class MediaViewModel : BaseViewModel
                     args.SetUri(new Uri(url));
                 }
             }
-            if (isYoutube)
+            else if (isYoutube)
             {
                 var manifest = await _youtube.Videos.Streams.GetManifestAsync(url);
 

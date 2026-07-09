@@ -30,7 +30,6 @@ public partial class YoutubeViewModel : BaseViewModel
                     Title = video.Title,
                     Author = video.Author.ChannelTitle,
                     VideoUrl = video.Url,
-                    Duration = video.Duration.Value,
                     ThumbnailUrl = video.Thumbnails.Count > 0 ? video.Thumbnails.GetWithHighestResolution().Url : string.Empty
                 });
             }
