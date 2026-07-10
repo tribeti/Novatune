@@ -1,7 +1,10 @@
-﻿using Novatune.App.Models;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Novatune.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using YoutubeExplode;
@@ -9,9 +12,22 @@ using YoutubeExplode.Common;
 
 namespace Novatune.App.Services;
 
-public class YoutubeService
+public static class YoutubeService
 {
-    private static readonly YoutubeClient _youtube = new();
+    private const int MaxResults = 20;
+
+    private static readonly HttpClient _httpClient = new(new SocketsHttpHandler
+    {
+        PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+        AutomaticDecompression = DecompressionMethods.All
+    });
+
+    private static readonly YoutubeClient _youtube = new(_httpClient);
+
+    private static readonly MemoryCache _cache = new(new MemoryCacheOptions
+    {
+        SizeLimit = 200
+    });
 
     public static async Task<List<YoutubeItem>> SearchVideosAsync(string keyword, CancellationToken cancellationToken = default)
     {
@@ -20,8 +36,14 @@ public class YoutubeService
             return [];
         }
 
-        var results = new List<YoutubeItem>();
-        const int maxResults = 20;
+        var cacheKey = keyword.Trim().ToLowerInvariant();
+
+        if (_cache.TryGetValue(cacheKey, out List<YoutubeItem>? cached) && cached is not null)
+        {
+            return [.. cached];
+        }
+
+        var results = new List<YoutubeItem>(MaxResults);
 
         try
         {
@@ -29,29 +51,47 @@ public class YoutubeService
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                string thumbnailUrl = string.Empty;
+
+                foreach (var thumb in video.Thumbnails)
+                {
+                    if (thumb.Resolution.Height is >= 360 and <= 480)
+                    {
+                        thumbnailUrl = thumb.Url;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(thumbnailUrl) && video.Thumbnails.Count > 0)
+                {
+                    thumbnailUrl = video.Thumbnails.GetWithHighestResolution().Url;
+                }
+
                 results.Add(new YoutubeItem
                 {
                     Title = video.Title,
                     Author = video.Author.ChannelTitle,
                     VideoUrl = video.Url,
-                    ThumbnailUrl = video.Thumbnails.Count > 0 ? video.Thumbnails.GetWithHighestResolution().Url : string.Empty
+                    ThumbnailUrl = thumbnailUrl
                 });
 
-                if (results.Count >= maxResults)
+                if (results.Count >= MaxResults)
                 {
                     break;
                 }
             }
 
+            _cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                Size = 1
+            });
+
             return results;
         }
-        catch (OperationCanceledException)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed: {ex.Message}, trying next...");
+            Debug.WriteLine($"YouTube search failed: {ex.Message}");
             return [];
         }
     }

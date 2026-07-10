@@ -13,7 +13,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8*" />
-            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="{x:Bind ViewModel.QueueColumnWidth, Mode=OneWay}" />
         </Grid.ColumnDefinitions>
 
         <MediaPlayerElement
