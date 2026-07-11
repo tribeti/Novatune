@@ -4,9 +4,6 @@ namespace Novatune.App.Models;
 
 public class RadioItem
 {
-    [JsonPropertyName("stationuuid")]
-    public string StationUuid { get; init; } = string.Empty;
-
     [JsonPropertyName("name")]
     public string Name { get; init; } = string.Empty;
 
