@@ -195,7 +195,7 @@ public sealed partial class MainWindow : Window
                     Kind = SourceKind.Radio,
                     Title = s.Name,
                     Subtitle = string.IsNullOrWhiteSpace(s.Tags) ? "Radio Station" : s.Tags,
-                    Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+                    Thumbnail = img ?? ViewModel._defaultImage,
                     SourceItem = s
                 });
             }
@@ -215,7 +215,7 @@ public sealed partial class MainWindow : Window
                         Kind = SourceKind.Youtube,
                         Title = v.Title,
                         Subtitle = v.Author,
-                        Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+                        Thumbnail = img ?? ViewModel._defaultImage,
                         SourceItem = v
                     });
                 }
