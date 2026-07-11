@@ -16,11 +16,20 @@
             <ColumnDefinition Width="{x:Bind ViewModel.QueueColumnWidth, Mode=OneWay}" />
         </Grid.ColumnDefinitions>
 
-        <MediaPlayerElement
-            x:Name="mediaPlayerElement"
-            Grid.Column="0"
-            AreTransportControlsEnabled="False"
-            Stretch="Uniform" />
+        <Grid Grid.Column="0">
+            <MediaPlayerElement
+                x:Name="mediaPlayerElement"
+                AreTransportControlsEnabled="False"
+                Stretch="Uniform" />
+
+            <ProgressRing
+                Width="60"
+                Height="60"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsActive="{x:Bind ViewModel.IsMediaLoading, Mode=OneWay}"
+                Visibility="{x:Bind ViewModel.IsMediaLoading, Mode=OneWay}" />
+        </Grid>
 
         <RelativePanel
             Grid.Column="1"

@@ -212,6 +212,9 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial MediaItem? CurrentTrack { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsMediaLoading { get; set; } = false;
+
     public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
     [RelayCommand]
@@ -365,7 +368,7 @@ public partial class MediaViewModel : BaseViewModel
         Playlist.Add(track);
         _mediaPlaybackList.Items.Add(track.PlaybackItem);
 
-        var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
+        var index = _mediaPlaybackList.Items.Count - 1;
         _mediaPlaybackList.MoveTo((uint) index);
         MediaPlayer.Play();
     }
@@ -391,7 +394,7 @@ public partial class MediaViewModel : BaseViewModel
         Playlist.Add(track);
         _mediaPlaybackList.Items.Add(track.PlaybackItem);
 
-        var index = _mediaPlaybackList.Items.IndexOf(track.PlaybackItem);
+        var index = _mediaPlaybackList.Items.Count - 1;
         _mediaPlaybackList.MoveTo((uint) index);
         MediaPlayer.Play();
     }
@@ -421,16 +424,24 @@ public partial class MediaViewModel : BaseViewModel
             }
             else if (isYoutube)
             {
-                var manifest = await _youtube.Videos.Streams.GetManifestAsync(url);
+                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
+                try
+                {
+                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url);
 
-                var streamInfo = manifest.GetMuxedStreams()
-                    .Where(s => s.Container == Container.Mp4)
-                    .GetWithHighestVideoQuality();
+                    var streamInfo = manifest.GetMuxedStreams()
+                        .Where(s => s.Container == Container.Mp4)
+                        .GetWithHighestVideoQuality();
 
-                if (streamInfo is not null)
-                    args.SetUri(new Uri(streamInfo.Url));
-                else
-                    Debug.WriteLine("No compatible muxed stream found for this video.");
+                    if (streamInfo is not null)
+                        args.SetUri(new Uri(streamInfo.Url));
+                    else
+                        Debug.WriteLine("No compatible muxed stream found for this video.");
+                }
+                finally
+                {
+                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+                }
             }
             else
             {
