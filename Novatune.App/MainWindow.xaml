@@ -135,8 +135,15 @@
                                 Command="{x:Bind ViewModel.PlayPauseCommand}"
                                 LabelPosition="Collapsed"
                                 RelativePanel.AlignHorizontalCenterWithPanel="True"
-                                RelativePanel.Below="Media_Timeline">
-                                <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                                RelativePanel.Below="Media_Timeline"
+                                ToolTipService.ToolTip="Play/Pause">
+                                <AppBarButton.Icon>
+                                    <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                                </AppBarButton.Icon>
+
+                                <AppBarButton.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="Space" />
+                                </AppBarButton.KeyboardAccelerators>
                             </AppBarButton>
 
                             <AppBarButton
