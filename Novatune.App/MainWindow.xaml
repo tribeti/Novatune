@@ -132,7 +132,7 @@
 
                             <AppBarButton
                                 x:Name="Play_Btn"
-                                Command="{x:Bind ViewModel.PlayPauseCommand}"
+                                Click="Play_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.AlignHorizontalCenterWithPanel="True"
                                 RelativePanel.Below="Media_Timeline"
@@ -148,7 +148,7 @@
 
                             <AppBarButton
                                 x:Name="Previous_Btn"
-                                Command="{x:Bind ViewModel.PreviousCommand}"
+                                Click="Previous_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.Below="Media_Timeline"
                                 RelativePanel.LeftOf="Play_Btn"
@@ -158,7 +158,7 @@
 
                             <AppBarButton
                                 x:Name="Shuffle_Btn"
-                                Command="{x:Bind ViewModel.ShuffleCommand}"
+                                Click="Shuffle_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.Below="Media_Timeline"
                                 RelativePanel.LeftOf="Previous_Btn"
@@ -168,7 +168,7 @@
 
                             <AppBarButton
                                 x:Name="Next_Btn"
-                                Command="{x:Bind ViewModel.NextCommand}"
+                                Click="Next_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.Below="Media_Timeline"
                                 RelativePanel.RightOf="Play_Btn"
@@ -178,7 +178,7 @@
 
                             <AppBarButton
                                 x:Name="Repeat_Btn"
-                                Command="{x:Bind ViewModel.RepeatCommand}"
+                                Click="Repeat_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.Below="Media_Timeline"
                                 RelativePanel.RightOf="Next_Btn"
@@ -194,7 +194,7 @@
                         <RelativePanel>
                             <AppBarButton
                                 x:Name="Radio_Play_Btn"
-                                Command="{x:Bind ViewModel.PlayPauseCommand}"
+                                Click="Play_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.AlignHorizontalCenterWithPanel="True"
                                 RelativePanel.AlignVerticalCenterWithPanel="True">
@@ -203,7 +203,7 @@
 
                             <AppBarButton
                                 x:Name="Radio_Previous_Btn"
-                                Command="{x:Bind ViewModel.PreviousCommand}"
+                                Click="Previous_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.AlignVerticalCenterWithPanel="True"
                                 RelativePanel.LeftOf="Radio_Play_Btn"
@@ -213,7 +213,7 @@
 
                             <AppBarButton
                                 x:Name="Radio_Next_Btn"
-                                Command="{x:Bind ViewModel.NextCommand}"
+                                Click="Next_Btn_Click"
                                 LabelPosition="Collapsed"
                                 RelativePanel.AlignVerticalCenterWithPanel="True"
                                 RelativePanel.RightOf="Radio_Play_Btn"
@@ -249,7 +249,7 @@
 
                     <AppBarButton
                         x:Name="Queue_Btn"
-                        Command="{x:Bind ViewModel.ToggleQueueCommand}"
+                        Click="Queue_Btn_Click"
                         LabelPosition="Collapsed"
                         RelativePanel.Below="Volume_Slider"
                         RelativePanel.LeftOf="MiniPlayer_Btn"

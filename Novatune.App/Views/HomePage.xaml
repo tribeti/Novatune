@@ -20,6 +20,7 @@
             <MediaPlayerElement
                 x:Name="mediaPlayerElement"
                 AreTransportControlsEnabled="False"
+                PosterSource="/Assets/LockScreenLogo.png"
                 Stretch="Uniform" />
 
             <ProgressRing
