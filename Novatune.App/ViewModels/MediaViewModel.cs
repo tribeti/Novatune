@@ -140,10 +140,8 @@ public partial class MediaViewModel : BaseViewModel
     public Visibility QueueVisibility => IsQueueVisible ? Visibility.Visible : Visibility.Collapsed;
     public GridLength QueueColumnWidth => IsQueueVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
 
-    [RelayCommand]
     public void ToggleQueue() => IsQueueVisible = !IsQueueVisible;
 
-    [RelayCommand]
     public void PlayPause()
     {
         if (IsPlaying)
@@ -159,7 +157,6 @@ public partial class MediaViewModel : BaseViewModel
         PlaybackPosition = seconds;
     }
 
-    [RelayCommand]
     public void CommitSeek()
     {
         MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
@@ -167,10 +164,8 @@ public partial class MediaViewModel : BaseViewModel
         IsUserInteracting = false;
     }
 
-    [RelayCommand]
     public void Previous() => _mediaPlaybackList.MovePrevious();
 
-    [RelayCommand]
     public void Next() => _mediaPlaybackList.MoveNext();
 
     [ObservableProperty]
@@ -179,7 +174,6 @@ public partial class MediaViewModel : BaseViewModel
     public Windows.UI.Text.FontWeight ShuffleFontWeight =>
         IsShuffleEnabled ? Microsoft.UI.Text.FontWeights.ExtraBold : Microsoft.UI.Text.FontWeights.ExtraLight;
 
-    [RelayCommand]
     public void Shuffle()
     {
         IsShuffleEnabled = !IsShuffleEnabled;
@@ -192,7 +186,6 @@ public partial class MediaViewModel : BaseViewModel
     public Windows.UI.Text.FontWeight RepeatFontWeight =>
         IsRepeatEnabled ? Microsoft.UI.Text.FontWeights.ExtraBold : Microsoft.UI.Text.FontWeights.ExtraLight;
 
-    [RelayCommand]
     public void Repeat()
     {
         IsRepeatEnabled = !IsRepeatEnabled;
@@ -243,7 +236,7 @@ public partial class MediaViewModel : BaseViewModel
                 source.CustomProperties["Kind"] = SourceKind.Local.ToString();
 
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
-                thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 200);
+                thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 100);
 
                 var playbackItem = new MediaPlaybackItem(source);
 
@@ -294,7 +287,11 @@ public partial class MediaViewModel : BaseViewModel
                 {
                     if (res!.Thumbnail is not null)
                     {
-                        bitmap = new BitmapImage();
+                        bitmap = new BitmapImage
+                        {
+                            DecodePixelWidth = 100,
+                            DecodePixelType = DecodePixelType.Physical
+                        };
                         await bitmap.SetSourceAsync(res.Thumbnail);
                     }
                 }
@@ -318,7 +315,6 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
     public void RemoveMedia(MediaItem? item)
     {
         if (item is null)
@@ -340,6 +336,11 @@ public partial class MediaViewModel : BaseViewModel
 
         Playlist.RemoveAt(index);
         _mediaPlaybackList.Items.RemoveAt(index);
+
+        if (item.PlaybackItem?.Source is IDisposable disposableSource)
+        {
+            disposableSource.Dispose();
+        }
 
         if (Playlist.Count == 0)
         {
@@ -483,8 +484,7 @@ public partial class MediaViewModel : BaseViewModel
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
-            var prev = Playlist.FirstOrDefault(t => t.IsCurrent);
-            prev?.IsCurrent = false;
+            CurrentTrack?.IsCurrent = false;
 
             if (args.NewItem is null)
             {

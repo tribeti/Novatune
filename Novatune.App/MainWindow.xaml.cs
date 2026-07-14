@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
 using Novatune.App.Services;
@@ -143,8 +142,14 @@ public sealed partial class MainWindow : Window
     }
 
     private void Thumb_DragStarted(object sender, DragStartedEventArgs e) => ViewModel.IsUserInteracting = true;
-    private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
-    private void Media_Timeline_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) => ViewModel.CommitSeekCommand.Execute(null);
+    private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e) => ViewModel.CommitSeek();
+    private void Media_Timeline_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) => ViewModel.CommitSeek();
+    private void Play_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.PlayPause();
+    private void Previous_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.Previous();
+    private void Next_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.Next();
+    private void Shuffle_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.Shuffle();
+    private void Repeat_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.Repeat();
+    private void Queue_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.ToggleQueue();
 
     private CancellationTokenSource? _searchCts;
     private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -171,7 +176,7 @@ public sealed partial class MainWindow : Window
 
             var stationsTask = RadioService.SearchStationsAsync(sender.Text, token);
             var videosTask = YoutubeService.SearchVideosAsync(sender.Text, token);
-            
+
             await Task.WhenAll(stationsTask, videosTask);
             if (token.IsCancellationRequested)
                 return;
@@ -183,19 +188,11 @@ public sealed partial class MainWindow : Window
 
             foreach (var s in stations)
             {
-                BitmapImage? img = null;
-                if (!string.IsNullOrWhiteSpace(s.Favicon))
-                {
-                    var url = s.Favicon.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + s.Favicon[7..] : s.Favicon;
-                    if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
-                        img = new BitmapImage(uri);
-                }
                 unifiedResults.Add(new MediaItem
                 {
                     Kind = SourceKind.Radio,
                     Title = s.Name,
                     Subtitle = string.IsNullOrWhiteSpace(s.Tags) ? "Radio Station" : s.Tags,
-                    Thumbnail = img ?? ViewModel._defaultImage,
                     SourceItem = s
                 });
             }
@@ -204,18 +201,11 @@ public sealed partial class MainWindow : Window
             {
                 foreach (var v in videos)
                 {
-                    BitmapImage? img = null;
-                    if (!string.IsNullOrWhiteSpace(v.ThumbnailUrl))
-                    {
-                        if (Uri.TryCreate(v.ThumbnailUrl, UriKind.Absolute, out var uri))
-                            img = new BitmapImage(uri);
-                    }
                     unifiedResults.Add(new MediaItem
                     {
                         Kind = SourceKind.Youtube,
                         Title = v.Title,
                         Subtitle = v.Author,
-                        Thumbnail = img ?? ViewModel._defaultImage,
                         SourceItem = v
                     });
                 }
