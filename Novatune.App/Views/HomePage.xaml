@@ -16,18 +16,18 @@
             <ColumnDefinition Width="{x:Bind ViewModel.QueueColumnWidth, Mode=OneWay}" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
-            <MediaPlayerElement
-                x:Name="mediaPlayerElement"
-                AreTransportControlsEnabled="False"
-                PosterSource="/Assets/LockScreenLogo.png"
-                Stretch="Uniform" />
+        <MediaPlayerElement
+            x:Name="mediaPlayerElement"
+            Grid.Column="0"
+            AreTransportControlsEnabled="False"
+            PosterSource="/Assets/LockScreenLogo.png"
+            Stretch="Uniform" />
 
-            <ProgressRing
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                IsActive="{x:Bind ViewModel.IsMediaLoading, Mode=OneWay}" />
-        </Grid>
+        <ProgressRing
+            Grid.Column="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsActive="{x:Bind ViewModel.IsMediaLoading, Mode=OneWay}" />
 
         <RelativePanel
             Grid.Column="1"
@@ -37,7 +37,7 @@
             <AppBarButton
                 x:Name="AddMedia"
                 Command="{x:Bind ViewModel.AddLocalMediaCommand}"
-                Icon="Add"
+                Icon="Folder"
                 IsCompact="True"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True" />
@@ -78,29 +78,36 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Column="0" Orientation="Vertical">
-                                <TextBlock
-                                    FontSize="16"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind Title}"
-                                    TextTrimming="CharacterEllipsis" />
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Subtitle}"
-                                    TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Text="{x:Bind Title}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Margin="0,4,0,0"
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Subtitle}"
+                                TextTrimming="CharacterEllipsis" />
 
                             <Button
                                 x:Name="RemoveItem"
+                                Grid.Row="0"
+                                Grid.RowSpan="2"
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 Click="RemoveItem_Click"
-                                CommandParameter="{x:Bind}"
                                 Content="&#xE711;"
                                 FontFamily="{ThemeResource SymbolThemeFontFamily}" />
                         </Grid>
