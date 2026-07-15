@@ -58,11 +58,6 @@
     <PackageReference Include="YoutubeExplode" Version="6.6.0" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Big_Buck_Bunny_720_10s_2MB.mp4">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="Views\LibraryPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

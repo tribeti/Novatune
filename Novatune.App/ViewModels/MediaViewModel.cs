@@ -9,6 +9,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Media.Core;
@@ -428,7 +429,8 @@ public partial class MediaViewModel : BaseViewModel
                 _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
                 try
                 {
-                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url);
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
 
                     var streamInfo = manifest.GetMuxedStreams()
                         .Where(s => s.Container == Container.Mp4)

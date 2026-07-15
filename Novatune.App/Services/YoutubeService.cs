@@ -3,6 +3,7 @@ using Novatune.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -20,7 +21,10 @@ public static class YoutubeService
     {
         PooledConnectionLifetime = TimeSpan.FromMinutes(5),
         AutomaticDecompression = DecompressionMethods.All
-    });
+    })
+    {
+        Timeout = TimeSpan.FromSeconds(15)
+    };
 
     private static readonly YoutubeClient _youtube = new(_httpClient);
 
@@ -47,25 +51,11 @@ public static class YoutubeService
 
         try
         {
-            await foreach (var video in _youtube.Search.GetVideosAsync(keyword, cancellationToken))
+            await foreach (var video in _youtube.Search.GetVideosAsync(keyword, cancellationToken).ConfigureAwait(false))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                string thumbnailUrl = string.Empty;
-
-                foreach (var thumb in video.Thumbnails)
-                {
-                    if (thumb.Resolution.Height is >= 360 and <= 480)
-                    {
-                        thumbnailUrl = thumb.Url;
-                        break;
-                    }
-                }
-
-                if (string.IsNullOrEmpty(thumbnailUrl) && video.Thumbnails.Count > 0)
-                {
-                    thumbnailUrl = video.Thumbnails.GetWithHighestResolution().Url;
-                }
+                string thumbnailUrl = video.Thumbnails
+                    .FirstOrDefault(t => t.Resolution.Height is >= 360 and <= 480)?.Url
+                    ?? video.Thumbnails.GetWithHighestResolution().Url;
 
                 results.Add(new YoutubeItem
                 {
