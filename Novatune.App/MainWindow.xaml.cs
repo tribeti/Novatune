@@ -152,7 +152,7 @@ public sealed partial class MainWindow : Window
     private void Queue_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.ToggleQueue();
 
     private CancellationTokenSource? _searchCts;
-    private IEnumerable<MediaItem> _suggestion;
+    private IEnumerable<MediaItem>? _suggestion;
     private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
