@@ -54,7 +54,8 @@
                 FontSize="18"
                 RelativePanel.AlignHorizontalCenterWithPanel="True"
                 RelativePanel.Below="MediaLogo"
-                Text="{x:Bind ViewModel.Title, Mode=OneWay}" />
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                TextWrapping="WrapWholeWords" />
             <MenuFlyoutSeparator
                 x:Name="sep"
                 RelativePanel.AlignLeftWithPanel="True"

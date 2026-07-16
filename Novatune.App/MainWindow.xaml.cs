@@ -152,6 +152,7 @@ public sealed partial class MainWindow : Window
     private void Queue_Btn_Click(object sender, RoutedEventArgs e) => ViewModel.ToggleQueue();
 
     private CancellationTokenSource? _searchCts;
+    private IEnumerable<MediaItem>? _suggestion;
     private async void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
@@ -211,14 +212,18 @@ public sealed partial class MainWindow : Window
                 }
             }
 
-            sender.ItemsSource = unifiedResults.Count > 0
+            var result = unifiedResults.Count > 0
                 ? unifiedResults
                 : new List<MediaItem> { new() { Title = "No results found", Subtitle = "Try different keywords", Kind = SourceKind.Local } };
+
+            sender.ItemsSource = result;
+            _suggestion = result;
         }
         catch (OperationCanceledException) { }
         catch (Exception)
         {
             sender.ItemsSource = Array.Empty<MediaItem>();
+            _suggestion = null;
         }
         finally
         {
@@ -245,6 +250,31 @@ public sealed partial class MainWindow : Window
 
             sender.Text = string.Empty;
             sender.ItemsSource = Array.Empty<MediaItem>();
+        }
+    }
+
+    private void SearchBox_GotFocus(object sender, RoutedEventArgs _)
+    {
+        var box = (AutoSuggestBox) sender;
+        if (!string.IsNullOrEmpty(box.Text) && _suggestion is not null)
+        {
+            box.ItemsSource = _suggestion;
+            box.IsSuggestionListOpen = true;
+        }
+    }
+
+    private void AddtoQueue_Btn_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not MediaItem item)
+            return;
+
+        if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
+        {
+            ViewModel.AddRadioToQueue(radio);
+        }
+        else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
+        {
+            ViewModel.AddYoutubeToQueue(youtube);
         }
     }
 }
