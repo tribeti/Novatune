@@ -30,23 +30,36 @@
                     x:Name="SearchBox"
                     MinWidth="400"
                     VerticalAlignment="Center"
+                    GotFocus="SearchBox_GotFocus"
                     PlaceholderText="Search for online media"
                     QueryIcon="Find"
                     QuerySubmitted="SearchBox_QuerySubmitted"
                     TextChanged="SearchBox_TextChanged">
                     <AutoSuggestBox.ItemTemplate>
                         <DataTemplate x:DataType="models:MediaItem">
-                            <StackPanel
-                                Margin="0,4"
-                                Orientation="Horizontal"
-                                Spacing="12">
+                            <Grid Margin="0,4" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
                                 <TextBlock
+                                    Grid.Column="0"
                                     MaxWidth="300"
                                     VerticalAlignment="Center"
                                     FontWeight="SemiBold"
                                     Text="{x:Bind Title}"
                                     TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
+
+                                <Button
+                                    Grid.Column="1"
+                                    Padding="6"
+                                    VerticalAlignment="Center"
+                                    Click="AddtoQueue_Btn_Click"
+                                    ToolTipService.ToolTip="Add to queue">
+                                    <FontIcon FontSize="14" Glyph="&#xE710;" />
+                                </Button>
+                            </Grid>
                         </DataTemplate>
                     </AutoSuggestBox.ItemTemplate>
                 </AutoSuggestBox>

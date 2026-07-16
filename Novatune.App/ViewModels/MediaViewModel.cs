@@ -349,7 +349,11 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
-    public void AddRadio(RadioItem station)
+    public void AddRadio(RadioItem station) => AddRadio(station, playNow: true);
+
+    public void AddRadioToQueue(RadioItem station) => AddRadio(station, playNow: false);
+
+    private void AddRadio(RadioItem station, bool playNow)
     {
         var binder = new MediaBinder { Token = $"{station.UrlResolved}" };
         binder.Binding += Binder_Binding;
@@ -367,15 +371,14 @@ public partial class MediaViewModel : BaseViewModel
 
         var track = MediaItem.FromRadio(station, playbackItem);
 
-        Playlist.Add(track);
-        _mediaPlaybackList.Items.Add(track.PlaybackItem);
-
-        var index = _mediaPlaybackList.Items.Count - 1;
-        _mediaPlaybackList.MoveTo((uint) index);
-        MediaPlayer.Play();
+        AddToPlaybackList(track, playNow);
     }
 
-    public void AddYoutube(YoutubeItem item)
+    public void AddYoutube(YoutubeItem item) => AddYoutube(item, playNow: true);
+
+    public void AddYoutubeToQueue(YoutubeItem item) => AddYoutube(item, playNow: false);
+
+    private void AddYoutube(YoutubeItem item, bool playNow)
     {
         var binder = new MediaBinder { Token = item.VideoUrl };
         binder.Binding += Binder_Binding;
@@ -393,12 +396,22 @@ public partial class MediaViewModel : BaseViewModel
 
         var track = MediaItem.FromYoutube(item, playbackItem);
 
+        AddToPlaybackList(track, playNow);
+    }
+
+    private void AddToPlaybackList(MediaItem track, bool playNow)
+    {
         Playlist.Add(track);
         _mediaPlaybackList.Items.Add(track.PlaybackItem);
 
-        var index = _mediaPlaybackList.Items.Count - 1;
-        _mediaPlaybackList.MoveTo((uint) index);
-        MediaPlayer.Play();
+        bool nothingLoaded = MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None;
+
+        if (playNow || nothingLoaded)
+        {
+            var index = _mediaPlaybackList.Items.Count - 1;
+            _mediaPlaybackList.MoveTo((uint) index);
+            MediaPlayer.Play();
+        }
     }
 
     private async void Binder_Binding(MediaBinder sender, MediaBindingEventArgs args)
