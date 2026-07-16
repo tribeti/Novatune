@@ -223,6 +223,7 @@ public sealed partial class MainWindow : Window
         catch (Exception)
         {
             sender.ItemsSource = Array.Empty<MediaItem>();
+            _suggestion = null;
         }
         finally
         {

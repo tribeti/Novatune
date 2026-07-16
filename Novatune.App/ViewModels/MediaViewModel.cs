@@ -404,9 +404,7 @@ public partial class MediaViewModel : BaseViewModel
         Playlist.Add(track);
         _mediaPlaybackList.Items.Add(track.PlaybackItem);
 
-        bool nothingLoaded = MediaPlayer.PlaybackSession.PlaybackState == MediaPlaybackState.None;
-
-        if (playNow || nothingLoaded)
+        if (playNow)
         {
             var index = _mediaPlaybackList.Items.Count - 1;
             _mediaPlaybackList.MoveTo((uint) index);

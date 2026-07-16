@@ -55,6 +55,7 @@
                                     Grid.Column="1"
                                     Padding="6"
                                     VerticalAlignment="Center"
+                                    AutomationProperties.Name="Add to queue"
                                     Click="AddtoQueue_Btn_Click"
                                     ClickMode="Press"
                                     Tag="{x:Bind}"
