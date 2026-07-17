@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Novatune.App.Models;
+﻿namespace Novatune.App.Models;
 
 public class YoutubeItem
 {
