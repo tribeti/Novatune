@@ -326,6 +326,7 @@ public partial class MediaViewModel : BaseViewModel
             return;
 
         bool wasCurrent = item.IsCurrent;
+        bool wasPlaying = IsPlaying;
 
         if (wasCurrent && Playlist.Count > 1)
         {
@@ -346,6 +347,21 @@ public partial class MediaViewModel : BaseViewModel
         if (Playlist.Count == 0)
         {
             MediaPlayer.Pause();
+            MediaPlayer.Source = null;
+            MediaPlayer.Source = _mediaPlaybackList;
+        }
+
+        else if (wasCurrent)
+        {
+            var currentSessionState = MediaPlayer.PlaybackSession.PlaybackState;
+            MediaPlayer.Pause();
+            MediaPlayer.Source = null;
+            MediaPlayer.Source = _mediaPlaybackList;
+
+            if (wasPlaying && currentSessionState == MediaPlaybackState.Playing)
+            {
+                MediaPlayer.Play();
+            }
         }
     }
 
