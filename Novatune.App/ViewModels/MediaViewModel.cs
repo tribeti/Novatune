@@ -72,6 +72,14 @@ public partial class MediaViewModel : BaseViewModel
 
             if (!IsUserInteracting)
                 TimelinePosition = PlaybackPosition;
+
+            if (CurrentTrack is not null && !IsLive)
+            {
+                var duration = session.NaturalDuration;
+                CurrentTrack.SavedPosition = duration > TimeSpan.Zero && duration - session.Position < TimeSpan.FromSeconds(20)
+                    ? TimeSpan.Zero
+                    : session.Position;
+            }
         };
 
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
@@ -534,6 +542,9 @@ public partial class MediaViewModel : BaseViewModel
                 Title = currentTrack.Title;
                 CurrentImage = currentTrack.Thumbnail ?? _defaultImage;
                 CurrentTrack = currentTrack;
+
+                if (!IsLive && currentTrack.SavedPosition > TimeSpan.Zero)
+                    MediaPlayer.PlaybackSession.Position = currentTrack.SavedPosition;
             }
             else
             {

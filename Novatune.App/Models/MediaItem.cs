@@ -28,6 +28,7 @@ public partial class MediaItem : ObservableObject
     public MediaPlaybackItem PlaybackItem { get; set; } = null!;
     public string? SourcePathOrUrl { get; set; }
     public object? SourceItem { get; set; }
+    public TimeSpan SavedPosition { get; set; } = TimeSpan.Zero;
 
     public static MediaItem FromLocal(string path, string title, string artist, BitmapImage? img, MediaPlaybackItem item)
     {
