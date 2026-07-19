@@ -74,7 +74,12 @@ public partial class MediaViewModel : BaseViewModel
                 TimelinePosition = PlaybackPosition;
 
             if (CurrentTrack is not null && !IsLive)
-                CurrentTrack.SavedPosition = session.Position;
+            {
+                var duration = session.NaturalDuration;
+                CurrentTrack.SavedPosition = duration > TimeSpan.Zero && duration - session.Position < TimeSpan.FromSeconds(20)
+                    ? TimeSpan.Zero
+                    : session.Position;
+            }
         };
 
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
