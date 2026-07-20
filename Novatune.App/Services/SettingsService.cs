@@ -31,7 +31,7 @@ public class SettingsService
             try
             {
                 string json = File.ReadAllText(_settingsPath);
-                return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                return JsonSerializer.Deserialize(json, SettingsJsonContext.Default.AppSettings) ?? new AppSettings();
             }
             catch
             {
@@ -45,7 +45,7 @@ public class SettingsService
     {
         try
         {
-            string json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
+            string json = JsonSerializer.Serialize(Settings, SettingsJsonContext.Default.AppSettings);
             File.WriteAllText(_settingsPath, json);
         }
         catch
