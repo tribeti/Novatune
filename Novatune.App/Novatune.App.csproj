@@ -17,7 +17,11 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<EnabledXamlOptionalChanges>DefaultStyleOptimizations,OptimizeApplyStyles</EnabledXamlOptionalChanges>
+	<EnabledXamlOptionalChanges>DefaultStyleOptimizations,OptimizeApplyStyles,IconNoGridOptimization,DeferContextFlyoutInit</EnabledXamlOptionalChanges>
+	<InvariantGlobalization>true</InvariantGlobalization>
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	<DebugType>none</DebugType>
+	<DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Views\HomePage.xaml" />

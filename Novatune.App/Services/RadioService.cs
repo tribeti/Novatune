@@ -34,8 +34,6 @@ public static class RadioService
         SizeLimit = 100
     });
 
-    private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
-
     static RadioService()
     {
         _http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Novatune/1.0 (mailto:contact@novatune.app)");
@@ -60,7 +58,7 @@ public static class RadioService
                 cts.CancelAfter(TimeSpan.FromSeconds(10));
 
                 var json = await _http.GetStringAsync("https://de1.api.radio-browser.info/json/servers", cts.Token).ConfigureAwait(false);
-                var servers = JsonSerializer.Deserialize<List<RadioItem>>(json, _jsonOptions);
+                var servers = JsonSerializer.Deserialize(json, RadioJsonContext.Default.ListRadioItem);
 
                 result = servers?
                     .Where(s => !string.IsNullOrWhiteSpace(s.Name))
@@ -119,7 +117,7 @@ public static class RadioService
 
                 var url = $"https://{server}/json/stations/search?name={Uri.EscapeDataString(keyword)}&hidebroken=true&order=votes&reverse=true&limit=10";
 
-                var stations = await _http.GetFromJsonAsync<List<RadioItem>>(url, _jsonOptions, cts.Token);
+                var stations = await _http.GetFromJsonAsync(url, RadioJsonContext.Default.ListRadioItem, cts.Token);
 
                 if (stations is not null)
                 {
