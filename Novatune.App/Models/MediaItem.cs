@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using Windows.Media.Playback;
@@ -10,7 +10,8 @@ public enum SourceKind
     Local,
     Radio,
     Youtube,
-    HLS
+    HLS,
+    TV
 }
 
 public partial class MediaItem : ObservableObject
@@ -81,6 +82,31 @@ public partial class MediaItem : ObservableObject
             Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
             PlaybackItem = item,
             SourcePathOrUrl = youtube.VideoUrl
+        };
+    }
+
+    public static MediaItem FromTV(IptvChannel channel, string streamUrl, MediaPlaybackItem item)
+    {
+        BitmapImage? img = null;
+        if (!string.IsNullOrWhiteSpace(channel.Logo))
+        {
+            var url = channel.Logo.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + channel.Logo[7..] : channel.Logo;
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                img = new BitmapImage(uri);
+        }
+
+        var subtitle = channel.Categories.Count > 0
+            ? string.Join(", ", channel.Categories)
+            : channel.Country;
+
+        return new MediaItem
+        {
+            Kind = SourceKind.TV,
+            Title = channel.Name,
+            Subtitle = string.IsNullOrWhiteSpace(subtitle) ? "TV Channel" : subtitle,
+            Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+            PlaybackItem = item,
+            SourcePathOrUrl = streamUrl
         };
     }
 }
