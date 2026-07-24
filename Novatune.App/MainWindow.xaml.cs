@@ -91,6 +91,12 @@ public sealed partial class MainWindow : Window
         thumb.DragCompleted += Thumb_DragCompleted;
     }
 
+    private static readonly Dictionary<string, Type> PageTypeMap = new()
+    {
+        [typeof(HomePage).FullName!] = typeof(HomePage),
+        [typeof(LibraryPage).FullName!] = typeof(LibraryPage),
+    };
+
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.IsSettingsSelected == true)
@@ -99,7 +105,8 @@ public sealed partial class MainWindow : Window
         }
         else if (args.SelectedItemContainer is not null)
         {
-            Type? navPageType = Type.GetType(args.SelectedItemContainer.Tag.ToString()!);
+            var tag = args.SelectedItemContainer.Tag?.ToString();
+            Type? navPageType = tag is not null && PageTypeMap.TryGetValue(tag, out var type) ? type : null;
             NavView_Navigate(navPageType, args.RecommendedNavigationTransitionInfo);
         }
     }

@@ -1,94 +1,104 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>Novatune.App</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x86;x64;ARM64</Platforms>
-    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <!--<PublishProfile>win-$(Platform).pubxml</PublishProfile>-->
-    <UseWinUI>true</UseWinUI>
-    <WinUISDKReferences>false</WinUISDKReferences>
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <Nullable>enable</Nullable>
+	<OutputType>WinExe</OutputType>
+	<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+	<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+	<RootNamespace>Novatune.App</RootNamespace>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
+	<Platforms>x86;x64;ARM64</Platforms>
+	<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+	<!--<PublishProfile>win-$(Platform).pubxml</PublishProfile>-->
+	<UseWinUI>true</UseWinUI>
+	<WinUISDKReferences>false</WinUISDKReferences>
+	<EnableMsixTooling>true</EnableMsixTooling>
+	<Nullable>enable</Nullable>
 	<WindowsPackageType>None</WindowsPackageType>
 	<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<EnabledXamlOptionalChanges>DefaultStyleOptimizations,OptimizeApplyStyles</EnabledXamlOptionalChanges>
+	<PublishSingleFile>false</PublishSingleFile>
+	<SelfContained>true</SelfContained>
+	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+	<EnabledXamlOptionalChanges>DefaultStyleOptimizations,OptimizeApplyStyles,IconNoGridOptimization,DeferContextFlyoutInit</EnabledXamlOptionalChanges>
+	<InvariantGlobalization>true</InvariantGlobalization>
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Views\HomePage.xaml" />
-    <None Remove="Views\LibraryPage.xaml" />
-    <None Remove="Views\SettingPage.xaml" />
+	<None Remove="Views\HomePage.xaml" />
+	<None Remove="Views\LibraryPage.xaml" />
+	<None Remove="Views\SettingPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+	<Content Include="Assets\SplashScreen.scale-200.png" />
+	<Content Include="Assets\LockScreenLogo.scale-200.png" />
+	<Content Include="Assets\Square150x150Logo.scale-200.png" />
+	<Content Include="Assets\Square44x44Logo.scale-200.png" />
+	<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+	<Content Include="Assets\StoreLogo.png" />
+	<Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Manifest Include="$(ApplicationManifest)" />
+	<Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
   <!--
-    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-    Tools extension to be activated for this project even if the Windows App SDK Nuget
-    package has not yet been restored.
+	Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+	Tools extension to be activated for this project even if the Windows App SDK Nuget
+	package has not yet been restored.
   -->
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <ProjectCapability Include="Msix" />
+	<ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
-    <PackageReference Include="DevWinUI" Version="10.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.10" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
-    <PackageReference Include="WinUIEx" Version="2.9.2" />
-    <PackageReference Include="YoutubeExplode" Version="6.6.0" />
+	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+	<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
+	<PackageReference Include="DevWinUI" Version="10.1.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.10" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
+	<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+	<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+	<PackageReference Include="WinUIEx" Version="2.9.2" />
+	<PackageReference Include="YoutubeExplode" Version="6.6.0" />
+	<PackageReference Include="Microsoft.WindowsAppSDK.AI" VersionOverride="*">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>compile</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Microsoft.Windows.AI.MachineLearning" VersionOverride="*">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>compile</IncludeAssets>
+	</PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\LibraryPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+	<Page Update="Views\LibraryPage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\SettingPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+	<Page Update="Views\SettingPage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\HomePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+	<Page Update="Views\HomePage.xaml">
+	  <Generator>MSBuild:Compile</Generator>
+	</Page>
   </ItemGroup>
 
   <!--
-    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
-    Explorer "Package and Publish" context menu entry to be enabled for this project even if
-    the Windows App SDK Nuget package has not yet been restored.
+	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+	Explorer "Package and Publish" context menu entry to be enabled for this project even if
+	the Windows App SDK Nuget package has not yet been restored.
   -->
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+	<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
 
   <!-- Publish Properties -->
   <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+	<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+	<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+	<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 </Project>
