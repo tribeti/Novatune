@@ -50,8 +50,7 @@ public sealed partial class MainWindow : Window
             flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
             ((MenuFlyoutItem) flyout.Items[0]).Click += (s, args) =>
             {
-                this.Show();
-                this.Activate();
+                this.ShowAndActivate();
             };
 
             ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
@@ -66,9 +65,35 @@ public sealed partial class MainWindow : Window
             if (settingsService.Settings.MinimizeOnClose)
             {
                 e.Cancel = true;
+                ReleaseUIResources();
                 this.Hide();
             }
         };
+    }
+
+    private void ReleaseUIResources()
+    {
+        ContentFrame.Content = null;
+        ContentFrame.BackStack.Clear();
+        ContentFrame.ForwardStack.Clear();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
+
+    private void RestoreUI()
+    {
+        if (ContentFrame.Content is null)
+        {
+            var pageType = typeof(HomePage);
+            ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
+        }
+    }
+
+    public void ShowAndActivate()
+    {
+        RestoreUI();
+        this.Show();
+        this.Activate();
     }
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
