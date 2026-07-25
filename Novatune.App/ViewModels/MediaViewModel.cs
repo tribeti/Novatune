@@ -423,6 +423,37 @@ public partial class MediaViewModel : BaseViewModel
         AddToPlaybackList(track, playNow);
     }
 
+    public void AddTV(IptvChannel channel) => AddTV(channel, playNow: true);
+
+    public void AddTVToQueue(IptvChannel channel) => AddTV(channel, playNow: false);
+
+    private void AddTV(IptvChannel channel, bool playNow)
+    {
+        var stream = channel.Streams.FirstOrDefault(s => s.IsWorking) ?? channel.Streams.FirstOrDefault();
+        if (stream is null || string.IsNullOrWhiteSpace(stream.Url))
+            return;
+
+        var streamUrl = stream.Url;
+
+        var binder = new MediaBinder { Token = streamUrl };
+        binder.Binding += Binder_Binding;
+
+        var source = MediaSource.CreateFromMediaBinder(binder);
+        source.CustomProperties["Kind"] = SourceKind.TV.ToString();
+
+        var playbackItem = new MediaPlaybackItem(source);
+
+        var props = playbackItem.GetDisplayProperties();
+        props.Type = MediaPlaybackType.Video;
+        props.VideoProperties.Title = channel.Name;
+        props.VideoProperties.Subtitle = "TV";
+        playbackItem.ApplyDisplayProperties(props);
+
+        var track = MediaItem.FromTV(channel, streamUrl, playbackItem);
+
+        AddToPlaybackList(track, playNow);
+    }
+
     private void AddToPlaybackList(MediaItem track, bool playNow)
     {
         Playlist.Add(track);
@@ -533,7 +564,7 @@ public partial class MediaViewModel : BaseViewModel
             }
 
             var kind = args.NewItem.Source.CustomProperties["Kind"] as string ?? "Unknown";
-            IsLive = (kind == SourceKind.Radio.ToString());
+            IsLive = (kind == SourceKind.Radio.ToString() || kind == SourceKind.TV.ToString());
 
             var currentTrack = Playlist.FirstOrDefault(t => t.PlaybackItem == args.NewItem);
             if (currentTrack is not null)

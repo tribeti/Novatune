@@ -184,13 +184,15 @@ public sealed partial class MainWindow : Window
 
             var stationsTask = RadioService.SearchStationsAsync(sender.Text, token);
             var videosTask = YoutubeService.SearchVideosAsync(sender.Text, token);
+            var tvTask = TVService.SearchChannelsAsync(sender.Text, token);
 
-            await Task.WhenAll(stationsTask, videosTask);
+            await Task.WhenAll(stationsTask, videosTask, tvTask);
             if (token.IsCancellationRequested)
                 return;
 
             var stations = stationsTask.Result;
             var videos = videosTask.Result;
+            var tvChannels = tvTask.Result;
 
             var unifiedResults = new List<MediaItem>();
 
@@ -217,6 +219,24 @@ public sealed partial class MainWindow : Window
                         SourceItem = v
                     });
                 }
+            }
+
+            foreach (var ch in tvChannels)
+            {
+                if (ch.Streams.Count == 0)
+                    continue;
+
+                var subtitle = ch.Categories.Count > 0
+                    ? string.Join(", ", ch.Categories)
+                    : ch.Country;
+
+                unifiedResults.Add(new MediaItem
+                {
+                    Kind = SourceKind.TV,
+                    Title = ch.Name,
+                    Subtitle = string.IsNullOrWhiteSpace(subtitle) ? "TV Channel" : subtitle,
+                    SourceItem = ch
+                });
             }
 
             var result = unifiedResults.Count > 0
@@ -254,6 +274,10 @@ public sealed partial class MainWindow : Window
             {
                 ViewModel.AddYoutube(youtube);
             }
+            else if (item.Kind == SourceKind.TV && item.SourceItem is IptvChannel tvChannel)
+            {
+                ViewModel.AddTV(tvChannel);
+            }
 
             sender.Text = string.Empty;
             sender.ItemsSource = Array.Empty<MediaItem>();
@@ -282,6 +306,10 @@ public sealed partial class MainWindow : Window
         else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
         {
             ViewModel.AddYoutubeToQueue(youtube);
+        }
+        else if (item.Kind == SourceKind.TV && item.SourceItem is IptvChannel tvChannel)
+        {
+            ViewModel.AddTVToQueue(tvChannel);
         }
     }
 }

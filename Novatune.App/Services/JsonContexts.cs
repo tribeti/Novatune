@@ -19,3 +19,12 @@ internal partial class SettingsJsonContext : JsonSerializerContext
 internal partial class RadioJsonContext : JsonSerializerContext
 {
 }
+
+[JsonSourceGenerationOptions(
+    PropertyNameCaseInsensitive = true,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable(typeof(IptvApiResponse))]
+[JsonSerializable(typeof(List<IptvChannel>))]
+internal partial class IptvJsonContext : JsonSerializerContext
+{
+}

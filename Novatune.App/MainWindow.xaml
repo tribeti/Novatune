@@ -213,6 +213,10 @@
                             RelativePanel.AlignHorizontalCenterWithPanel="True"
                             RelativePanel.AlignVerticalCenterWithPanel="True">
                             <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+
+                            <AppBarButton.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Space" />
+                            </AppBarButton.KeyboardAccelerators>
                         </AppBarButton>
 
                         <AppBarButton
