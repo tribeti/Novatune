@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Memory;
 using Novatune.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -39,11 +40,12 @@ public static class TVService
         if (string.IsNullOrWhiteSpace(keyword))
             return [];
 
-        var cacheKey = $"iptv:{keyword.Trim().ToLowerInvariant()}";
+        var normalized = keyword.Trim().ToLowerInvariant();
+        var cacheKey = $"iptv:{normalized}";
 
         if (_searchCache.TryGetValue(cacheKey, out List<IptvChannel>? cached) && cached is not null)
         {
-            return [.. cached];
+            return CloneChannels(cached);
         }
 
         try
@@ -51,7 +53,7 @@ public static class TVService
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromSeconds(8));
 
-            var url = $"https://tv-api-production-61f7.up.railway.app/api/v1/channels?q={Uri.EscapeDataString(keyword)}&has_stream=true&clean_streams=true&sort=streams_count&order=desc&limit=10";
+            var url = $"https://tv-api-production-61f7.up.railway.app/api/v1/channels?q={Uri.EscapeDataString(normalized)}&has_stream=true&clean_streams=true&sort=streams_count&order=desc&limit=10";
 
             var response = await _http.GetFromJsonAsync(url, IptvJsonContext.Default.IptvApiResponse, cts.Token).ConfigureAwait(false);
 
@@ -63,14 +65,40 @@ public static class TVService
                     Size = 1
                 });
 
-                return results;
+                return CloneChannels(results);
             }
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.WriteLine("[IptvService] Search timed out");
+        }
+        catch (Exception ex)
         {
             Debug.WriteLine($"[IptvService] Search failed: {ex.Message}");
         }
 
         return [];
     }
+
+    private static List<IptvChannel> CloneChannels(List<IptvChannel> source) =>
+        source.Select(ch => new IptvChannel
+        {
+            Id = ch.Id,
+            Name = ch.Name,
+            Country = ch.Country,
+            Logo = ch.Logo,
+            Categories = [.. ch.Categories],
+            StreamsCount = ch.StreamsCount,
+            Streams = ch.Streams.Select(s => new IptvStream
+            {
+                Url = s.Url,
+                Quality = s.Quality,
+                Format = s.Format,
+                IsWorking = s.IsWorking
+            }).ToList()
+        }).ToList();
 }
