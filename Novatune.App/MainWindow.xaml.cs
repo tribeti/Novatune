@@ -76,22 +76,15 @@ public sealed partial class MainWindow : Window
         ContentFrame.Content = null;
         ContentFrame.BackStack.Clear();
         ContentFrame.ForwardStack.Clear();
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
     }
 
-    private void RestoreUI()
+    public void ShowAndActivate()
     {
         if (ContentFrame.Content is null)
         {
             var pageType = typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
-    }
-
-    public void ShowAndActivate()
-    {
-        RestoreUI();
         this.Show();
         this.Activate();
     }
