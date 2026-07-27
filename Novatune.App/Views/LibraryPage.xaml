@@ -8,7 +8,124 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock>hi11</TextBlock>
-    </Grid>
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        IsTabStop="True"
+        VerticalScrollBarVisibility="Auto"
+        VerticalScrollMode="Enabled">
+
+        <RelativePanel Padding="36">
+
+            <TextBlock
+                x:Name="Title1"
+                Padding="0,0,0,16"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Text="Recently played" />
+            <ScrollViewer
+                x:Name="PlayedList"
+                HorizontalScrollBarVisibility="Hidden"
+                HorizontalScrollMode="Enabled"
+                IsVerticalScrollChainingEnabled="True"
+                RelativePanel.Below="Title1"
+                VerticalScrollBarVisibility="Hidden"
+                VerticalScrollMode="Disabled">
+                <ItemsRepeater ItemsSource="{x:Bind RecentlyPlayedItems}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="12" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="local:MediaItem11">
+                            <StackPanel>
+                                <Image
+                                    Width="150"
+                                    Height="150"
+                                    HorizontalAlignment="Left"
+                                    Source="{x:Bind ImageUrl}"
+                                    Stretch="UniformToFill" />
+                                <TextBlock
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind Title}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+
+            <TextBlock
+                x:Name="Title2"
+                Padding="0,16,0,16"
+                RelativePanel.Below="PlayedList"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Text="TV Channels" />
+            <ScrollViewer
+                x:Name="TVList"
+                HorizontalScrollBarVisibility="Hidden"
+                HorizontalScrollMode="Enabled"
+                IsVerticalScrollChainingEnabled="True"
+                RelativePanel.Below="Title2"
+                VerticalScrollBarVisibility="Hidden"
+                VerticalScrollMode="Disabled">
+                <ItemsRepeater ItemsSource="{x:Bind TvChannelsItems}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="12" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="local:MediaItem11">
+                            <StackPanel>
+                                <Image
+                                    Width="150"
+                                    Height="150"
+                                    HorizontalAlignment="Left"
+                                    Source="{x:Bind ImageUrl}"
+                                    Stretch="UniformToFill" />
+                                <TextBlock
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind Title}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+
+            <TextBlock
+                x:Name="Title3"
+                Padding="0,16,0,16"
+                RelativePanel.Below="TVList"
+                Style="{StaticResource TitleTextBlockStyle}"
+                Text="Online Playlist" />
+            <ScrollViewer
+                x:Name="OnlineList"
+                HorizontalScrollBarVisibility="Hidden"
+                HorizontalScrollMode="Enabled"
+                IsVerticalScrollChainingEnabled="True"
+                RelativePanel.Below="Title3"
+                VerticalScrollBarVisibility="Hidden"
+                VerticalScrollMode="Disabled">
+                <ItemsRepeater ItemsSource="{x:Bind OnlinePlaylistItems}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="12" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="local:MediaItem11">
+                            <StackPanel>
+                                <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" CornerRadius="8">
+                                    <FontIcon Glyph="&#xE8F6;" />
+                                </Border>
+                                <TextBlock
+                                    Style="{StaticResource BodyTextBlockStyle}"
+                                    Text="{x:Bind Title}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="NoWrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+        </RelativePanel>
+    </ScrollViewer>
 </Page>
