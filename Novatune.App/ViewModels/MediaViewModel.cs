@@ -587,7 +587,25 @@ public partial class MediaViewModel : BaseViewModel
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
     {
         Debug.WriteLine($"ItemFailed: {args.Error.ErrorCode}");
-        _dispatcherQueue.TryEnqueue(() => { if (sender.Items.Count > 1) sender.MoveNext(); });
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                var failedTrack = Playlist.FirstOrDefault(t => t.PlaybackItem == args.Item);
+                Debug.WriteLine($"ItemFailed: errorCode={args?.Error?.ErrorCode}, itemsCount={sender.Items.Count}, failedTrack={(failedTrack is not null ? failedTrack.Title : "not found")}");
+
+                if (failedTrack is not null)
+                    RemoveMedia(failedTrack);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                Debug.WriteLine($"ItemFailed cleanup COMException: HResult=0x{ex.HResult:X8}, Message={ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ItemFailed cleanup unexpected exception: {ex}");
+            }
+        });
     }
 
     #endregion
