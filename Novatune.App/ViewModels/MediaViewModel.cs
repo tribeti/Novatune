@@ -333,7 +333,7 @@ public partial class MediaViewModel : BaseViewModel
         if (index < 0)
             return;
 
-        bool wasCurrent = item.IsCurrent;
+        bool wasCurrent = _mediaPlaybackList.CurrentItem == item.PlaybackItem;
         bool wasPlaying = IsPlaying;
 
         if (wasCurrent && Playlist.Count > 1)
@@ -361,12 +361,11 @@ public partial class MediaViewModel : BaseViewModel
 
         else if (wasCurrent)
         {
-            var currentSessionState = MediaPlayer.PlaybackSession.PlaybackState;
             MediaPlayer.Pause();
             MediaPlayer.Source = null;
             MediaPlayer.Source = _mediaPlaybackList;
 
-            if (wasPlaying && currentSessionState == MediaPlaybackState.Playing)
+            if (wasPlaying)
             {
                 MediaPlayer.Play();
             }
@@ -398,29 +397,48 @@ public partial class MediaViewModel : BaseViewModel
         AddToPlaybackList(track, playNow);
     }
 
-    public void AddYoutube(YoutubeItem item) => AddYoutube(item, playNow: true);
+    public async void AddYoutube(YoutubeItem item) => await AddYoutube(item, playNow: true);
 
-    public void AddYoutubeToQueue(YoutubeItem item) => AddYoutube(item, playNow: false);
+    public async void AddYoutubeToQueue(YoutubeItem item) => await AddYoutube(item, playNow: false);
 
-    private void AddYoutube(YoutubeItem item, bool playNow)
+    private async Task AddYoutube(YoutubeItem item, bool playNow)
     {
-        var binder = new MediaBinder { Token = item.VideoUrl };
-        binder.Binding += Binder_Binding;
+        _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            var manifest = await _youtube.Videos.Streams.GetManifestAsync(item.VideoUrl, cts.Token);
 
-        var source = MediaSource.CreateFromMediaBinder(binder);
-        source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
+            var streamInfo = manifest.GetMuxedStreams()
+                .Where(s => s.Container == Container.Mp4)
+                .GetWithHighestVideoQuality();
 
-        var playbackItem = new MediaPlaybackItem(source);
+            if (streamInfo is not null)
+            {
+                var source = MediaSource.CreateFromUri(new Uri(streamInfo.Url));
+                source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
 
-        var props = playbackItem.GetDisplayProperties();
-        props.Type = MediaPlaybackType.Video;
-        props.VideoProperties.Title = item.Title;
-        props.VideoProperties.Subtitle = item.Author;
-        playbackItem.ApplyDisplayProperties(props);
+                var playbackItem = new MediaPlaybackItem(source);
 
-        var track = MediaItem.FromYoutube(item, playbackItem);
+                var props = playbackItem.GetDisplayProperties();
+                props.Type = MediaPlaybackType.Video;
+                props.VideoProperties.Title = item.Title;
+                props.VideoProperties.Subtitle = item.Author;
+                playbackItem.ApplyDisplayProperties(props);
 
-        AddToPlaybackList(track, playNow);
+                var track = MediaItem.FromYoutube(item, playbackItem);
+
+                AddToPlaybackList(track, playNow);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"[Youtube] Loading error: {e.Message}");
+        }
+        finally
+        {
+            _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+        }
     }
 
     public void AddTV(IptvChannel channel) => AddTV(channel, playNow: true);
@@ -488,28 +506,6 @@ public partial class MediaViewModel : BaseViewModel
                 else
                 {
                     args.SetUri(new Uri(url));
-                }
-            }
-            else if (isYoutube)
-            {
-                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
-                try
-                {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
-
-                    var streamInfo = manifest.GetMuxedStreams()
-                        .Where(s => s.Container == Container.Mp4)
-                        .GetWithHighestVideoQuality();
-
-                    if (streamInfo is not null)
-                        args.SetUri(new Uri(streamInfo.Url));
-                    else
-                        Debug.WriteLine("No compatible muxed stream found for this video.");
-                }
-                finally
-                {
-                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
                 }
             }
             else
@@ -592,7 +588,7 @@ public partial class MediaViewModel : BaseViewModel
             try
             {
                 var failedTrack = Playlist.FirstOrDefault(t => t.PlaybackItem == args.Item);
-                Debug.WriteLine($"ItemFailed: errorCode={args?.Error?.ErrorCode}, itemsCount={sender.Items.Count}, failedTrack={(failedTrack is not null ? failedTrack.Title : "not found")}");
+                Debug.WriteLine($"ItemFailed: errorCode={args?.Error?.ErrorCode}");
 
                 if (failedTrack is not null)
                     RemoveMedia(failedTrack);
