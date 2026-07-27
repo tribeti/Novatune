@@ -98,6 +98,10 @@
                 RelativePanel.Below="TVList"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="Online Playlist" />
+            <Button
+                Content="Add playlist"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignVerticalCenterWith="Title3" />
             <ScrollViewer
                 x:Name="OnlineList"
                 HorizontalScrollBarVisibility="Hidden"
