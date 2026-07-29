@@ -87,12 +87,10 @@ public static class TVService
     private static List<IptvChannel> CloneChannels(List<IptvChannel> source) =>
         source.Select(ch => new IptvChannel
         {
-            Id = ch.Id,
             Name = ch.Name,
             Country = ch.Country,
             Logo = ch.Logo,
             Categories = [.. ch.Categories],
-            StreamsCount = ch.StreamsCount,
             Streams = ch.Streams.Select(s => new IptvStream
             {
                 Url = s.Url,

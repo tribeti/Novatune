@@ -2,8 +2,8 @@
 
 public class YoutubeItem
 {
-    public string Title { get; init; } = string.Empty;
-    public string Author { get; init; } = string.Empty;
-    public string VideoUrl { get; init; } = string.Empty;
-    public string ThumbnailUrl { get; init; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public string VideoUrl { get; set; } = string.Empty;
+    public string ThumbnailUrl { get; set; } = string.Empty;
 }

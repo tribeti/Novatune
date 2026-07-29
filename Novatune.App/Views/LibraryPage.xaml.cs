@@ -1,13 +1,13 @@
 using Microsoft.UI.Xaml.Controls;
+using Novatune.App.Models;
 using System.Collections.ObjectModel;
 
 namespace Novatune.App.Views;
 
 public sealed partial class LibraryPage : Page
 {
-    public ObservableCollection<MediaItem11> RecentlyPlayedItems { get; } = [];
-    public ObservableCollection<MediaItem11> TvChannelsItems { get; } = [];
-    public ObservableCollection<MediaItem11> OnlinePlaylistItems { get; } = [];
+    public ObservableCollection<IptvChannel> TvChannelsItems { get; } = [];
+    public ObservableCollection<YoutubeItem> OnlinePlaylistItems { get; } = [];
 
     public LibraryPage()
     {
@@ -17,47 +17,186 @@ public sealed partial class LibraryPage : Page
 
     private void LoadSampleData()
     {
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Midnight City", ImageUrl = "https://picsum.photos/seed/music1/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Blinding Lights", ImageUrl = "https://picsum.photos/seed/music2/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Levitating", ImageUrl = "https://picsum.photos/seed/music3/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Peaches", ImageUrl = "https://picsum.photos/seed/music4/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Stay", ImageUrl = "https://picsum.photos/seed/music5/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Stay", ImageUrl = "https://picsum.photos/seed/music5/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Stay", ImageUrl = "https://picsum.photos/seed/music5/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Stay", ImageUrl = "https://picsum.photos/seed/music5/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Stay", ImageUrl = "https://picsum.photos/seed/music5/200/200" });
-        RecentlyPlayedItems.Add(new MediaItem11 { Title = "Stay", ImageUrl = "https://picsum.photos/seed/music5/200/200" });
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV1",
+            Country = "VN",
+            Logo = "https://i.imgur.com/vZYlGIW.png",
+            Categories = [],
+            Streams =
+            [
+            new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv1/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv1/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv1/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv1-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
 
-        TvChannelsItems.Add(new MediaItem11 { Title = "News 24/7", ImageUrl = "https://picsum.photos/seed/tv1/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Sports HD", ImageUrl = "https://picsum.photos/seed/tv2/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Movie Classics", ImageUrl = "https://picsum.photos/seed/tv3/200/200" });
-        TvChannelsItems.Add(new MediaItem11 { Title = "Kids Zone", ImageUrl = "https://picsum.photos/seed/tv4/200/200" });
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV2",
+            Country = "VN",
+            Logo = "https://i.imgur.com/qWWpYRR.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv2/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv2/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv2/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv2-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
 
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Chill Vibes Playlist" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Workout Mix 2024" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Top 50 Global" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
-        OnlinePlaylistItems.Add(new MediaItem11 { Title = "Acoustic Covers" });
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV3",
+            Country = "VN",
+            Logo = "https://i.imgur.com/4lJG1fu.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv3/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv3/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv3-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv3/live247-hls-avc/index.m3u8", Quality = "", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV4",
+            Country = "VN",
+            Logo = "https://i.imgur.com/WsLLmR2.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv4/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv4/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv4/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv4-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV5",
+            Country = "VN",
+            Logo = "https://i.imgur.com/Vnnna1C.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv5/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv5/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv5-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv5/live247-hls-avc/index.m3u8", Quality = "", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV5 Tay Nam Bo",
+            Country = "VN",
+            Logo = "https://i.imgur.com/xiuHjEQ.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv5tnb/live-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv5tnb-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV5 Tay Nguyen",
+            Country = "VN",
+            Logo = "https://i.imgur.com/Hlcnqqt.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv5tn/live-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv5tn-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV6",
+            Country = "VN",
+            Logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/VTV6_logo_2026_final.svg/960px-VTV6_logo_2026_final.svg.png",
+            Categories = ["sports"],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv6/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv6/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv6/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv6tt-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV7",
+            Country = "VN",
+            Logo = "https://i.imgur.com/ZwoP823.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv7/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv7/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv7/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv7-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV8",
+            Country = "VN",
+            Logo = "https://i.imgur.com/rf9adGJ.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv8/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv8/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv8/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv8-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV9",
+            Country = "VN",
+            Logo = "https://i.imgur.com/QiY55sy.png",
+            Categories = [],
+            Streams =
+            [
+                new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv9/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv9/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv9/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vtvgolive-failover.vtvdigital.vn/vtvgo/vtv9-manifest.m3u8", Quality = "720p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        TvChannelsItems.Add(new IptvChannel
+        {
+            Name = "VTV10",
+            Country = "VN",
+            Logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/VTV10_logo_2026.png/960px-VTV10_logo_2026.png",
+            Categories = [],
+            Streams =
+            [
+            new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv10/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv10/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv10/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
+        ]
+        });
+
+        OnlinePlaylistItems.Add(new YoutubeItem { Title = "Chill Vibes Playlist", Author = "ChillNation", VideoUrl = "https://youtube.com/watch?v=example1", ThumbnailUrl = "https://img.icons8.com/color/150/youtube-play.png" });
+        OnlinePlaylistItems.Add(new YoutubeItem { Title = "Workout Power Mix", Author = "GymBeats", VideoUrl = "https://youtube.com/watch?v=example2", ThumbnailUrl = "https://img.icons8.com/color/150/youtube-play.png" });
+        OnlinePlaylistItems.Add(new YoutubeItem { Title = "Lo-fi Study Beats", Author = "StudyMusic", VideoUrl = "https://youtube.com/watch?v=example3", ThumbnailUrl = "https://img.icons8.com/color/150/youtube-play.png" });
+        OnlinePlaylistItems.Add(new YoutubeItem { Title = "Top Hits 2026", Author = "MusicTrends", VideoUrl = "https://youtube.com/watch?v=example4", ThumbnailUrl = "https://img.icons8.com/color/150/youtube-play.png" });
+        OnlinePlaylistItems.Add(new YoutubeItem { Title = "Acoustic Covers", Author = "AcousticVibes", VideoUrl = "https://youtube.com/watch?v=example5", ThumbnailUrl = "https://img.icons8.com/color/150/youtube-play.png" });
+        OnlinePlaylistItems.Add(new YoutubeItem { Title = "V-Pop Ballad Collection", Author = "VietMusic", VideoUrl = "https://youtube.com/watch?v=example6", ThumbnailUrl = "https://img.icons8.com/color/150/youtube-play.png" });
     }
-}
-
-public partial class MediaItem11
-{
-    public string Title { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
 }

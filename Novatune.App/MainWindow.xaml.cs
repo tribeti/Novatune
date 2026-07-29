@@ -140,6 +140,7 @@ public sealed partial class MainWindow : Window
         if (navPageType is not null && !Type.Equals(preNavPageType, navPageType))
         {
             ContentFrame.Navigate(navPageType, null, transitionInfo);
+            ContentFrame.BackStack.Clear();
         }
     }
 

@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Novatune.App.Models"
+    NavigationCacheMode="Required"
     mc:Ignorable="d">
 
     <ScrollViewer
@@ -16,48 +18,9 @@
         VerticalScrollMode="Enabled">
 
         <RelativePanel Padding="36">
-
-            <TextBlock
-                x:Name="Title1"
-                Padding="0,0,0,16"
-                Style="{StaticResource TitleTextBlockStyle}"
-                Text="Recently played" />
-            <ScrollViewer
-                x:Name="PlayedList"
-                HorizontalScrollBarVisibility="Hidden"
-                HorizontalScrollMode="Enabled"
-                IsVerticalScrollChainingEnabled="True"
-                RelativePanel.Below="Title1"
-                VerticalScrollBarVisibility="Hidden"
-                VerticalScrollMode="Disabled">
-                <ItemsRepeater ItemsSource="{x:Bind RecentlyPlayedItems}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal" Spacing="12" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="local:MediaItem11">
-                            <StackPanel>
-                                <Image
-                                    Width="150"
-                                    Height="150"
-                                    HorizontalAlignment="Left"
-                                    Source="{x:Bind ImageUrl}"
-                                    Stretch="UniformToFill" />
-                                <TextBlock
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Title}"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="NoWrap" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </ScrollViewer>
-
             <TextBlock
                 x:Name="Title2"
                 Padding="0,16,0,16"
-                RelativePanel.Below="PlayedList"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="TV Channels" />
             <ScrollViewer
@@ -73,17 +36,17 @@
                         <StackLayout Orientation="Horizontal" Spacing="12" />
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="local:MediaItem11">
+                        <DataTemplate x:DataType="models:IptvChannel">
                             <StackPanel>
                                 <Image
                                     Width="150"
                                     Height="150"
                                     HorizontalAlignment="Left"
-                                    Source="{x:Bind ImageUrl}"
-                                    Stretch="UniformToFill" />
+                                    Source="{x:Bind Logo}"
+                                    Stretch="Uniform" />
                                 <TextBlock
                                     Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Title}"
+                                    Text="{x:Bind Name}"
                                     TextTrimming="CharacterEllipsis"
                                     TextWrapping="NoWrap" />
                             </StackPanel>
@@ -115,7 +78,7 @@
                         <StackLayout Orientation="Horizontal" Spacing="12" />
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="local:MediaItem11">
+                        <DataTemplate x:DataType="models:YoutubeItem">
                             <StackPanel>
                                 <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" CornerRadius="8">
                                     <FontIcon Glyph="&#xE8F6;" />
