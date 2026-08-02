@@ -91,9 +91,13 @@ public static class YoutubeService
             return null;
         }
 
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(90));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+        var token = linkedCts.Token;
+
         try
         {
-            var playlistMeta = await _youtube.Playlists.GetAsync(playlistUrl, cancellationToken).ConfigureAwait(false);
+            var playlistMeta = await _youtube.Playlists.GetAsync(playlistUrl, token).ConfigureAwait(false);
 
             var playlist = new YoutubePlaylist
             {
@@ -107,7 +111,7 @@ public static class YoutubeService
                 Videos = [],
             };
 
-            await foreach (var batch in _youtube.Playlists.GetVideoBatchesAsync(playlistUrl, cancellationToken).ConfigureAwait(false))
+            await foreach (var batch in _youtube.Playlists.GetVideoBatchesAsync(playlistUrl, token).ConfigureAwait(false))
             {
                 foreach (var video in batch.Items)
                 {
