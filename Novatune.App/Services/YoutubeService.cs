@@ -140,6 +140,7 @@ public static class YoutubeService
     {
         return thumbnails
             .FirstOrDefault(t => t.Resolution.Height is >= 360 and <= 480)?.Url
-            ?? thumbnails.GetWithHighestResolution().Url;
+            ?? thumbnails.GetWithHighestResolution().Url
+            ?? string.Empty;
     }
 }
