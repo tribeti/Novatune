@@ -53,9 +53,7 @@ public static class YoutubeService
         {
             await foreach (var video in _youtube.Search.GetVideosAsync(keyword, cancellationToken).ConfigureAwait(false))
             {
-                string thumbnailUrl = video.Thumbnails
-                    .FirstOrDefault(t => t.Resolution.Height is >= 360 and <= 480)?.Url
-                    ?? video.Thumbnails.GetWithHighestResolution().Url;
+                string thumbnailUrl = GetPreferredThumbnailUrl(video.Thumbnails);
 
                 results.Add(new YoutubeItem
                 {
@@ -113,9 +111,7 @@ public static class YoutubeService
             {
                 foreach (var video in batch.Items)
                 {
-                    string thumbnailUrl = video.Thumbnails
-                        .FirstOrDefault(t => t.Resolution.Height is >= 360 and <= 480)?.Url
-                        ?? video.Thumbnails.GetWithHighestResolution().Url;
+                    string thumbnailUrl = GetPreferredThumbnailUrl(video.Thumbnails);
 
                     playlist.Videos.Add(new YoutubeItem
                     {
@@ -134,5 +130,12 @@ public static class YoutubeService
             Debug.WriteLine($"YouTube playlist fetch failed: {ex.Message}");
             return null;
         }
+    }
+
+    private static string GetPreferredThumbnailUrl(IReadOnlyList<Thumbnail> thumbnails)
+    {
+        return thumbnails
+            .FirstOrDefault(t => t.Resolution.Height is >= 360 and <= 480)?.Url
+            ?? thumbnails.GetWithHighestResolution().Url;
     }
 }

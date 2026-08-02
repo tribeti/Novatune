@@ -457,24 +457,29 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
-    private void AddYoutubeBinding(YoutubeItem item, bool playNow)
+    private MediaPlaybackItem CreatePlaybackItem(string url, string title, string subtitle, SourceKind kind)
     {
-        var binder = new MediaBinder { Token = item.VideoUrl };
+        var binder = new MediaBinder { Token = url };
         binder.Binding += Binder_Binding;
 
         var source = MediaSource.CreateFromMediaBinder(binder);
-        source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
+        source.CustomProperties["Kind"] = kind.ToString();
 
         var playbackItem = new MediaPlaybackItem(source);
 
         var props = playbackItem.GetDisplayProperties();
         props.Type = MediaPlaybackType.Video;
-        props.VideoProperties.Title = item.Title;
-        props.VideoProperties.Subtitle = item.Author;
+        props.VideoProperties.Title = title;
+        props.VideoProperties.Subtitle = subtitle;
         playbackItem.ApplyDisplayProperties(props);
 
-        var track = MediaItem.FromYoutube(item, playbackItem);
+        return playbackItem;
+    }
 
+    private void AddYoutubeBinding(YoutubeItem item, bool playNow)
+    {
+        var playbackItem = CreatePlaybackItem(item.VideoUrl, item.Title, item.Author, SourceKind.Youtube);
+        var track = MediaItem.FromYoutube(item, playbackItem);
         AddToPlaybackList(track, playNow);
     }
 
@@ -490,22 +495,8 @@ public partial class MediaViewModel : BaseViewModel
 
         var streamUrl = stream.Url;
 
-        var binder = new MediaBinder { Token = streamUrl };
-        binder.Binding += Binder_Binding;
-
-        var source = MediaSource.CreateFromMediaBinder(binder);
-        source.CustomProperties["Kind"] = SourceKind.TV.ToString();
-
-        var playbackItem = new MediaPlaybackItem(source);
-
-        var props = playbackItem.GetDisplayProperties();
-        props.Type = MediaPlaybackType.Video;
-        props.VideoProperties.Title = channel.Name;
-        props.VideoProperties.Subtitle = "TV";
-        playbackItem.ApplyDisplayProperties(props);
-
+        var playbackItem = CreatePlaybackItem(streamUrl, channel.Name, "TV", SourceKind.TV);
         var track = MediaItem.FromTV(channel, streamUrl, playbackItem);
-
         AddToPlaybackList(track, playNow);
     }
 
