@@ -37,19 +37,28 @@
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="models:IptvChannel">
-                            <StackPanel>
-                                <Image
-                                    Width="150"
-                                    Height="150"
-                                    HorizontalAlignment="Left"
-                                    Source="{x:Bind Logo}"
-                                    Stretch="Uniform" />
-                                <TextBlock
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="{x:Bind Name}"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="NoWrap" />
-                            </StackPanel>
+                            <Button
+                                x:Name="TVItem"
+                                Padding="8"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                Click="TVItem_Click"
+                                DataContext="{x:Bind}"
+                                ToolTipService.ToolTip="{x:Bind Name}">
+                                <StackPanel>
+                                    <Image
+                                        Width="150"
+                                        Height="150"
+                                        HorizontalAlignment="Left"
+                                        Source="{x:Bind Logo}"
+                                        Stretch="Uniform" />
+                                    <TextBlock
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind Name}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </Button>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
