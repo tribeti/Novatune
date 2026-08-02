@@ -333,7 +333,7 @@ public partial class MediaViewModel : BaseViewModel
         if (index < 0)
             return;
 
-        bool wasCurrent = item.IsCurrent;
+        bool wasCurrent = _mediaPlaybackList.CurrentItem == item.PlaybackItem;
         bool wasPlaying = IsPlaying;
 
         if (wasCurrent && Playlist.Count > 1)
@@ -361,12 +361,11 @@ public partial class MediaViewModel : BaseViewModel
 
         else if (wasCurrent)
         {
-            var currentSessionState = MediaPlayer.PlaybackSession.PlaybackState;
             MediaPlayer.Pause();
             MediaPlayer.Source = null;
             MediaPlayer.Source = _mediaPlaybackList;
 
-            if (wasPlaying && currentSessionState == MediaPlaybackState.Playing)
+            if (wasPlaying)
             {
                 MediaPlayer.Play();
             }
@@ -398,28 +397,89 @@ public partial class MediaViewModel : BaseViewModel
         AddToPlaybackList(track, playNow);
     }
 
-    public void AddYoutube(YoutubeItem item) => AddYoutube(item, playNow: true);
+    public async void AddYoutube(YoutubeItem item) => await AddYoutube(item, playNow: true);
 
-    public void AddYoutubeToQueue(YoutubeItem item) => AddYoutube(item, playNow: false);
+    public async void AddYoutubeToQueue(YoutubeItem item) => await AddYoutube(item, playNow: false);
 
-    private void AddYoutube(YoutubeItem item, bool playNow)
+    private async Task AddYoutube(YoutubeItem item, bool playNow)
     {
-        var binder = new MediaBinder { Token = item.VideoUrl };
+        _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            var manifest = await _youtube.Videos.Streams.GetManifestAsync(item.VideoUrl, cts.Token);
+
+            var streamInfo = manifest.GetMuxedStreams()
+                .Where(s => s.Container == Container.Mp4)
+                .GetWithHighestVideoQuality();
+
+            if (streamInfo is not null)
+            {
+                var source = MediaSource.CreateFromUri(new Uri(streamInfo.Url));
+                source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
+
+                var playbackItem = new MediaPlaybackItem(source);
+
+                var props = playbackItem.GetDisplayProperties();
+                props.Type = MediaPlaybackType.Video;
+                props.VideoProperties.Title = item.Title;
+                props.VideoProperties.Subtitle = item.Author;
+                playbackItem.ApplyDisplayProperties(props);
+
+                var track = MediaItem.FromYoutube(item, playbackItem);
+
+                AddToPlaybackList(track, playNow);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"[Youtube] Loading error: {e.Message}");
+        }
+        finally
+        {
+            _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+        }
+    }
+
+    public void AddYoutubePlaylistToQueue(YoutubePlaylist playlist)
+    {
+        if (playlist?.Videos is null || playlist.Videos.Count == 0)
+            return;
+
+        bool isFirst = true;
+        foreach (var video in playlist.Videos)
+        {
+            if (Playlist.Any(t => t.SourcePathOrUrl == video.VideoUrl))
+                continue;
+
+            AddYoutubeBinding(video, playNow: isFirst);
+            isFirst = false;
+        }
+    }
+
+    private MediaPlaybackItem CreatePlaybackItem(string url, string title, string subtitle, SourceKind kind)
+    {
+        var binder = new MediaBinder { Token = url };
         binder.Binding += Binder_Binding;
 
         var source = MediaSource.CreateFromMediaBinder(binder);
-        source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
+        source.CustomProperties["Kind"] = kind.ToString();
 
         var playbackItem = new MediaPlaybackItem(source);
 
         var props = playbackItem.GetDisplayProperties();
         props.Type = MediaPlaybackType.Video;
-        props.VideoProperties.Title = item.Title;
-        props.VideoProperties.Subtitle = item.Author;
+        props.VideoProperties.Title = title;
+        props.VideoProperties.Subtitle = subtitle;
         playbackItem.ApplyDisplayProperties(props);
 
-        var track = MediaItem.FromYoutube(item, playbackItem);
+        return playbackItem;
+    }
 
+    private void AddYoutubeBinding(YoutubeItem item, bool playNow)
+    {
+        var playbackItem = CreatePlaybackItem(item.VideoUrl, item.Title, item.Author, SourceKind.Youtube);
+        var track = MediaItem.FromYoutube(item, playbackItem);
         AddToPlaybackList(track, playNow);
     }
 
@@ -435,22 +495,8 @@ public partial class MediaViewModel : BaseViewModel
 
         var streamUrl = stream.Url;
 
-        var binder = new MediaBinder { Token = streamUrl };
-        binder.Binding += Binder_Binding;
-
-        var source = MediaSource.CreateFromMediaBinder(binder);
-        source.CustomProperties["Kind"] = SourceKind.TV.ToString();
-
-        var playbackItem = new MediaPlaybackItem(source);
-
-        var props = playbackItem.GetDisplayProperties();
-        props.Type = MediaPlaybackType.Video;
-        props.VideoProperties.Title = channel.Name;
-        props.VideoProperties.Subtitle = "TV";
-        playbackItem.ApplyDisplayProperties(props);
-
+        var playbackItem = CreatePlaybackItem(streamUrl, channel.Name, "TV", SourceKind.TV);
         var track = MediaItem.FromTV(channel, streamUrl, playbackItem);
-
         AddToPlaybackList(track, playNow);
     }
 
@@ -478,7 +524,28 @@ public partial class MediaViewModel : BaseViewModel
             bool isYoutube = host.Contains("youtube.com") || host.Contains("youtu.be");
             bool isHls = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase);
 
-            if (isHls)
+            if (isYoutube)
+            {
+                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
+                    var streamInfo = manifest.GetMuxedStreams()
+                        .Where(s => s.Container == Container.Mp4)
+                        .GetWithHighestVideoQuality();
+
+                    if (streamInfo is not null)
+                    {
+                        args.SetUri(new Uri(streamInfo.Url));
+                    }
+                }
+                finally
+                {
+                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+                }
+            }
+            else if (isHls)
             {
                 var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
                 if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
@@ -488,28 +555,6 @@ public partial class MediaViewModel : BaseViewModel
                 else
                 {
                     args.SetUri(new Uri(url));
-                }
-            }
-            else if (isYoutube)
-            {
-                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
-                try
-                {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
-
-                    var streamInfo = manifest.GetMuxedStreams()
-                        .Where(s => s.Container == Container.Mp4)
-                        .GetWithHighestVideoQuality();
-
-                    if (streamInfo is not null)
-                        args.SetUri(new Uri(streamInfo.Url));
-                    else
-                        Debug.WriteLine("No compatible muxed stream found for this video.");
-                }
-                finally
-                {
-                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
                 }
             }
             else
@@ -587,7 +632,25 @@ public partial class MediaViewModel : BaseViewModel
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
     {
         Debug.WriteLine($"ItemFailed: {args.Error.ErrorCode}");
-        _dispatcherQueue.TryEnqueue(() => { if (sender.Items.Count > 1) sender.MoveNext(); });
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                var failedTrack = Playlist.FirstOrDefault(t => t.PlaybackItem == args.Item);
+                Debug.WriteLine($"ItemFailed: errorCode={args?.Error?.ErrorCode}");
+
+                if (failedTrack is not null)
+                    RemoveMedia(failedTrack);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                Debug.WriteLine($"ItemFailed cleanup COMException: HResult=0x{ex.HResult:X8}, Message={ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"ItemFailed cleanup unexpected exception: {ex}");
+            }
+        });
     }
 
     #endregion

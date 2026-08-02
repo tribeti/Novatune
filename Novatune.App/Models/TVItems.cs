@@ -17,9 +17,6 @@ public class IptvApiResponse
 
 public class IptvChannel
 {
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = "";
-
     [JsonPropertyName("name")]
     public string Name { get; set; } = "";
 
@@ -31,9 +28,6 @@ public class IptvChannel
 
     [JsonPropertyName("categories")]
     public List<string> Categories { get; set; } = [];
-
-    [JsonPropertyName("streams_count")]
-    public int StreamsCount { get; set; }
 
     [JsonPropertyName("streams")]
     public List<IptvStream> Streams { get; set; } = [];
