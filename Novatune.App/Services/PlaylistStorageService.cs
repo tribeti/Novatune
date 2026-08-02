@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Novatune.App.Services;
@@ -11,6 +12,7 @@ namespace Novatune.App.Services;
 public class PlaylistStorageService
 {
     private readonly string _filePath;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     private List<YoutubePlaylist> _playlists = [];
 
     public IReadOnlyList<YoutubePlaylist> Playlists => _playlists;
@@ -25,25 +27,46 @@ public class PlaylistStorageService
 
     public async Task LoadAsync()
     {
-        if (!File.Exists(_filePath))
-        {
-            _playlists = [];
-            return;
-        }
-
+        await _semaphore.WaitAsync().ConfigureAwait(false);
         try
         {
-            string json = await File.ReadAllTextAsync(_filePath).ConfigureAwait(false);
-            _playlists = JsonSerializer.Deserialize(json, PlaylistJsonContext.Default.ListYoutubePlaylist) ?? [];
+            if (!File.Exists(_filePath))
+            {
+                _playlists = [];
+                return;
+            }
+
+            try
+            {
+                string json = await File.ReadAllTextAsync(_filePath).ConfigureAwait(false);
+                _playlists = JsonSerializer.Deserialize(json, PlaylistJsonContext.Default.ListYoutubePlaylist) ?? [];
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to load playlists: {ex.Message}");
+                _playlists = [];
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            Debug.WriteLine($"Failed to load playlists: {ex.Message}");
-            _playlists = [];
+            _semaphore.Release();
         }
     }
 
     public async Task SaveAsync()
+    {
+        await _semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            await SaveInternalAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private async Task SaveInternalAsync()
     {
         try
         {
@@ -58,14 +81,30 @@ public class PlaylistStorageService
 
     public async Task AddAsync(YoutubePlaylist playlist)
     {
-        _playlists.RemoveAll(p => p.PlaylistId == playlist.PlaylistId);
-        _playlists.Add(playlist);
-        await SaveAsync().ConfigureAwait(false);
+        await _semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            _playlists.RemoveAll(p => p.PlaylistId == playlist.PlaylistId);
+            _playlists.Add(playlist);
+            await SaveInternalAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task RemoveAsync(string playlistId)
     {
-        _playlists.RemoveAll(p => p.PlaylistId == playlistId);
-        await SaveAsync().ConfigureAwait(false);
+        await _semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            _playlists.RemoveAll(p => p.PlaylistId == playlistId);
+            await SaveInternalAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 }
