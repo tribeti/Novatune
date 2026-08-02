@@ -71,6 +71,7 @@
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="Online Playlist" />
             <Button
+                Click="AddPlaylist_Click"
                 Content="Add playlist"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.AlignVerticalCenterWith="Title3" />
@@ -87,17 +88,60 @@
                         <StackLayout Orientation="Horizontal" Spacing="12" />
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="models:YoutubeItem">
-                            <StackPanel>
-                                <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" CornerRadius="8">
-                                    <FontIcon Glyph="&#xE8F6;" />
-                                </Border>
-                                <TextBlock
-                                    Style="{StaticResource BodyTextBlockStyle}"
-                                    Text="{x:Bind Title}"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="NoWrap" />
-                            </StackPanel>
+                        <DataTemplate x:DataType="models:YoutubePlaylist">
+                            <Button
+                                Padding="8"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                Click="PlaylistItem_Click"
+                                DataContext="{x:Bind}"
+                                ToolTipService.ToolTip="{x:Bind Title}">
+                                <Button.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem
+                                            Click="PlayPlaylist_Click"
+                                            Tag="{x:Bind}"
+                                            Text="Play All">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xF5B0;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                        <MenuFlyoutItem
+                                            Click="RemovePlaylist_Click"
+                                            Tag="{x:Bind}"
+                                            Text="Remove">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE711;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </Button.ContextFlyout>
+                                <StackPanel Width="180">
+                                    <Border
+                                        Height="120"
+                                        Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                        CornerRadius="8">
+                                        <Image
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Source="{x:Bind ThumbnailUrl}"
+                                            Stretch="UniformToFill" />
+                                    </Border>
+                                    <TextBlock
+                                        Margin="0,8,0,0"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource BodyTextBlockStyle}"
+                                        Text="{x:Bind Title}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind Author}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </Button>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>

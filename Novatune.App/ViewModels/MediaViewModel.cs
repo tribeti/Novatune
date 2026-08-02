@@ -441,6 +441,43 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
+    public void AddYoutubePlaylistToQueue(YoutubePlaylist playlist)
+    {
+        if (playlist?.Videos is null || playlist.Videos.Count == 0)
+            return;
+
+        bool isFirst = true;
+        foreach (var video in playlist.Videos)
+        {
+            if (Playlist.Any(t => t.SourcePathOrUrl == video.VideoUrl))
+                continue;
+
+            AddYoutubeBinding(video, playNow: isFirst);
+            isFirst = false;
+        }
+    }
+
+    private void AddYoutubeBinding(YoutubeItem item, bool playNow)
+    {
+        var binder = new MediaBinder { Token = item.VideoUrl };
+        binder.Binding += Binder_Binding;
+
+        var source = MediaSource.CreateFromMediaBinder(binder);
+        source.CustomProperties["Kind"] = SourceKind.Youtube.ToString();
+
+        var playbackItem = new MediaPlaybackItem(source);
+
+        var props = playbackItem.GetDisplayProperties();
+        props.Type = MediaPlaybackType.Video;
+        props.VideoProperties.Title = item.Title;
+        props.VideoProperties.Subtitle = item.Author;
+        playbackItem.ApplyDisplayProperties(props);
+
+        var track = MediaItem.FromYoutube(item, playbackItem);
+
+        AddToPlaybackList(track, playNow);
+    }
+
     public void AddTV(IptvChannel channel) => AddTV(channel, playNow: true);
 
     public void AddTVToQueue(IptvChannel channel) => AddTV(channel, playNow: false);
@@ -496,7 +533,28 @@ public partial class MediaViewModel : BaseViewModel
             bool isYoutube = host.Contains("youtube.com") || host.Contains("youtu.be");
             bool isHls = url.Contains(".m3u8", StringComparison.OrdinalIgnoreCase);
 
-            if (isHls)
+            if (isYoutube)
+            {
+                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
+                    var streamInfo = manifest.GetMuxedStreams()
+                        .Where(s => s.Container == Container.Mp4)
+                        .GetWithHighestVideoQuality();
+
+                    if (streamInfo is not null)
+                    {
+                        args.SetUri(new Uri(streamInfo.Url));
+                    }
+                }
+                finally
+                {
+                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+                }
+            }
+            else if (isHls)
             {
                 var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
                 if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)

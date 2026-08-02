@@ -39,6 +39,7 @@ public partial class App : Application
         var services = new ServiceCollection();
         services.AddSingleton<MediaViewModel>();
         services.AddSingleton<SettingsService>();
+        services.AddSingleton<PlaylistStorageService>();
         return services.BuildServiceProvider();
     }
 }
