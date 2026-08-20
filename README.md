@@ -1,52 +1,100 @@
+<div align="center">
+
 # Novatune
 
-A modern Windows audio player application built with WinUI 3 and .NET 8. Novatune allows you to play local audio files, stream music from YouTube, and manage your playlists with a rich, user-friendly interface.  
+**A sleek, modern multimedia player for Windows built with WinUI 3 & .NET 10.**
 
-[![Screenshot-2025-07-03-144730.png](https://i.postimg.cc/50bDhDFq/Screenshot-2025-07-03-144730.png)](https://postimg.cc/sBHnS6mv)
-## Features
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![WinUI 3](https://img.shields.io/badge/WinUI-3%20%2F%20WindowsAppSDK-0078D7?style=flat-square&logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-tribeti-orange.svg?style=flat-square&logo=github)](https://github.com/tribeti)
 
-- **Local Audio Playback**: Browse and play audio files from your device, view metadata
-- **YouTube Streaming**: Search for YouTube videos and stream audio directly within the app.
-- **Playlist Management**: Create, shuffle, and repeat playlists.
-- **Modern UI**: Built with WinUI 3 for a responsive and attractive user experience.
-- **Media Controls**: Full-featured playback controls, including seek, volume, and playback state.
+<br/>
 
-## Getting Started
+[![Novatune Screenshot](https://i.postimg.cc/jdMs32c7/Screenshot-2026-08-20-102355.png)](https://postimg.cc/sBHnS6mv)
 
-### Prerequisites
-- Windows 10 version 17763 or later
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Visual Studio 2022 or later (with UWP/WinUI workloads)
-
-### Build and Run
-1. Clone the repository.
-2. Open the solution in Visual Studio.
-3. Restore NuGet packages.
-4. Build and run the project.
-
-## Usage
-- **Local Files**: Use the folder picker to add your music library. Select tracks to play, or mark them as favorites.
-- **Online (YouTube)**: Use the search bar to find YouTube videos. Click a result to stream its audio.
-- **Playback Controls**: Use the media controls to play, pause, skip, shuffle, or repeat tracks.
-
-## Technologies Used
-- .NET 8
-- WinUI 3
-- [LibVLCSharp](https://github.com/videolan/libvlcsharp) (for media playback)
-- [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) (for YouTube integration)
-- [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)
-
-## Third-Party Libraries and Credits
-This project makes use of the following open source libraries:
-
-- [LibVLCSharp](https://github.com/videolan/libvlcsharp) - LGPL 2.1
-- [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) - MIT
-- [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) - MIT
-- [WinUIEx](https://github.com/dotMorten/WinUIEx) - MIT
-
-Please refer to each library's repository for their respective licenses and attributions.
-
-## License
-This project is for educational and personal use. See [LICENSE](LICENSE) for more information.
+</div>
 
 ---
+
+## 🌟 Overview
+
+**Novatune** is a lightweight, feature-rich audio and multimedia player designed specifically for Windows 10 and 11. Powered by **WinUI 3** and **.NET 10**, it offers a native, responsive Fluent Design experience with Mica material backdrops, seamless local playback, online YouTube streaming, global online radio, and live IPTV broadcasting.
+
+---
+
+## ✨ Features
+
+- **Local Music Playback**: Pick audio files or entire music folders, view metadata and album art, and manage your current playback queue.
+- **YouTube Streaming**: Search for any song or video on YouTube with fast instant search, automatic thumbnail loading, and background audio streaming.
+- **Online Radio Stations**: Discover and tune into thousands of worldwide live radio stations powered by the Radio Browser API with caching.
+- **IPTV & Live TV Channels**: Stream live television channels directly in the app.
+- **Playlist Management**: Create custom online playlists, save favorites, import playlists, shuffle, and repeat.
+- **Full Playback Controls**: Interactive scrubber timeline, volume control, next/previous track navigation, shuffle & repeat modes, and keyboard shortcuts (e.g. `Space` to Play/Pause).
+- **Modern Windows 11 UI**: Beautiful Fluent Design featuring native Mica backdrop, dark/light theme integration, and smooth animations.
+- **System Tray Integration**: Option to minimize Novatune to the system tray for uninterrupted background listening.
+
+---
+
+## 🛠️ Built With
+
+- **Framework**: [.NET 10](https://dotnet.microsoft.com/) & [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) (WinUI 3)
+- **UI & Controls**: [DevWinUI](https://github.com/Ghost1372/DevWinUI), [WinUIEx](https://github.com/dotMorten/WinUIEx), [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit)
+- **Architecture**: MVVM with [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)
+- **Media & Streaming**:
+  - [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) – Fast YouTube metadata extraction & media stream resolution
+  - Radio Browser API – Worldwide live radio directory
+  - IPTV Stream Resolver – Live channel streaming
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **OS**: Windows 10 version 1809 (Build 17763) or Windows 11 (recommended)
+- **SDK**: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- **IDE**: Visual Studio 2022 (v18.0 or newer) with:
+  - *WinUI Application Development* workload
+
+### Clone & Run
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/tribeti/Novatune.git
+   cd Novatune
+   ```
+
+2. **Open in Visual Studio**:
+   - Open `Novatune.slnx` or `Novatune.App/Novatune.App.csproj`.
+
+3. **Restore NuGet Packages & Build**:
+   ```bash
+   dotnet restore
+   dotnet build
+   ```
+
+4. **Run**:
+   - Press <kbd>F5</kbd> in Visual Studio or run `Novatune.App`.
+
+---
+
+## 🤝 Third-Party Open Source Credits
+Special thanks to the authors and maintainers of the following open-source projects:
+
+| Library | Author / Organization | License | Description |
+| :--- | :--- | :--- | :--- |
+| [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | Microsoft & CommunityToolkit | MIT | MVVM architecture & source generators |
+| [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) | Alexey Golub (Tyrrrz) | MIT | YouTube stream & metadata extraction |
+| [WinUIEx](https://github.com/dotMorten/WinUIEx) | Morten Nielsen | MIT | Windowing & system extensions for WinUI 3 |
+| [DevWinUI](https://github.com/Ghost1372/DevWinUI) | Ghost1372 | MIT | Fluent controls & modern UI components |
+
+> For a full list of third-party libraries and dependencies, see [THIRD_PARTY_CREDITS.md](THIRD_PARTY_CREDITS.md).
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+Copyright © 2025 **[tribeti](https://github.com/tribeti)**. All rights reserved.
