@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Novatune.App.Views.SettingPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Novatune.App.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <RelativePanel
+        Margin="24"
+        Padding="24"
+        Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
+        CornerRadius="8">
+        <TextBlock
+            x:Name="Header"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Text="Close behavior" />
+        <TextBlock
+            x:Name="Description"
+            RelativePanel.Below="Header"
+            Text="Close button should minimize app" />
+        <ToggleSwitch
+            x:Name="TraySwitch"
+            RelativePanel.Below="Description"
+            Toggled="TraySwitch_Toggled" />
+    </RelativePanel>
+</Page>

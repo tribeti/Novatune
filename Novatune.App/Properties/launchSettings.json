@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Novatune.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Novatune.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
