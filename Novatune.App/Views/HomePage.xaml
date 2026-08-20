@@ -38,11 +38,13 @@
             Visibility="{x:Bind ViewModel.QueueVisibility, Mode=OneWay}">
             <AppBarButton
                 x:Name="AddMedia"
+                AutomationProperties.Name="Add local media"
                 Command="{x:Bind ViewModel.AddLocalMediaCommand}"
                 Icon="Folder"
                 IsCompact="True"
                 RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.AlignTopWithPanel="True" />
+                RelativePanel.AlignTopWithPanel="True"
+                ToolTipService.ToolTip="Add local media" />
             <Image
                 x:Name="MediaLogo"
                 MaxHeight="100"
