@@ -25,7 +25,6 @@ We gratefully acknowledge the following free and open services that power online
 | :--- | :--- | :--- | :--- |
 | **Radio Browser** | Radio Browser Community | Community-driven database of worldwide online radio stations | https://www.radio-browser.info/ |
 | **IPTV-org** | iptv-org Community | Publicly available IPTV channel streams | https://github.com/iptv-org/iptv |
-| **YouTube** | YouTube / Google LLC | Video & audio streaming platform (accessed via YoutubeExplode) | https://www.youtube.com/ |
 
 ---
 
