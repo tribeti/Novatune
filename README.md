@@ -54,9 +54,8 @@
 
 - **OS**: Windows 10 version 1809 (Build 17763) or Windows 11 (recommended)
 - **SDK**: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- **IDE**: Visual Studio 2022 (v17.12 or newer) with:
-  - *.NET Desktop Development* workload
-  - *Windows App SDK C# Templates* installed
+- **IDE**: Visual Studio 2022 (v18.0 or newer) with:
+  - *WinUI Application Development* workload
 
 ### Clone & Run
 
