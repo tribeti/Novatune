@@ -134,6 +134,14 @@ public static class RadioService
             {
                 Debug.WriteLine($"[RadioService] Server {server} failed: {ex.Message}");
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (OperationCanceledException ex)
+            {
+                Debug.WriteLine($"[RadioService] Server {server} timed out {ex}");
+            }
         }
 
         return [];
