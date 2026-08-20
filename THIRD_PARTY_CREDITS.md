@@ -1,22 +1,35 @@
-# Third-Party Libraries and Credits
+# Credits & Acknowledgments
+## 📦 Third-Party Libraries & Dependencies
 
-This project uses the following open source libraries. Full credit and thanks to their authors and contributors. Please see each library's repository and license for more details.
+This project makes use of the following open-source libraries and frameworks. Full credit and heartfelt thanks to their respective authors and contributors:
 
-| Library Name                                      | Author/Organization         | License      | Repository/Website                                      |
-|---------------------------------------------------|----------------------------|--------------|--------------------------------------------------------|
-| CommunityToolkit.Mvvm                             | Microsoft, CommunityToolkit| MIT          | https://github.com/CommunityToolkit/dotnet              |
-| CommunityToolkit.WinUI.Controls.SettingsControls   | Microsoft, CommunityToolkit| MIT          | https://github.com/CommunityToolkit/WindowsCommunityToolkit |
-| LibVLCSharp                                       | VideoLAN, Martin Finkel    | LGPL 2.1     | https://github.com/videolan/libvlcsharp                 |
-| Microsoft.Extensions.DependencyInjection          | Microsoft                  | MIT          | https://github.com/dotnet/runtime                       |
-| Microsoft.Windows.CsWinRT                         | Microsoft                  | MIT          | https://github.com/microsoft/cswinrt                    |
-| Microsoft.Windows.SDK.BuildTools                  | Microsoft                  | MIT          | https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools |
-| Microsoft.WindowsAppSDK                           | Microsoft                  | MIT          | https://github.com/microsoft/WindowsAppSDK              |
-| runtime.win-x64.Microsoft.DotNet.ILCompiler       | Microsoft                  | MIT          | https://www.nuget.org/packages/runtime.win-x64.Microsoft.DotNet.ILCompiler |
-| System.Private.Uri                                | Microsoft                  | MIT          | https://www.nuget.org/packages/System.Private.Uri        |
-| VideoLAN.LibVLC.Windows                          | VideoLAN                   | LGPL 2.1     | https://www.videolan.org/vlc/                           |
-| WinUIEx                                           | Morten Nielsen             | MIT          | https://github.com/dotMorten/WinUIEx                    |
-| YoutubeExplode                                    | Tyrrrz                     | MIT          | https://github.com/Tyrrrz/YoutubeExplode                |
+| Library Name | Author / Organization | License | Repository / Website |
+| :--- | :--- | :--- | :--- |
+| **CommunityToolkit.Mvvm** | Microsoft & CommunityToolkit | MIT | https://github.com/CommunityToolkit/dotnet |
+| **CommunityToolkit.WinUI.Controls.Primitives** | Microsoft & CommunityToolkit | MIT | https://github.com/CommunityToolkit/WindowsCommunityToolkit |
+| **DevWinUI** | Ghost1372 | MIT | https://github.com/Ghost1372/DevWinUI |
+| **WinUIEx** | Morten Nielsen | MIT | https://github.com/dotMorten/WinUIEx |
+| **YoutubeExplode** | Alexey Golub (Tyrrrz) | MIT | https://github.com/Tyrrrz/YoutubeExplode |
+| **Microsoft.WindowsAppSDK** | Microsoft | MIT | https://github.com/microsoft/WindowsAppSDK |
+| **Microsoft.Windows.SDK.BuildTools** | Microsoft | MIT | https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools |
+| **Microsoft.Extensions.DependencyInjection** | Microsoft | MIT | https://github.com/dotnet/runtime |
+| **Microsoft.Extensions.Caching.Memory** | Microsoft | MIT | https://github.com/dotnet/runtime |
 
 ---
 
-This file is provided to give full credit to the creators and maintainers of the libraries that make this project possible. Their work is licensed under their respective licenses, which are included in their repositories and/or NuGet packages.
+## 🌐 Open APIs & Data Providers
+
+We gratefully acknowledge the following free and open services that power online media capabilities in Novatune:
+
+| Service | Provider / Community | Description | Website / Repository |
+| :--- | :--- | :--- | :--- |
+| **Radio Browser** | Radio Browser Community | Community-driven database of worldwide online radio stations | https://www.radio-browser.info/ |
+| **IPTV-org** | iptv-org Community | Publicly available IPTV channel streams | https://github.com/iptv-org/iptv |
+| **YouTube** | YouTube / Google LLC | Video & audio streaming platform (accessed via YoutubeExplode) | https://www.youtube.com/ |
+
+---
+
+## 📄 License Notice
+
+All third-party libraries and assets are the property of their respective owners and are distributed under their individual open-source licenses. Please refer to each repository or package for the full license text and attributions.
+
