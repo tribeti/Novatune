@@ -4,10 +4,10 @@
 
 **A sleek, modern multimedia player for Windows built with WinUI 3 & .NET 10.**
 
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![WinUI 3](https://img.shields.io/badge/WinUI-3%20%2F%20WindowsAppSDK-0078D7?style=flat-square&logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
-[![Author](https://img.shields.io/badge/Author-tribeti-orange.svg?style=flat-square&logo=github)](https://github.com/tribeti)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![WinUI 3](https://img.shields.io/badge/WinUI-3%20%2F%20WindowsAppSDK-0078D7&logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-tribeti-orange.svg?slogo=github)](https://github.com/tribeti)
 
 <br/>
 
@@ -16,8 +16,6 @@
 </div>
 
 ---
-
-## 🌟 Overview
 
 **Novatune** is a lightweight, feature-rich audio and multimedia player designed specifically for Windows 10 and 11. Powered by **WinUI 3** and **.NET 10**, it offers a native, responsive Fluent Design experience with Mica material backdrops, seamless local playback, online YouTube streaming, global online radio, and live IPTV broadcasting.
 
@@ -36,7 +34,7 @@
 
 ---
 
-## 🛠️ Built With
+## Tech stack
 
 - **Framework**: [.NET 10](https://dotnet.microsoft.com/) & [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) (WinUI 3)
 - **UI & Controls**: [DevWinUI](https://github.com/Ghost1372/DevWinUI), [WinUIEx](https://github.com/dotMorten/WinUIEx), [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit)
@@ -48,7 +46,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -79,7 +77,7 @@
 
 ---
 
-## 🤝 Third-Party Open Source Credits
+## Third-Party Open Source Credits
 Special thanks to the authors and maintainers of the following open-source projects:
 
 | Library | Author / Organization | License | Description |
@@ -93,7 +91,7 @@ Special thanks to the authors and maintainers of the following open-source proje
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
