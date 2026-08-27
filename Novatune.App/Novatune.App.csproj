@@ -29,16 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-	<Content Include="Assets\SplashScreen.scale-200.png" />
-	<Content Include="Assets\LockScreenLogo.scale-200.png" />
-	<Content Include="Assets\Square150x150Logo.scale-200.png" />
-	<Content Include="Assets\Square44x44Logo.scale-200.png" />
-	<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-	<Content Include="Assets\StoreLogo.png" />
-	<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>
-
-  <ItemGroup>
 	<Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
@@ -53,7 +43,7 @@
   <ItemGroup>
 	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 	<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
-	<PackageReference Include="DevWinUI" Version="10.4.0" />
+	<PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.11" />
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
 	<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
@@ -98,9 +88,22 @@
   <PropertyGroup>
 	<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
 	<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-	<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+	<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">True</PublishTrimmed>
 	<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	<!--<PublishAot>true</PublishAot>-->
+	<AssemblyName>Novatune</AssemblyName>
+	<AssemblyTitle>Novatune</AssemblyTitle>
+	<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+	<!--<PublishAot>True</PublishAot>-->
+	<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <Optimize>True</Optimize>
   </PropertyGroup>
 </Project>

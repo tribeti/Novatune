@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DevWinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -223,7 +222,10 @@ public partial class MediaViewModel : BaseViewModel
     public async Task AddLocalMedia()
     {
         var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary, ViewMode = PickerViewMode.List };
-        picker.FileTypeFilter.AddRange([".wmv", ".mp4", ".mkv", ".mp3", ".flac"]);
+        picker.FileTypeFilter.Add(".wmv");
+        picker.FileTypeFilter.Add(".mp4");
+        picker.FileTypeFilter.Add(".mp3");
+        picker.FileTypeFilter.Add(".flac");
         var hwnd = WindowNative.GetWindowHandle((App.Current as App)!.MainWindow);
         InitializeWithWindow.Initialize(picker, hwnd);
 
