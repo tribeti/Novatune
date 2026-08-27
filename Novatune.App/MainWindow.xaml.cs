@@ -1,4 +1,4 @@
-using DevWinUI;
+using CommunityToolkit.WinUI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -34,9 +34,13 @@ public sealed partial class MainWindow : Window
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
+        // slider
+        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
         // window
+        this.AppWindow.SetIcon("Assets/icon.ico");
+        this.AppWindow.SetTaskbarIcon("Assets/icon.ico");
         this.CenterOnScreen();
-        var manager = WinUIEx.WindowManager.Get(this);
+        var manager = WindowManager.Get(this);
         manager.MinWidth = 800;
         manager.MinHeight = 600;
         manager.Width = 1000;
@@ -91,13 +95,10 @@ public sealed partial class MainWindow : Window
 
     private void Media_Timeline_Loaded(object sender, RoutedEventArgs e)
     {
-        if (sender is not Slider slider)
-            return;
-
-        if (slider
-            .FindDescendants()
-            .OfType<Thumb>()
-            .FirstOrDefault(x => x.Name == "HorizontalThumb") is not Thumb thumb)
+        if (this.Media_Timeline
+                    .FindDescendants()
+                    .OfType<Thumb>()
+                    .FirstOrDefault(x => x.Name == "HorizontalThumb") is not Thumb thumb)
         {
             return;
         }

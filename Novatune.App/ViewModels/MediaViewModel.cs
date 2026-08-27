@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DevWinUI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -217,13 +216,14 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsMediaLoading { get; set; } = false;
 
-    public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
-
     [RelayCommand]
     public async Task AddLocalMedia()
     {
         var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary, ViewMode = PickerViewMode.List };
-        picker.FileTypeFilter.AddRange([".wmv", ".mp4", ".mkv", ".mp3", ".flac"]);
+        picker.FileTypeFilter.Add(".wmv");
+        picker.FileTypeFilter.Add(".mp4");
+        picker.FileTypeFilter.Add(".mp3");
+        picker.FileTypeFilter.Add(".flac");
         var hwnd = WindowNative.GetWindowHandle((App.Current as App)!.MainWindow);
         InitializeWithWindow.Initialize(picker, hwnd);
 
@@ -592,7 +592,7 @@ public partial class MediaViewModel : BaseViewModel
             if (args.NewItem is null)
             {
                 Title = string.Empty;
-                CurrentImage = _defaultImage;
+                CurrentImage = null;
                 CurrentTrack = null;
                 IsLive = false;
                 return;
@@ -606,7 +606,7 @@ public partial class MediaViewModel : BaseViewModel
             {
                 currentTrack.IsCurrent = true;
                 Title = currentTrack.Title;
-                CurrentImage = currentTrack.Thumbnail ?? _defaultImage;
+                CurrentImage = currentTrack.Thumbnail;
                 CurrentTrack = currentTrack;
 
                 if (!IsLive && currentTrack.SavedPosition > TimeSpan.Zero)
