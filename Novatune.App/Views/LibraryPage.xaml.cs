@@ -91,6 +91,7 @@ public sealed partial class LibraryPage : Page
         if (sender is Button button && button.DataContext is IptvChannel channel)
         {
             ViewModel.AddTV(channel);
+            this.Frame.Navigate(typeof(HomePage));
         }
     }
 
@@ -179,6 +180,7 @@ public sealed partial class LibraryPage : Page
         if (sender is Button button && button.DataContext is YoutubePlaylist playlist)
         {
             ViewModel.AddYoutubePlaylistToQueue(playlist);
+            this.Frame.Navigate(typeof(HomePage));
         }
     }
 
@@ -187,6 +189,7 @@ public sealed partial class LibraryPage : Page
         if (sender is MenuFlyoutItem item && item.Tag is YoutubePlaylist playlist)
         {
             ViewModel.AddYoutubePlaylistToQueue(playlist);
+            this.Frame.Navigate(typeof(HomePage));
         }
     }
 

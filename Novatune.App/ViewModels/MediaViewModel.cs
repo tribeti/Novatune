@@ -408,10 +408,7 @@ public partial class MediaViewModel : BaseViewModel
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             var manifest = await _youtube.Videos.Streams.GetManifestAsync(item.VideoUrl, cts.Token);
-
-            var streamInfo = manifest.GetMuxedStreams()
-                .Where(s => s.Container == Container.Mp4)
-                .GetWithHighestVideoQuality();
+            var streamInfo = manifest.GetAudioStreams().GetWithHighestBitrate();
 
             if (streamInfo is not null)
             {
@@ -452,7 +449,9 @@ public partial class MediaViewModel : BaseViewModel
             if (Playlist.Any(t => t.SourcePathOrUrl == video.VideoUrl))
                 continue;
 
-            AddYoutubeBinding(video, playNow: isFirst);
+            var playbackItem = CreatePlaybackItem(video.VideoUrl, video.Title, video.Author, SourceKind.Youtube);
+            var track = MediaItem.FromYoutube(video, playbackItem);
+            AddToPlaybackList(track, isFirst);
             isFirst = false;
         }
     }
@@ -474,13 +473,6 @@ public partial class MediaViewModel : BaseViewModel
         playbackItem.ApplyDisplayProperties(props);
 
         return playbackItem;
-    }
-
-    private void AddYoutubeBinding(YoutubeItem item, bool playNow)
-    {
-        var playbackItem = CreatePlaybackItem(item.VideoUrl, item.Title, item.Author, SourceKind.Youtube);
-        var track = MediaItem.FromYoutube(item, playbackItem);
-        AddToPlaybackList(track, playNow);
     }
 
     public void AddTV(IptvChannel channel) => AddTV(channel, playNow: true);
@@ -531,9 +523,7 @@ public partial class MediaViewModel : BaseViewModel
                 {
                     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
                     var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
-                    var streamInfo = manifest.GetMuxedStreams()
-                        .Where(s => s.Container == Container.Mp4)
-                        .GetWithHighestVideoQuality();
+                    var streamInfo = manifest.GetAudioStreams().GetWithHighestBitrate();
 
                     if (streamInfo is not null)
                     {
