@@ -216,8 +216,6 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsMediaLoading { get; set; } = false;
 
-    public readonly BitmapImage _defaultImage = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
-
     [RelayCommand]
     public async Task AddLocalMedia()
     {
@@ -594,7 +592,7 @@ public partial class MediaViewModel : BaseViewModel
             if (args.NewItem is null)
             {
                 Title = string.Empty;
-                CurrentImage = _defaultImage;
+                CurrentImage = null;
                 CurrentTrack = null;
                 IsLive = false;
                 return;
@@ -608,7 +606,7 @@ public partial class MediaViewModel : BaseViewModel
             {
                 currentTrack.IsCurrent = true;
                 Title = currentTrack.Title;
-                CurrentImage = currentTrack.Thumbnail ?? _defaultImage;
+                CurrentImage = currentTrack.Thumbnail;
                 CurrentTrack = currentTrack;
 
                 if (!IsLive && currentTrack.SavedPosition > TimeSpan.Zero)
