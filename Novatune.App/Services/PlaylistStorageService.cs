@@ -2,9 +2,7 @@ using Novatune.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +11,6 @@ namespace Novatune.App.Services;
 public class PlaylistStorageService
 {
     private const int RefreshConcurrency = 2;
-    private readonly string _filePath;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private List<YoutubePlaylist> _playlists = [];
     private bool _isLoaded;
@@ -22,14 +19,6 @@ public class PlaylistStorageService
 
     public IReadOnlyList<YoutubePlaylist> Playlists => _playlists;
     public Task RefreshTask => _refreshTask;
-
-    public PlaylistStorageService()
-    {
-        string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string appFolder = Path.Combine(localAppData, "Novatune");
-        Directory.CreateDirectory(appFolder);
-        _filePath = Path.Combine(appFolder, "playlists.json");
-    }
 
     public async Task InitializeAsync()
     {
@@ -66,20 +55,13 @@ public class PlaylistStorageService
 
             _isLoaded = true;
 
-            if (!File.Exists(_filePath))
-            {
-                _playlists = [];
-                return;
-            }
-
             try
             {
-                string json = await File.ReadAllTextAsync(_filePath).ConfigureAwait(false);
-                _playlists = JsonSerializer.Deserialize(json, PlaylistJsonContext.Default.ListYoutubePlaylist) ?? [];
+                _playlists = await Task.Run(PlaylistDatabase.GetAllPlaylists).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to load playlists: {ex.Message}");
+                Debug.WriteLine($"Failed to load playlists from DB: {ex.Message}");
                 _playlists = [];
             }
         }
@@ -89,45 +71,24 @@ public class PlaylistStorageService
         }
     }
 
-    public async Task SaveAsync()
-    {
-        await _semaphore.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            await SaveInternalAsync().ConfigureAwait(false);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
-
-    private async Task SaveInternalAsync()
-    {
-        try
-        {
-            string json = JsonSerializer.Serialize(_playlists, PlaylistJsonContext.Default.ListYoutubePlaylist);
-            await File.WriteAllTextAsync(_filePath, json).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to save playlists: {ex.Message}");
-        }
-    }
+    public Task SaveAsync() => Task.CompletedTask;
 
     public async Task AddAsync(YoutubePlaylist playlist)
     {
         await _semaphore.WaitAsync().ConfigureAwait(false);
         try
         {
+            await Task.Run(() => PlaylistDatabase.UpsertPlaylist(playlist)).ConfigureAwait(false);
             int index = _playlists.FindIndex(p => p.PlaylistId == playlist.PlaylistId);
-
             if (index >= 0)
                 _playlists[index] = playlist;
             else
                 _playlists.Add(playlist);
-
-            await SaveInternalAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to add playlist to DB: {ex.Message}");
+            throw;
         }
         finally
         {
@@ -140,8 +101,13 @@ public class PlaylistStorageService
         await _semaphore.WaitAsync().ConfigureAwait(false);
         try
         {
+            await Task.Run(() => PlaylistDatabase.DeletePlaylist(playlistId)).ConfigureAwait(false);
             _playlists.RemoveAll(p => p.PlaylistId == playlistId);
-            await SaveInternalAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to remove playlist from DB: {ex.Message}");
+            throw;
         }
         finally
         {
@@ -200,7 +166,17 @@ public class PlaylistStorageService
             }
 
             if (changed)
-                await SaveInternalAsync().ConfigureAwait(false);
+            {
+                var toUpsert = results
+                    .Where(r => r.Playlist is not null)
+                    .Select(r => r.Playlist!);
+
+                await Task.Run(() =>
+                {
+                    foreach (var p in toUpsert)
+                        PlaylistDatabase.UpsertPlaylist(p);
+                }).ConfigureAwait(false);
+            }
         }
         finally
         {

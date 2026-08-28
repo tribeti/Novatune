@@ -21,6 +21,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        PlaylistDatabase.InitializeDatabase();
         Services = ConfigureServices();
     }
 
