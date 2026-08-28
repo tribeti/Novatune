@@ -15,6 +15,7 @@ This project makes use of the following open-source libraries and frameworks. Fu
 | **Microsoft.Windows.SDK.BuildTools** | Microsoft | MIT | https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools |
 | **Microsoft.Extensions.DependencyInjection** | Microsoft | MIT | https://github.com/dotnet/runtime |
 | **Microsoft.Extensions.Caching.Memory** | Microsoft | MIT | https://github.com/dotnet/runtime |
+| **Microsoft.Data.Sqlite** | Microsoft | MIT | https://github.com/dotnet/efcore |
 
 ---
 
