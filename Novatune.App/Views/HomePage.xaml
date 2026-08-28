@@ -10,25 +10,6 @@
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
-    <Page.Resources>
-        <Flyout x:Name="PlaybackSpeedFlyout">
-            <StackPanel>
-                <TextBlock
-                    x:Name="SpeedValueText"
-                    HorizontalAlignment="Center"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="1.0x" />
-                <Slider
-                    x:Name="PlaybackSpeedSlider"
-                    Maximum="2.0"
-                    Minimum="0.25"
-                    StepFrequency="0.05"
-                    TickFrequency="0.25"
-                    Value="1.0" />
-            </StackPanel>
-        </Flyout>
-    </Page.Resources>
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="8*" />

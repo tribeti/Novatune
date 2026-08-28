@@ -336,18 +336,21 @@ public sealed partial class MainWindow : Window
         var defaultId = MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default);
         ComboBoxItem? defaultItem = null;
 
-        foreach (var device in devices)
+        if (Output_Box.Items.Count > 0)
         {
-            var item = new ComboBoxItem
+            foreach (var device in devices)
             {
-                Content = device.Name,
-                Tag = device
-            };
-            Output_Box.Items.Add(item);
+                var item = new ComboBoxItem
+                {
+                    Content = device.Name,
+                    Tag = device
+                };
+                Output_Box.Items.Add(item);
 
-            if (defaultItem is null && string.Equals(device.Id, defaultId, StringComparison.OrdinalIgnoreCase))
-            {
-                defaultItem = item;
+                if (defaultItem is null && string.Equals(device.Id, defaultId, StringComparison.OrdinalIgnoreCase))
+                {
+                    defaultItem = item;
+                }
             }
         }
 
