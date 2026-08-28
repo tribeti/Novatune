@@ -363,4 +363,9 @@ public sealed partial class MainWindow : Window
             ViewModel.MediaPlayer.AudioDevice = selectedDevice;
         }
     }
+
+    private void MiniPlayer_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
 }
