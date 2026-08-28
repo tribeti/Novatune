@@ -281,6 +281,16 @@
                     <FontIcon Glyph="&#xE93C;" />
                 </Button>
 
+                <AppBarButton
+                    x:Name="MiniPlayer_Btn"
+                    LabelPosition="Collapsed"
+                    RelativePanel.Below="Volume_Slider"
+                    RelativePanel.LeftOf="MediaSetting_Btn"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTipService.ToolTip="Mini Player">
+                    <FontIcon Glyph="&#xEE49;" />
+                </AppBarButton>
+
                 <Button
                     x:Name="MediaSetting_Btn"
                     RelativePanel.AlignRightWithPanel="True"
@@ -311,39 +321,16 @@
                                     Header="Audio Output Selection"
                                     Loaded="Output_Box_Loaded"
                                     SelectionChanged="Output_Box_SelectionChanged" />
-                                <Grid Grid.Row="1" ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Slider
-                                        x:Name="PlaybackSpeedSlider"
-                                        Grid.Column="0"
-                                        Header="Playback Speed"
-                                        Maximum="2.0"
-                                        Minimum="0.25"
-                                        StepFrequency="0.25"
-                                        Value="1.0" />
-                                    <TextBlock
-                                        x:Name="PlaybackSpeedValueText"
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        Text="1.0x" />
-                                </Grid>
 
-                                <Button
-                                    x:Name="MiniPlayer"
-                                    Grid.Row="2"
-                                    HorizontalAlignment="Stretch"
-                                    Click="MiniPlayer_Click"
-                                    Style="{StaticResource DefaultButtonStyle}">
-                                    <Button.Content>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE8A1;" />
-                                            <TextBlock Text="Mini Player" />
-                                        </StackPanel>
-                                    </Button.Content>
-                                </Button>
+                                <Slider
+                                    x:Name="PlaybackSpeedSlider"
+                                    Grid.Row="1"
+                                    Header="Playback Speed"
+                                    Maximum="2.0"
+                                    Minimum="0.25"
+                                    StepFrequency="0.25"
+                                    ValueChanged="PlaybackSpeedSlider_ValueChanged"
+                                    Value="1.0" />
                             </Grid>
                         </Flyout>
                     </Button.Flyout>

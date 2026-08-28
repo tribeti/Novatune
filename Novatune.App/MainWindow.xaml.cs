@@ -336,7 +336,7 @@ public sealed partial class MainWindow : Window
         var defaultId = MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default);
         ComboBoxItem? defaultItem = null;
 
-        if (Output_Box.Items.Count > 0)
+        if (Output_Box.Items.Count <= 0)
         {
             foreach (var device in devices)
             {
@@ -367,8 +367,6 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void MiniPlayer_Click(object sender, RoutedEventArgs e)
-    {
+    private void PlaybackSpeedSlider_ValueChanged(object _, RangeBaseValueChangedEventArgs e) => ViewModel.MediaPlayer.PlaybackSession.PlaybackRate = PlaybackSpeedSlider.Value;
 
-    }
 }
