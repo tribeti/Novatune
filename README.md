@@ -23,37 +23,36 @@
 
 ## ✨ Features
 
-- **Local Music Playback**: Pick audio files or entire music folders, view metadata and album art, and manage your current playback queue.
-- **YouTube Streaming**: Search for any song or video on YouTube with fast instant search, automatic thumbnail loading, and background audio streaming.
-- **Online Radio Stations**: Discover and tune into thousands of worldwide live radio stations powered by the Radio Browser API with caching.
-- **IPTV & Live TV Channels**: Stream live television channels directly in the app.
-- **Playlist Management**: Create custom online playlists, save favorites, import playlists, shuffle, and repeat.
-- **Full Playback Controls**: Interactive scrubber timeline, volume control, next/previous track navigation, shuffle & repeat modes, and keyboard shortcuts (e.g. `Space` to Play/Pause).
-- **Modern Windows 11 UI**: Beautiful Fluent Design featuring native Mica backdrop, dark/light theme integration, and smooth animations.
-- **System Tray Integration**: Option to minimize Novatune to the system tray for uninterrupted background listening.
-
+- **Local Media Playback**: Play audio (`.mp3`, `.flac`) and video (`.mp4`, `.wmv`, `.mkv`) files, automatically extract ID3/music metadata and album art thumbnails, and manage your current playback queue.
+- **YouTube Streaming & Playlists**: Search songs and videos with instant query suggestions, stream high-bitrate audio in the background, and import YouTube playlists with persistent local storage and auto-sync.
+- **Online Radio Stations**: Discover and tune into thousands of worldwide live radio stations powered by the Radio Browser API.
+- **IPTV & Live TV Broadcasting**: Stream live television channels directly with support for HLS adaptive streams.
+- **Global Search in Title Bar**: Unified search box integrated right into the window title bar for searching YouTube, radio stations, and IPTV channels.
+- **Rich Playback Controls**: Interactive scrubber timeline with formatted time tooltips, Play/Pause (`Space`), Next/Previous, Shuffle, Repeat, Volume control, Playback Speed (0.25x – 2.0x), and Audio Output Device switcher.
+- **Modern Windows 11 UI**: Fluent Design featuring native Mica backdrop, dark/light theme integration, animated visual icons, and responsive layouts.
+- **System Tray**: Minimize-to-tray on close, and quick tray context menu (`Open` / `Quit`).
 ---
 
 ## Tech stack
 
 - **Framework**: [.NET 10](https://dotnet.microsoft.com/) & [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) (WinUI 3)
-- **UI & Controls**: [DevWinUI](https://github.com/Ghost1372/DevWinUI), [WinUIEx](https://github.com/dotMorten/WinUIEx), [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit)
-- **Architecture**: MVVM with [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)
+- **Architecture**: MVVM with [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) & [Microsoft.Extensions.DependencyInjection](https://github.com/dotnet/runtime)
+- **UI & Windowing**: [WinUIEx](https://github.com/dotMorten/WinUIEx), [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit) (Primitives & Extensions)
 - **Media & Streaming**:
-  - [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) – Fast YouTube metadata extraction & media stream resolution
-  - Radio Browser API – Worldwide live radio directory
-  - IPTV Stream Resolver – Live channel streaming
-
+  - [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) – YouTube metadata extraction, playlist retrieval & audio stream extraction
+  - [Radio Browser API](https://www.radio-browser.info/) – Worldwide live radio directory with mirror pooling
+  - IPTV Stream Resolver – Live TV channel streaming & HLS playback (`AdaptiveMediaSource`)
 ---
 
 ## Getting Started
 
 ### Prerequisites
 
-- **OS**: Windows 10 version 1809 (Build 17763) or Windows 11 (recommended)
-- **SDK**: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- **OS**: Windows 10 version 2004 (Build 19041) or higher / Windows 11 (recommended)
+- **SDK**: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (net10.0-windows10.0.26100.0)
 - **IDE**: Visual Studio 2022 (v18.0 or newer) with:
   - *WinUI Application Development* workload
+  - *Desktop development with C++* workload
 
 ### Clone & Run
 
@@ -69,7 +68,7 @@
 3. **Restore NuGet Packages & Build**:
    ```bash
    dotnet restore
-   dotnet build
+   dotnet build -p:Platform=x64
    ```
 
 4. **Run**:
@@ -82,10 +81,11 @@ Special thanks to the authors and maintainers of the following open-source proje
 
 | Library | Author / Organization | License | Description |
 | :--- | :--- | :--- | :--- |
-| [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | Microsoft & CommunityToolkit | MIT | MVVM architecture & source generators |
+| [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | Microsoft & CommunityToolkit | MIT | MVVM architecture, observable properties & commands |
+| [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit) | Microsoft & CommunityToolkit | MIT | UI controls & visual tree extensions |
+| [WinUIEx](https://github.com/dotMorten/WinUIEx) | Morten Nielsen | MIT | Windowing, window management & system tray extensions |
 | [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) | Alexey Golub (Tyrrrz) | MIT | YouTube stream & metadata extraction |
-| [WinUIEx](https://github.com/dotMorten/WinUIEx) | Morten Nielsen | MIT | Windowing & system extensions for WinUI 3 |
-| [DevWinUI](https://github.com/Ghost1372/DevWinUI) | Ghost1372 | MIT | Fluent controls & modern UI components |
+| [Microsoft.WindowsAppSDK](https://github.com/microsoft/WindowsAppSDK) | Microsoft | MIT | Windows App SDK / WinUI 3 UI components |
 
 > For a full list of third-party libraries and dependencies, see [THIRD_PARTY_CREDITS.md](THIRD_PARTY_CREDITS.md).
 
