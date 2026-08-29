@@ -142,6 +142,8 @@ public static class PlaylistDatabase
     /// </summary>
     public static void UpsertPlaylist(YoutubePlaylist playlist)
     {
+        ArgumentNullException.ThrowIfNull(playlist);
+
         using var db = CreateConnection();
         db.Open();
 
@@ -216,6 +218,8 @@ public static class PlaylistDatabase
     /// </summary>
     public static void DeletePlaylist(string playlistId)
     {
+        ArgumentNullException.ThrowIfNull(playlistId);
+
         using var db = CreateConnection();
         db.Open();
 
