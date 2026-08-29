@@ -52,14 +52,21 @@ public sealed partial class MainWindow : Window
         manager.TrayIconContextMenu += (w, e) =>
         {
             var flyout = new MenuFlyout();
+            flyout.Items.Add(new MenuFlyoutItem { Text = ViewModel.IsPlaying ? "Pause" : "Play" });
             flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
             flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
-            ((MenuFlyoutItem) flyout.Items[0]).Click += (s, args) =>
+            ((MenuFlyoutItem) flyout.Items[0]).Click += (s, __) =>
+            {
+                ViewModel.PlayPause();
+                ((MenuFlyoutItem) s).Text = ViewModel.IsPlaying ? "Pause" : "Play";
+            };
+
+            ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
             {
                 this.ShowAndActivate();
             };
 
-            ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
+            ((MenuFlyoutItem) flyout.Items[2]).Click += (s, args) =>
             {
                 this.Close();
             };
