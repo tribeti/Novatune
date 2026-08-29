@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
+using Windows.Media.Devices;
 using WinUIEx;
 
 namespace Novatune.App;
@@ -69,17 +71,12 @@ public sealed partial class MainWindow : Window
             if (settingsService.Settings.MinimizeOnClose)
             {
                 e.Cancel = true;
-                ReleaseUIResources();
+                ContentFrame.Content = null;
+                ContentFrame.BackStack.Clear();
+                ContentFrame.ForwardStack.Clear();
                 this.Hide();
             }
         };
-    }
-
-    private void ReleaseUIResources()
-    {
-        ContentFrame.Content = null;
-        ContentFrame.BackStack.Clear();
-        ContentFrame.ForwardStack.Clear();
     }
 
     public void ShowAndActivate()
@@ -332,4 +329,44 @@ public sealed partial class MainWindow : Window
             ViewModel.AddTVToQueue(tvChannel);
         }
     }
+
+    private async void Output_Box_Loaded(object _, RoutedEventArgs e)
+    {
+        var devices = await DeviceInformation.FindAllAsync(MediaDevice.GetAudioRenderSelector());
+        var defaultId = MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default);
+        ComboBoxItem? defaultItem = null;
+
+        if (Output_Box.Items.Count <= 0)
+        {
+            foreach (var device in devices)
+            {
+                var item = new ComboBoxItem
+                {
+                    Content = device.Name,
+                    Tag = device
+                };
+                Output_Box.Items.Add(item);
+
+                if (defaultItem is null && string.Equals(device.Id, defaultId, StringComparison.OrdinalIgnoreCase))
+                {
+                    defaultItem = item;
+                }
+            }
+        }
+
+        if (defaultItem is not null)
+            Output_Box.SelectedItem = defaultItem;
+    }
+
+    private void Output_Box_SelectionChanged(object _, SelectionChangedEventArgs e)
+    {
+        DeviceInformation selectedDevice = (DeviceInformation) ((ComboBoxItem) Output_Box.SelectedItem).Tag;
+        if (selectedDevice is not null)
+        {
+            ViewModel.MediaPlayer.AudioDevice = selectedDevice;
+        }
+    }
+
+    private void PlaybackSpeedSlider_ValueChanged(object _, RangeBaseValueChangedEventArgs e) => ViewModel.MediaPlayer.PlaybackSession.PlaybackRate = PlaybackSpeedSlider.Value;
+
 }

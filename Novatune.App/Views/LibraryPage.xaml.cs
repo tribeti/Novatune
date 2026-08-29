@@ -21,7 +21,7 @@ public sealed partial class LibraryPage : Page
     public LibraryPage()
     {
         this.InitializeComponent();
-        LoadSampleData();
+        LoadTVList();
         LoadPlaylists();
     }
 
@@ -29,12 +29,11 @@ public sealed partial class LibraryPage : Page
     {
         try
         {
-            await _playlistStorage.LoadAsync();
-            OnlinePlaylistItems.Clear();
-            foreach (var playlist in _playlistStorage.Playlists)
-            {
-                OnlinePlaylistItems.Add(playlist);
-            }
+            await _playlistStorage.InitializeAsync();
+            RefreshPlaylistItems();
+
+            await _playlistStorage.RefreshTask;
+            RefreshPlaylistItems();
         }
         catch (Exception ex)
         {
@@ -42,7 +41,17 @@ public sealed partial class LibraryPage : Page
         }
     }
 
-    private void LoadSampleData()
+    private void RefreshPlaylistItems()
+    {
+        OnlinePlaylistItems.Clear();
+
+        foreach (var playlist in _playlistStorage.Playlists)
+        {
+            OnlinePlaylistItems.Add(playlist);
+        }
+    }
+
+    private void LoadTVList()
     {
         TvChannelsItems.Add(new IptvChannel
         {
@@ -151,7 +160,6 @@ public sealed partial class LibraryPage : Page
             }
 
             await _playlistStorage.AddAsync(playlist);
-            // Remove existing entry if re-importing same playlist
             for (int i = OnlinePlaylistItems.Count - 1; i >= 0; i--)
             {
                 if (OnlinePlaylistItems[i].PlaylistId == playlist.PlaylistId)

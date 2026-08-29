@@ -3,6 +3,7 @@
     x:Class="Novatune.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App"
@@ -109,8 +110,8 @@
 
         <Grid Grid.Row="2" Margin="12,12,36,12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="8*" />
-                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="7*" />
+                <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
 
             <controls:SwitchPresenter Grid.Column="0" Value="{x:Bind ViewModel.IsLive, Mode=OneWay}">
@@ -243,6 +244,22 @@
             </controls:SwitchPresenter>
 
             <RelativePanel Grid.Column="1" Margin="36,0,0,0">
+                <RelativePanel.Resources>
+                    <Style
+                        x:Key="IconOnlyButtonStyle"
+                        BasedOn="{StaticResource DefaultButtonStyle}"
+                        TargetType="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="6" />
+                        <Setter Property="MinWidth" Value="32" />
+                        <Setter Property="MinHeight" Value="32" />
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </RelativePanel.Resources>
                 <FontIcon
                     x:Name="Volume"
                     Margin="0,6,12,0"
@@ -254,24 +271,70 @@
                     RelativePanel.RightOf="Volume"
                     Value="{x:Bind ViewModel.Volume, Mode=TwoWay}" />
 
+                <Button
+                    x:Name="Queue_Btn"
+                    Click="Queue_Btn_Click"
+                    RelativePanel.Below="Volume_Slider"
+                    RelativePanel.LeftOf="MiniPlayer_Btn"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTipService.ToolTip="Queue">
+                    <FontIcon Glyph="&#xE93C;" />
+                </Button>
+
                 <AppBarButton
                     x:Name="MiniPlayer_Btn"
                     LabelPosition="Collapsed"
-                    RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.Below="Volume_Slider"
+                    RelativePanel.LeftOf="MediaSetting_Btn"
+                    Style="{StaticResource IconOnlyButtonStyle}"
                     ToolTipService.ToolTip="Mini Player">
                     <FontIcon Glyph="&#xEE49;" />
                 </AppBarButton>
 
-                <AppBarButton
-                    x:Name="Queue_Btn"
-                    Click="Queue_Btn_Click"
-                    LabelPosition="Collapsed"
+                <Button
+                    x:Name="MediaSetting_Btn"
+                    RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.Below="Volume_Slider"
-                    RelativePanel.LeftOf="MiniPlayer_Btn"
-                    ToolTipService.ToolTip="Queue">
-                    <FontIcon Glyph="&#xEA37;" />
-                </AppBarButton>
+                    Style="{StaticResource IconOnlyButtonStyle}">
+                    <Button.Content>
+                        <AnimatedIcon x:Name="SettingsAnimatedIcon">
+                            <AnimatedIcon.Source>
+                                <animatedvisuals:AnimatedSettingsVisualSource />
+                            </AnimatedIcon.Source>
+                            <AnimatedIcon.FallbackIconSource>
+                                <SymbolIconSource Symbol="Setting" />
+                            </AnimatedIcon.FallbackIconSource>
+                        </AnimatedIcon>
+                    </Button.Content>
+                    <Button.Flyout>
+                        <Flyout>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <ComboBox
+                                    x:Name="Output_Box"
+                                    Grid.Row="0"
+                                    Header="Audio Output Selection"
+                                    Loaded="Output_Box_Loaded"
+                                    SelectionChanged="Output_Box_SelectionChanged" />
+
+                                <Slider
+                                    x:Name="PlaybackSpeedSlider"
+                                    Grid.Row="1"
+                                    Header="Playback Speed"
+                                    Maximum="2.0"
+                                    Minimum="0.25"
+                                    StepFrequency="0.25"
+                                    ValueChanged="PlaybackSpeedSlider_ValueChanged"
+                                    Value="1.0" />
+                            </Grid>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
             </RelativePanel>
         </Grid>
     </Grid>
