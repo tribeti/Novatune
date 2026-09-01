@@ -204,8 +204,6 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            await Task.Delay(350, token);
-
             var stationsTask = RadioService.SearchStationsAsync(sender.Text, token);
             var videosTask = YoutubeService.SearchVideosAsync(sender.Text, token);
             var tvTask = TVService.SearchChannelsAsync(sender.Text, token);

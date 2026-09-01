@@ -244,22 +244,6 @@
             </controls:SwitchPresenter>
 
             <RelativePanel Grid.Column="1" Margin="36,0,0,0">
-                <RelativePanel.Resources>
-                    <Style
-                        x:Key="IconOnlyButtonStyle"
-                        BasedOn="{StaticResource DefaultButtonStyle}"
-                        TargetType="Button">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Padding" Value="6" />
-                        <Setter Property="MinWidth" Value="32" />
-                        <Setter Property="MinHeight" Value="32" />
-                        <Setter Property="Width" Value="36" />
-                        <Setter Property="Height" Value="36" />
-                        <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                    </Style>
-                </RelativePanel.Resources>
                 <FontIcon
                     x:Name="Volume"
                     Margin="0,6,12,0"

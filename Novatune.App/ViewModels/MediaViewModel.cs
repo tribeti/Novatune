@@ -372,6 +372,12 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
+    public void ClearPlaylist()
+    {
+        _mediaPlaybackList.Items.Clear();
+        Playlist.Clear();
+    }
+
     public void AddRadio(RadioItem station) => AddRadio(station, playNow: true);
 
     public void AddRadioToQueue(RadioItem station) => AddRadio(station, playNow: false);
