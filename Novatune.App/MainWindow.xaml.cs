@@ -204,6 +204,8 @@ public sealed partial class MainWindow : Window
         try
         {
             var results = await SearchService.SearchAllAsync(sender.Text, token);
+            if (_searchCts.Token != token)
+                return;
 
             sender.ItemsSource = results.Count > 0
                 ? results
