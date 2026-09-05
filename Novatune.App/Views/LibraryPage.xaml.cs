@@ -228,7 +228,7 @@ public sealed partial class LibraryPage : Page
             XamlRoot = this.XamlRoot,
         };
 
-        _ = loadingDialog.ShowAsync();
+        var loadingTask = loadingDialog.ShowAsync();
 
         try
         {
@@ -243,6 +243,8 @@ public sealed partial class LibraryPage : Page
                     XamlRoot = this.XamlRoot,
                 };
 
+                loadingDialog.Hide();
+                await loadingTask;
                 await errorDialog.ShowAsync();
                 return;
             }
@@ -262,6 +264,8 @@ public sealed partial class LibraryPage : Page
                 XamlRoot = this.XamlRoot,
             };
 
+            loadingDialog.Hide();
+            await loadingTask;
             await errorDialog.ShowAsync();
         }
         finally
