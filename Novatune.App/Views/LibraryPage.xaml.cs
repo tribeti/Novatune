@@ -17,6 +17,7 @@ public sealed partial class LibraryPage : Page
 
     private readonly MediaViewModel ViewModel = App.Current.Services.GetRequiredService<MediaViewModel>();
     private readonly PlaylistStorageService _playlistStorage = App.Current.Services.GetRequiredService<PlaylistStorageService>();
+    private bool _isRefreshingPlaylist;
 
     public LibraryPage()
     {
@@ -212,5 +213,66 @@ public sealed partial class LibraryPage : Page
                     OnlinePlaylistItems.RemoveAt(i);
             }
         }
+    }
+
+    private async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isRefreshingPlaylist || sender is not MenuFlyoutItem { Tag: YoutubePlaylist playlist })
+            return;
+
+        _isRefreshingPlaylist = true;
+        var loadingDialog = new ContentDialog
+        {
+            Title = "Refreshing playlist...",
+            Content = new ProgressRing { IsActive = true },
+            XamlRoot = this.XamlRoot,
+        };
+
+        var loadingTask = loadingDialog.ShowAsync();
+
+        try
+        {
+            var refreshedPlaylist = await YoutubeService.GetPlaylistAsync(playlist.PlaylistUrl);
+            if (refreshedPlaylist is null)
+            {
+                var errorDialog = new ContentDialog
+                {
+                    Title = "Error",
+                    Content = "Failed to refresh playlist. Please try again later.",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot,
+                };
+
+                loadingDialog.Hide();
+                await loadingTask;
+                await errorDialog.ShowAsync();
+                return;
+            }
+
+            await _playlistStorage.AddAsync(refreshedPlaylist);
+            RefreshPlaylistItems();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Refresh playlist failed: {ex.Message}");
+
+            var errorDialog = new ContentDialog
+            {
+                Title = "Error",
+                Content = $"Refresh failed: {ex.Message}",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot,
+            };
+
+            loadingDialog.Hide();
+            await loadingTask;
+            await errorDialog.ShowAsync();
+        }
+        finally
+        {
+            loadingDialog.Hide();
+            _isRefreshingPlaylist = false;
+        }
+
     }
 }

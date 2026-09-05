@@ -27,23 +27,39 @@
             HorizontalAlignment="Stretch"
             Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
             Visibility="{x:Bind ViewModel.QueueVisibility, Mode=OneWay}">
-            <AppBarButton
+            <Button
                 x:Name="AddMedia"
+                Margin="8"
                 AutomationProperties.Name="Add local media"
                 Command="{x:Bind ViewModel.AddLocalMediaCommand}"
-                Icon="Folder"
-                IsCompact="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignTopWithPanel="True"
+                Style="{StaticResource IconOnlyButtonStyle}"
+                ToolTipService.ToolTip="Add local media">
+                <FontIcon Glyph="&#xE8B7;" />
+            </Button>
+
+            <Button
+                x:Name="ClearList"
+                Margin="8"
+                AutomationProperties.Name="Clear Playlist"
+                Click="ClearList_Click"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True"
-                ToolTipService.ToolTip="Add local media" />
+                Style="{StaticResource IconOnlyButtonStyle}"
+                ToolTipService.ToolTip="Clear Playlist">
+                <FontIcon Glyph="&#xE894;" />
+            </Button>
+
             <Image
                 x:Name="MediaLogo"
-                MaxHeight="100"
+                MaxHeight="120"
                 RelativePanel.AlignHorizontalCenterWithPanel="True"
                 RelativePanel.Below="AddMedia"
                 Source="{x:Bind ViewModel.CurrentImage, Mode=OneWay}" />
             <TextBlock
                 x:Name="MediaTitle"
+                Padding="8"
                 FontSize="18"
                 RelativePanel.AlignHorizontalCenterWithPanel="True"
                 RelativePanel.Below="MediaLogo"

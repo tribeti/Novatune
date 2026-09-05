@@ -107,6 +107,14 @@
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                         <MenuFlyoutItem
+                                            Click="RefreshPlaylist_Click"
+                                            Tag="{x:Bind}"
+                                            Text="Refresh">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE72C;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                        <MenuFlyoutItem
                                             Click="RemovePlaylist_Click"
                                             Tag="{x:Bind}"
                                             Text="Remove">

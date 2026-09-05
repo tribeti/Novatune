@@ -38,4 +38,6 @@ public sealed partial class HomePage : Page
             ViewModel.RemoveMedia(item);
         }
     }
+
+    private void ClearList_Click(object sender, RoutedEventArgs e) => ViewModel.ClearPlaylist();
 }

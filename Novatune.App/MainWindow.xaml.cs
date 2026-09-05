@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Media.Devices;
 using WinUIEx;
@@ -204,71 +203,14 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            await Task.Delay(350, token);
-
-            var stationsTask = RadioService.SearchStationsAsync(sender.Text, token);
-            var videosTask = YoutubeService.SearchVideosAsync(sender.Text, token);
-            var tvTask = TVService.SearchChannelsAsync(sender.Text, token);
-
-            await Task.WhenAll(stationsTask, videosTask, tvTask);
-            if (token.IsCancellationRequested)
+            var results = await SearchService.SearchAllAsync(sender.Text, token);
+            if (_searchCts.Token != token)
                 return;
 
-            var stations = stationsTask.Result;
-            var videos = videosTask.Result;
-            var tvChannels = tvTask.Result;
-
-            var unifiedResults = new List<MediaItem>();
-
-            foreach (var s in stations)
-            {
-                unifiedResults.Add(new MediaItem
-                {
-                    Kind = SourceKind.Radio,
-                    Title = s.Name,
-                    Subtitle = string.IsNullOrWhiteSpace(s.Tags) ? "Radio Station" : s.Tags,
-                    SourceItem = s
-                });
-            }
-
-            if (videos is not null)
-            {
-                foreach (var v in videos)
-                {
-                    unifiedResults.Add(new MediaItem
-                    {
-                        Kind = SourceKind.Youtube,
-                        Title = v.Title,
-                        Subtitle = v.Author,
-                        SourceItem = v
-                    });
-                }
-            }
-
-            foreach (var ch in tvChannels)
-            {
-                if (ch.Streams.Count == 0)
-                    continue;
-
-                var subtitle = ch.Categories.Count > 0
-                    ? string.Join(", ", ch.Categories)
-                    : ch.Country;
-
-                unifiedResults.Add(new MediaItem
-                {
-                    Kind = SourceKind.TV,
-                    Title = ch.Name,
-                    Subtitle = string.IsNullOrWhiteSpace(subtitle) ? "TV Channel" : subtitle,
-                    SourceItem = ch
-                });
-            }
-
-            var result = unifiedResults.Count > 0
-                ? unifiedResults
+            sender.ItemsSource = results.Count > 0
+                ? results
                 : new List<MediaItem> { new() { Title = "No results found", Subtitle = "Try different keywords", Kind = SourceKind.Local } };
-
-            sender.ItemsSource = result;
-            _suggestion = result;
+            _suggestion = results;
         }
         catch (OperationCanceledException) { }
         catch (Exception)
