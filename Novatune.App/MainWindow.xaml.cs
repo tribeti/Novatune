@@ -77,10 +77,18 @@ public sealed partial class MainWindow : Window
             if (settingsService.Settings.MinimizeOnClose)
             {
                 e.Cancel = true;
+                _searchCts?.Cancel();
+                _searchCts?.Dispose();
+                _searchCts = null;
+                _suggestion = null;
+                SearchBox.ItemsSource = Array.Empty<MediaItem>();
                 ContentFrame.Content = null;
                 ContentFrame.BackStack.Clear();
                 ContentFrame.ForwardStack.Clear();
+                ViewModel.ReleaseForTray();
                 this.Hide();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
             }
         };
     }
@@ -92,6 +100,7 @@ public sealed partial class MainWindow : Window
             var pageType = typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
+        ViewModel.RestoreFromTray();
         this.Show();
         this.Activate();
     }
@@ -199,12 +208,13 @@ public sealed partial class MainWindow : Window
         }
 
         _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
+        var cts = _searchCts;
+        var token = cts.Token;
 
         try
         {
             var results = await SearchService.SearchAllAsync(sender.Text, token);
-            if (_searchCts.Token != token)
+            if (!ReferenceEquals(_searchCts, cts))
                 return;
 
             sender.ItemsSource = results.Count > 0
@@ -215,14 +225,17 @@ public sealed partial class MainWindow : Window
         catch (OperationCanceledException) { }
         catch (Exception)
         {
+            if (!ReferenceEquals(_searchCts, cts))
+                return;
+
             sender.ItemsSource = Array.Empty<MediaItem>();
             _suggestion = null;
         }
         finally
         {
-            if (_searchCts?.Token == token)
+            if (ReferenceEquals(_searchCts, cts))
             {
-                _searchCts.Dispose();
+                cts.Dispose();
                 _searchCts = null;
             }
         }

@@ -650,4 +650,20 @@ public partial class MediaViewModel : BaseViewModel
     }
 
     #endregion
+
+    public void ReleaseForTray()
+    {
+        _positionTimer.Stop();
+        _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 1;
+        System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+        GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
+    }
+
+    public void RestoreFromTray()
+    {
+        if (IsPlaying)
+            _positionTimer.Start();
+
+        _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
+    }
 }
