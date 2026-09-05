@@ -225,6 +225,9 @@ public sealed partial class MainWindow : Window
         catch (OperationCanceledException) { }
         catch (Exception)
         {
+            if (!ReferenceEquals(_searchCts, cts))
+                return;
+
             sender.ItemsSource = Array.Empty<MediaItem>();
             _suggestion = null;
         }
