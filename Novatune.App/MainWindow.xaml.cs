@@ -77,10 +77,17 @@ public sealed partial class MainWindow : Window
             if (settingsService.Settings.MinimizeOnClose)
             {
                 e.Cancel = true;
+                _searchCts?.Cancel();
+                _searchCts?.Dispose();
+                _searchCts = null;
+                _suggestion = null;
                 ContentFrame.Content = null;
                 ContentFrame.BackStack.Clear();
                 ContentFrame.ForwardStack.Clear();
+                ViewModel.ReleaseForTray();
                 this.Hide();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
             }
         };
     }
@@ -92,6 +99,7 @@ public sealed partial class MainWindow : Window
             var pageType = typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
+        ViewModel.RestoreFromTray();
         this.Show();
         this.Activate();
     }
