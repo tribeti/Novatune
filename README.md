@@ -74,6 +74,10 @@
 4. **Run**:
    - Press <kbd>F5</kbd> in Visual Studio or run `Novatune.App`.
 
+5. **Publish your own** (Optional):
+   ```bash
+   dotnet publish Novatune.App\Novatune.App.csproj -c Release -r win-x64 -p:Platform=x64 -o ./publish
+   ```
 ---
 
 ## Third-Party Open Source Credits
