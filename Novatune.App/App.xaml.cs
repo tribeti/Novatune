@@ -41,6 +41,7 @@ public partial class App : Application
         services.AddSingleton<MediaViewModel>();
         services.AddSingleton<SettingsService>();
         services.AddSingleton<PlaylistStorageService>();
+        services.AddSingleton<DiscordRpcService>();
         return services.BuildServiceProvider();
     }
 }
