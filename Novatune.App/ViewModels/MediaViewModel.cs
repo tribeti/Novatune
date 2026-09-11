@@ -46,10 +46,12 @@ public partial class MediaViewModel : BaseViewModel
     public partial bool IsLive { get; set; } = false;
 
     private readonly DiscordRpcService _discordRpc;
+    private readonly SettingsService _settingsService;
 
-    public MediaViewModel(DiscordRpcService discordRpc)
+    public MediaViewModel(DiscordRpcService discordRpc, SettingsService settingsService)
     {
         _discordRpc = discordRpc;
+        _settingsService = settingsService;
         MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
@@ -677,8 +679,14 @@ public partial class MediaViewModel : BaseViewModel
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
     }
 
-    private void UpdateDiscordPresence()
+    public void UpdateDiscordPresence()
     {
+        if (!_settingsService.Settings.EnableDiscordRpc)
+        {
+            _discordRpc.ClearPresence();
+            return;
+        }
+
         if (CurrentTrack is null)
         {
             _discordRpc.ClearPresence();

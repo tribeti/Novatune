@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text.Json;
 
@@ -7,6 +7,7 @@ namespace Novatune.App.Services;
 public class AppSettings
 {
     public bool MinimizeOnClose { get; set; } = false;
+    public bool EnableDiscordRpc { get; set; } = true;
 }
 
 public class SettingsService

@@ -7,11 +7,13 @@ namespace Novatune.App.Services;
 public sealed partial class DiscordRpcService : IDisposable
 {
     private readonly DiscordRpcClient _client;
+    private readonly SettingsService _settingsService;
     private bool _disposed;
     private const string ApplicationId = "1547684622664470649";
 
-    public DiscordRpcService()
+    public DiscordRpcService(SettingsService settingsService)
     {
+        _settingsService = settingsService;
         _client = new DiscordRpcClient(ApplicationId)
         {
             Logger = new ConsoleLogger(LogLevel.Warning, true)
@@ -45,7 +47,7 @@ public sealed partial class DiscordRpcService : IDisposable
         string? largeImageText = null,
         DateTime? startTime = null)
     {
-        if (_disposed || !_client.IsInitialized)
+        if (_disposed || !_client.IsInitialized || !_settingsService.Settings.EnableDiscordRpc)
             return;
 
         var presence = new RichPresence
