@@ -176,6 +176,7 @@ public partial class MediaViewModel : BaseViewModel
         MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
         PlaybackPosition = TimelinePosition;
         IsUserInteracting = false;
+        UpdateDiscordPresence();
     }
 
     public void Previous() => _mediaPlaybackList.MovePrevious();
@@ -710,7 +711,7 @@ public partial class MediaViewModel : BaseViewModel
             state: state,
             largeImageKey: "angry-bird-angry-bird-red_1_",
             largeImageText: "Novatune",
-            startTime: IsPlaying ? (IsLive ? DateTime.UtcNow : DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(Math.Max(0, PlaybackPosition)))) : null
+            startTime: IsPlaying ? (IsLive ? DateTime.UtcNow : DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(Math.Max(0, MediaPlayer.PlaybackSession.Position.TotalSeconds)))) : null
         );
     }
 }
