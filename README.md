@@ -50,7 +50,7 @@
 
 - **OS**: Windows 10 version 2004 (Build 19041) or higher / Windows 11 (recommended)
 - **SDK**: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (net10.0-windows10.0.26100.0)
-- **IDE**: Visual Studio 2022 (v18.0 or newer) with:
+- **IDE**: [Visual Studio 2026](https://visualstudio.microsoft.com/)  with:
   - *WinUI Application Development* workload
   - *Desktop development with C++* workload
 

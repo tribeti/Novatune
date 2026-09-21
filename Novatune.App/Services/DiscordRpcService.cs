@@ -34,7 +34,33 @@ public sealed partial class DiscordRpcService : IDisposable
             System.Diagnostics.Debug.WriteLine($"[DiscordRPC] Connection failed: {e.Type}");
         };
 
-        _client.Initialize();
+        // Chỉ init khi user đã bật RPC trong settings.
+        if (_settingsService.Settings.EnableDiscordRpc)
+        {
+            _client.Initialize();
+        }
+    }
+
+    private bool EnsureInitialized()
+    {
+        if (_disposed)
+            return false;
+
+        if (!_settingsService.Settings.EnableDiscordRpc)
+        {
+            if (_client.IsInitialized)
+            {
+                _client.Deinitialize();
+            }
+            return false;
+        }
+
+        if (!_client.IsInitialized)
+        {
+            _client.Initialize();
+        }
+
+        return _client.IsInitialized;
     }
 
     /// <summary>
@@ -47,7 +73,7 @@ public sealed partial class DiscordRpcService : IDisposable
         string? largeImageText = null,
         DateTime? startTime = null)
     {
-        if (_disposed || !_client.IsInitialized || !_settingsService.Settings.EnableDiscordRpc)
+        if (!EnsureInitialized())
             return;
 
         var presence = new RichPresence
@@ -87,7 +113,12 @@ public sealed partial class DiscordRpcService : IDisposable
             return;
 
         _disposed = true;
-        _client.ClearPresence();
+
+        if (_client.IsInitialized)
+        {
+            _client.ClearPresence();
+        }
+
         _client.Dispose();
     }
 }

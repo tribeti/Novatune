@@ -53,11 +53,10 @@ public class PlaylistStorageService
             if (_isLoaded)
                 return;
 
-            _isLoaded = true;
-
             try
             {
                 _playlists = await Task.Run(PlaylistDatabase.GetAllPlaylists).ConfigureAwait(false);
+                _isLoaded = true;
             }
             catch (Exception ex)
             {
@@ -150,7 +149,7 @@ public class PlaylistStorageService
         await _semaphore.WaitAsync().ConfigureAwait(false);
         try
         {
-            bool changed = false;
+            var applied = new List<YoutubePlaylist>();
 
             foreach (var result in results)
             {
@@ -162,18 +161,14 @@ public class PlaylistStorageService
                     continue;
 
                 _playlists[index] = result.Playlist;
-                changed = true;
+                applied.Add(result.Playlist);
             }
 
-            if (changed)
+            if (applied.Count > 0)
             {
-                var toUpsert = results
-                    .Where(r => r.Playlist is not null)
-                    .Select(r => r.Playlist!);
-
                 await Task.Run(() =>
                 {
-                    foreach (var p in toUpsert)
+                    foreach (var p in applied)
                         PlaylistDatabase.UpsertPlaylist(p);
                 }).ConfigureAwait(false);
             }

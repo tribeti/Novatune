@@ -53,23 +53,23 @@
 		<PackageReference Include="YoutubeExplode" Version="6.6.2" />
 
 		<!--delete bloat-->
-		<PackageReference Include="Microsoft.WindowsAppSDK.AI" VersionOverride="*">
+		<PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>compile</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Windows.AI.MachineLearning" VersionOverride="*">
+		<PackageReference Include="Microsoft.Windows.AI.MachineLearning" Version="*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>compile</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.WindowsAppSDK.Search" VersionOverride="*">
+		<PackageReference Include="Microsoft.WindowsAppSDK.Search" Version="*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>compile</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.WindowsAppSDK.ML" VersionOverride="*">
+		<PackageReference Include="Microsoft.WindowsAppSDK.ML" Version="*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>compile</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Web.WebView2" VersionOverride="*">
+		<PackageReference Include="Microsoft.Web.WebView2" Version="*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>compile</IncludeAssets>
 		</PackageReference>
