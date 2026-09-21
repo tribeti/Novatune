@@ -34,6 +34,8 @@ public sealed partial class MainWindow : Window
         // title bar
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+        titleBar.Loaded += (_, _) => UpdateTitleBarSpacer();
+        AppWindow.Changed += AppWindow_Changed;
         this.SetTitleBar(titleBar);
         // slider
         this.Media_Timeline.Loaded += Media_Timeline_Loaded;
@@ -91,6 +93,23 @@ public sealed partial class MainWindow : Window
                 GC.WaitForPendingFinalizers();
             }
         };
+    }
+
+    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if (args.DidSizeChange || args.DidPresenterChange)
+        {
+            UpdateTitleBarSpacer();
+        }
+    }
+
+    private void UpdateTitleBarSpacer()
+    {
+        if (titleBar.XamlRoot is null)
+            return;
+
+        double scale = titleBar.XamlRoot.RasterizationScale;
+        TitleBarLeftSpacer.Width = AppWindow.TitleBar.RightInset / scale;
     }
 
     public void ShowAndActivate()

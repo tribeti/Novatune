@@ -22,10 +22,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TitleBar
-            x:Name="titleBar"
-            Title="Novatune"
-            Grid.Row="0">
+        <TitleBar x:Name="titleBar" Grid.Row="0">
+            <TitleBar.LeftHeader>
+                <Border x:Name="TitleBarLeftSpacer" Width="0" />
+            </TitleBar.LeftHeader>
+
             <TitleBar.Content>
                 <AutoSuggestBox
                     x:Name="SearchBox"

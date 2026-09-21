@@ -19,55 +19,8 @@
 
         <RelativePanel Padding="36">
             <TextBlock
-                x:Name="Title2"
-                Padding="0,16,0,16"
-                Style="{StaticResource TitleTextBlockStyle}"
-                Text="TV Channels" />
-            <ScrollViewer
-                x:Name="TVList"
-                HorizontalScrollBarVisibility="Hidden"
-                HorizontalScrollMode="Enabled"
-                IsVerticalScrollChainingEnabled="True"
-                RelativePanel.Below="Title2"
-                VerticalScrollBarVisibility="Hidden"
-                VerticalScrollMode="Disabled">
-                <ItemsRepeater ItemsSource="{x:Bind TvChannelsItems}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal" Spacing="12" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="models:IptvChannel">
-                            <Button
-                                x:Name="TVItem"
-                                Padding="8"
-                                HorizontalAlignment="Left"
-                                Background="Transparent"
-                                Click="TVItem_Click"
-                                DataContext="{x:Bind}"
-                                ToolTipService.ToolTip="{x:Bind Name}">
-                                <StackPanel>
-                                    <Image
-                                        Width="150"
-                                        Height="150"
-                                        HorizontalAlignment="Left"
-                                        Source="{x:Bind Logo}"
-                                        Stretch="Uniform" />
-                                    <TextBlock
-                                        Style="{StaticResource CaptionTextBlockStyle}"
-                                        Text="{x:Bind Name}"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="NoWrap" />
-                                </StackPanel>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </ScrollViewer>
-
-            <TextBlock
                 x:Name="Title3"
                 Padding="0,16,0,16"
-                RelativePanel.Below="TVList"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="Online Playlist" />
             <Button
