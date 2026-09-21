@@ -2,8 +2,6 @@
 
 # Novatune
 
-**A sleek, modern multimedia player for Windows built with WinUI 3 & .NET 10.**
-
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![WinUI 3](https://img.shields.io/badge/WinUI-3%20%2F%20WindowsAppSDK-0078D7&logo=windows&logoColor=white)](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -27,8 +25,6 @@
 - **YouTube Streaming & Playlists**: Search songs and videos with instant query suggestions, stream high-bitrate audio in the background, and import YouTube playlists with persistent local storage and auto-sync.
 - **Online Radio Stations**: Discover and tune into thousands of worldwide live radio stations powered by the Radio Browser API.
 - **IPTV & Live TV Broadcasting**: Stream live television channels directly with support for HLS adaptive streams.
-- **Global Search in Title Bar**: Unified search box integrated right into the window title bar for searching YouTube, radio stations, and IPTV channels.
-- **Rich Playback Controls**: Interactive scrubber timeline with formatted time tooltips, Play/Pause (`Space`), Next/Previous, Shuffle, Repeat, Volume control, Playback Speed (0.25x – 2.0x), and Audio Output Device switcher.
 - **Modern Windows 11 UI**: Fluent Design featuring native Mica backdrop, dark/light theme integration, animated visual icons, and responsive layouts.
 - **System Tray**: Minimize-to-tray on close, and quick tray context menu (`Open` / `Quit`).
 ---
@@ -37,11 +33,11 @@
 
 - **Framework**: [.NET 10](https://dotnet.microsoft.com/) & [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) (WinUI 3)
 - **Architecture**: MVVM with [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) & [Microsoft.Extensions.DependencyInjection](https://github.com/dotnet/runtime)
-- **UI & Windowing**: [WinUIEx](https://github.com/dotMorten/WinUIEx), [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit) (Primitives & Extensions)
+- **UI & Windowing**: [WinUIEx](https://github.com/dotMorten/WinUIEx), [CommunityToolkit.WinUI](https://github.com/CommunityToolkit/WindowsCommunityToolkit)
 - **Media & Streaming**:
   - [YoutubeExplode](https://github.com/Tyrrrz/YoutubeExplode) – YouTube metadata extraction, playlist retrieval & audio stream extraction
   - [Radio Browser API](https://www.radio-browser.info/) – Worldwide live radio directory with mirror pooling
-  - IPTV Stream Resolver – Live TV channel streaming & HLS playback (`AdaptiveMediaSource`)
+  - IPTV Stream Resolver – Live TV channel streaming & playback
 ---
 
 ## Getting Started
