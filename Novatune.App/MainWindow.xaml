@@ -260,21 +260,11 @@
                     x:Name="Queue_Btn"
                     Click="Queue_Btn_Click"
                     RelativePanel.Below="Volume_Slider"
-                    RelativePanel.LeftOf="MiniPlayer_Btn"
+                    RelativePanel.LeftOf="MediaSetting_Btn"
                     Style="{StaticResource IconOnlyButtonStyle}"
                     ToolTipService.ToolTip="Queue">
                     <FontIcon Glyph="&#xE93C;" />
                 </Button>
-
-                <AppBarButton
-                    x:Name="MiniPlayer_Btn"
-                    LabelPosition="Collapsed"
-                    RelativePanel.Below="Volume_Slider"
-                    RelativePanel.LeftOf="MediaSetting_Btn"
-                    Style="{StaticResource IconOnlyButtonStyle}"
-                    ToolTipService.ToolTip="Mini Player">
-                    <FontIcon Glyph="&#xEE49;" />
-                </AppBarButton>
 
                 <Button
                     x:Name="MediaSetting_Btn"
