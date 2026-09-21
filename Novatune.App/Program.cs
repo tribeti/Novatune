@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Novatune.App;
 
+// single-instanced app setup
 public class Program
 {
     [STAThread]
