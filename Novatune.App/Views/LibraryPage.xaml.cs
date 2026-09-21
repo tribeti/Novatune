@@ -12,16 +12,15 @@ namespace Novatune.App.Views;
 
 public sealed partial class LibraryPage : Page
 {
-    public ObservableCollection<IptvChannel> TvChannelsItems { get; } = [];
     public ObservableCollection<YoutubePlaylist> OnlinePlaylistItems { get; } = [];
 
     private readonly MediaViewModel ViewModel = App.Current.Services.GetRequiredService<MediaViewModel>();
     private readonly PlaylistStorageService _playlistStorage = App.Current.Services.GetRequiredService<PlaylistStorageService>();
+    private bool _isRefreshingPlaylist;
 
     public LibraryPage()
     {
         this.InitializeComponent();
-        LoadSampleData();
         LoadPlaylists();
     }
 
@@ -29,12 +28,11 @@ public sealed partial class LibraryPage : Page
     {
         try
         {
-            await _playlistStorage.LoadAsync();
-            OnlinePlaylistItems.Clear();
-            foreach (var playlist in _playlistStorage.Playlists)
-            {
-                OnlinePlaylistItems.Add(playlist);
-            }
+            await _playlistStorage.InitializeAsync();
+            RefreshPlaylistItems();
+
+            await _playlistStorage.RefreshTask;
+            RefreshPlaylistItems();
         }
         catch (Exception ex)
         {
@@ -42,56 +40,13 @@ public sealed partial class LibraryPage : Page
         }
     }
 
-    private void LoadSampleData()
+    private void RefreshPlaylistItems()
     {
-        TvChannelsItems.Add(new IptvChannel
-        {
-            Name = "VTV1",
-            Country = "VN",
-            Logo = "https://i.imgur.com/vZYlGIW.png",
-            Categories = [],
-            Streams =
-            [
-            new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv1/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv1/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv1/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-        ]
-        });
+        OnlinePlaylistItems.Clear();
 
-        TvChannelsItems.Add(new IptvChannel
+        foreach (var playlist in _playlistStorage.Playlists)
         {
-            Name = "VTV2",
-            Country = "VN",
-            Logo = "https://i.imgur.com/qWWpYRR.png",
-            Categories = [],
-            Streams =
-            [
-            new IptvStream { Url = "https://live-a.fptplay53.net/live/media/vtv2/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv2/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv2/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-        ]
-        });
-
-        TvChannelsItems.Add(new IptvChannel
-        {
-            Name = "VTV3",
-            Country = "VN",
-            Logo = "https://i.imgur.com/4lJG1fu.png",
-            Categories = [],
-            Streams =
-            [
-            new IptvStream { Url = "https://live.fptplay53.net/live/media/vtv3/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-            new IptvStream { Url = "https://vips-livecdn.fptplay.net/live/media/vtv3/live247-hls-avc/index.m3u8", Quality = "1080p", Format = "hls", IsWorking = true },
-        ]
-        });
-    }
-
-    private void TVItem_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button button && button.DataContext is IptvChannel channel)
-        {
-            ViewModel.AddTV(channel);
-            this.Frame.Navigate(typeof(HomePage));
+            OnlinePlaylistItems.Add(playlist);
         }
     }
 
@@ -151,7 +106,6 @@ public sealed partial class LibraryPage : Page
             }
 
             await _playlistStorage.AddAsync(playlist);
-            // Remove existing entry if re-importing same playlist
             for (int i = OnlinePlaylistItems.Count - 1; i >= 0; i--)
             {
                 if (OnlinePlaylistItems[i].PlaylistId == playlist.PlaylistId)
@@ -204,5 +158,66 @@ public sealed partial class LibraryPage : Page
                     OnlinePlaylistItems.RemoveAt(i);
             }
         }
+    }
+
+    private async void RefreshPlaylist_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isRefreshingPlaylist || sender is not MenuFlyoutItem { Tag: YoutubePlaylist playlist })
+            return;
+
+        _isRefreshingPlaylist = true;
+        var loadingDialog = new ContentDialog
+        {
+            Title = "Refreshing playlist...",
+            Content = new ProgressRing { IsActive = true },
+            XamlRoot = this.XamlRoot,
+        };
+
+        var loadingTask = loadingDialog.ShowAsync();
+
+        try
+        {
+            var refreshedPlaylist = await YoutubeService.GetPlaylistAsync(playlist.PlaylistUrl);
+            if (refreshedPlaylist is null)
+            {
+                var errorDialog = new ContentDialog
+                {
+                    Title = "Error",
+                    Content = "Failed to refresh playlist. Please try again later.",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot,
+                };
+
+                loadingDialog.Hide();
+                await loadingTask;
+                await errorDialog.ShowAsync();
+                return;
+            }
+
+            await _playlistStorage.AddAsync(refreshedPlaylist);
+            RefreshPlaylistItems();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Refresh playlist failed: {ex.Message}");
+
+            var errorDialog = new ContentDialog
+            {
+                Title = "Error",
+                Content = $"Refresh failed: {ex.Message}",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot,
+            };
+
+            loadingDialog.Hide();
+            await loadingTask;
+            await errorDialog.ShowAsync();
+        }
+        finally
+        {
+            loadingDialog.Hide();
+            _isRefreshingPlaylist = false;
+        }
+
     }
 }

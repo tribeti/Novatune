@@ -29,8 +29,3 @@ internal partial class IptvJsonContext : JsonSerializerContext
 {
 }
 
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(List<YoutubePlaylist>))]
-internal partial class PlaylistJsonContext : JsonSerializerContext
-{
-}

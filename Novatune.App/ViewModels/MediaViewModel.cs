@@ -4,6 +4,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Novatune.App.Models;
+using Novatune.App.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -44,8 +45,13 @@ public partial class MediaViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsLive { get; set; } = false;
 
-    public MediaViewModel()
+    private readonly DiscordRpcService _discordRpc;
+    private readonly SettingsService _settingsService;
+
+    public MediaViewModel(DiscordRpcService discordRpc, SettingsService settingsService)
     {
+        _discordRpc = discordRpc;
+        _settingsService = settingsService;
         MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
@@ -60,6 +66,8 @@ public partial class MediaViewModel : BaseViewModel
                     _positionTimer.Start();
                 else
                     _positionTimer.Stop();
+
+                UpdateDiscordPresence();
             });
         };
 
@@ -170,6 +178,7 @@ public partial class MediaViewModel : BaseViewModel
         MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);
         PlaybackPosition = TimelinePosition;
         IsUserInteracting = false;
+        UpdateDiscordPresence();
     }
 
     public void Previous() => _mediaPlaybackList.MovePrevious();
@@ -370,6 +379,13 @@ public partial class MediaViewModel : BaseViewModel
                 MediaPlayer.Play();
             }
         }
+    }
+
+    public void ClearPlaylist()
+    {
+        _mediaPlaybackList.Items.Clear();
+        Playlist.Clear();
+        _discordRpc.ClearPresence();
     }
 
     public void AddRadio(RadioItem station) => AddRadio(station, playNow: true);
@@ -595,6 +611,7 @@ public partial class MediaViewModel : BaseViewModel
                 CurrentImage = null;
                 CurrentTrack = null;
                 IsLive = false;
+                UpdateDiscordPresence();
                 return;
             }
 
@@ -616,6 +633,7 @@ public partial class MediaViewModel : BaseViewModel
             {
                 CurrentTrack = null;
             }
+            UpdateDiscordPresence();
         });
     }
 
@@ -644,4 +662,64 @@ public partial class MediaViewModel : BaseViewModel
     }
 
     #endregion
+
+    public void ReleaseForTray()
+    {
+        _positionTimer.Stop();
+        _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 1;
+        System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+        GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
+    }
+
+    public void RestoreFromTray()
+    {
+        if (IsPlaying)
+            _positionTimer.Start();
+
+        _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
+    }
+
+    public void UpdateDiscordPresence()
+    {
+        if (!_settingsService.Settings.EnableDiscordRpc)
+        {
+            _discordRpc.ClearPresence();
+            return;
+        }
+
+        if (CurrentTrack is null)
+        {
+            _discordRpc.ClearPresence();
+            return;
+        }
+
+        string details = CurrentTrack.Title;
+        string state;
+
+        if (!IsPlaying)
+        {
+            state = "Paused • Novatune";
+        }
+        else if (IsLive)
+        {
+            state = CurrentTrack.Kind switch
+            {
+                SourceKind.Radio => "Listening to Radio",
+                SourceKind.TV => "Watching TV",
+                _ => "Live"
+            };
+        }
+        else
+        {
+            state = string.IsNullOrWhiteSpace(CurrentTrack.Subtitle) ? "Novatune" : CurrentTrack.Subtitle;
+        }
+
+        _discordRpc.UpdatePresence(
+            details: details,
+            state: state,
+            largeImageKey: "angry-bird-angry-bird-red_1_",
+            largeImageText: "Novatune",
+            startTime: IsPlaying ? (IsLive ? DateTime.UtcNow : DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(Math.Max(0, MediaPlayer.PlaybackSession.Position.TotalSeconds)))) : null
+        );
+    }
 }

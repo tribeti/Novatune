@@ -14,7 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
+using Windows.Media.Devices;
 using WinUIEx;
 
 namespace Novatune.App;
@@ -33,6 +34,8 @@ public sealed partial class MainWindow : Window
         // title bar
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+        titleBar.Loaded += (_, _) => UpdateTitleBarSpacer();
+        AppWindow.Changed += AppWindow_Changed;
         this.SetTitleBar(titleBar);
         // slider
         this.Media_Timeline.Loaded += Media_Timeline_Loaded;
@@ -50,14 +53,21 @@ public sealed partial class MainWindow : Window
         manager.TrayIconContextMenu += (w, e) =>
         {
             var flyout = new MenuFlyout();
+            flyout.Items.Add(new MenuFlyoutItem { Text = ViewModel.IsPlaying ? "Pause" : "Play" });
             flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
             flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
-            ((MenuFlyoutItem) flyout.Items[0]).Click += (s, args) =>
+            ((MenuFlyoutItem) flyout.Items[0]).Click += (s, __) =>
+            {
+                ViewModel.PlayPause();
+                ((MenuFlyoutItem) s).Text = ViewModel.IsPlaying ? "Pause" : "Play";
+            };
+
+            ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
             {
                 this.ShowAndActivate();
             };
 
-            ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
+            ((MenuFlyoutItem) flyout.Items[2]).Click += (s, args) =>
             {
                 this.Close();
             };
@@ -69,17 +79,37 @@ public sealed partial class MainWindow : Window
             if (settingsService.Settings.MinimizeOnClose)
             {
                 e.Cancel = true;
-                ReleaseUIResources();
+                _searchCts?.Cancel();
+                _searchCts?.Dispose();
+                _searchCts = null;
+                _suggestion = null;
+                SearchBox.ItemsSource = Array.Empty<MediaItem>();
+                ContentFrame.Content = null;
+                ContentFrame.BackStack.Clear();
+                ContentFrame.ForwardStack.Clear();
+                ViewModel.ReleaseForTray();
                 this.Hide();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
             }
         };
     }
 
-    private void ReleaseUIResources()
+    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
     {
-        ContentFrame.Content = null;
-        ContentFrame.BackStack.Clear();
-        ContentFrame.ForwardStack.Clear();
+        if (args.DidSizeChange || args.DidPresenterChange)
+        {
+            UpdateTitleBarSpacer();
+        }
+    }
+
+    private void UpdateTitleBarSpacer()
+    {
+        if (titleBar.XamlRoot is null)
+            return;
+
+        double scale = titleBar.XamlRoot.RasterizationScale;
+        TitleBarLeftSpacer.Width = AppWindow.TitleBar.RightInset / scale;
     }
 
     public void ShowAndActivate()
@@ -89,6 +119,7 @@ public sealed partial class MainWindow : Window
             var pageType = typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
+        ViewModel.RestoreFromTray();
         this.Show();
         this.Activate();
     }
@@ -196,87 +227,34 @@ public sealed partial class MainWindow : Window
         }
 
         _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
+        var cts = _searchCts;
+        var token = cts.Token;
 
         try
         {
-            await Task.Delay(350, token);
-
-            var stationsTask = RadioService.SearchStationsAsync(sender.Text, token);
-            var videosTask = YoutubeService.SearchVideosAsync(sender.Text, token);
-            var tvTask = TVService.SearchChannelsAsync(sender.Text, token);
-
-            await Task.WhenAll(stationsTask, videosTask, tvTask);
-            if (token.IsCancellationRequested)
+            var results = await SearchService.SearchAllAsync(sender.Text, token);
+            if (!ReferenceEquals(_searchCts, cts))
                 return;
 
-            var stations = stationsTask.Result;
-            var videos = videosTask.Result;
-            var tvChannels = tvTask.Result;
-
-            var unifiedResults = new List<MediaItem>();
-
-            foreach (var s in stations)
-            {
-                unifiedResults.Add(new MediaItem
-                {
-                    Kind = SourceKind.Radio,
-                    Title = s.Name,
-                    Subtitle = string.IsNullOrWhiteSpace(s.Tags) ? "Radio Station" : s.Tags,
-                    SourceItem = s
-                });
-            }
-
-            if (videos is not null)
-            {
-                foreach (var v in videos)
-                {
-                    unifiedResults.Add(new MediaItem
-                    {
-                        Kind = SourceKind.Youtube,
-                        Title = v.Title,
-                        Subtitle = v.Author,
-                        SourceItem = v
-                    });
-                }
-            }
-
-            foreach (var ch in tvChannels)
-            {
-                if (ch.Streams.Count == 0)
-                    continue;
-
-                var subtitle = ch.Categories.Count > 0
-                    ? string.Join(", ", ch.Categories)
-                    : ch.Country;
-
-                unifiedResults.Add(new MediaItem
-                {
-                    Kind = SourceKind.TV,
-                    Title = ch.Name,
-                    Subtitle = string.IsNullOrWhiteSpace(subtitle) ? "TV Channel" : subtitle,
-                    SourceItem = ch
-                });
-            }
-
-            var result = unifiedResults.Count > 0
-                ? unifiedResults
+            sender.ItemsSource = results.Count > 0
+                ? results
                 : new List<MediaItem> { new() { Title = "No results found", Subtitle = "Try different keywords", Kind = SourceKind.Local } };
-
-            sender.ItemsSource = result;
-            _suggestion = result;
+            _suggestion = results;
         }
         catch (OperationCanceledException) { }
         catch (Exception)
         {
+            if (!ReferenceEquals(_searchCts, cts))
+                return;
+
             sender.ItemsSource = Array.Empty<MediaItem>();
             _suggestion = null;
         }
         finally
         {
-            if (_searchCts?.Token == token)
+            if (ReferenceEquals(_searchCts, cts))
             {
-                _searchCts.Dispose();
+                cts.Dispose();
                 _searchCts = null;
             }
         }
@@ -332,4 +310,44 @@ public sealed partial class MainWindow : Window
             ViewModel.AddTVToQueue(tvChannel);
         }
     }
+
+    private async void Output_Box_Loaded(object _, RoutedEventArgs e)
+    {
+        var devices = await DeviceInformation.FindAllAsync(MediaDevice.GetAudioRenderSelector());
+        var defaultId = MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default);
+        ComboBoxItem? defaultItem = null;
+
+        if (Output_Box.Items.Count <= 0)
+        {
+            foreach (var device in devices)
+            {
+                var item = new ComboBoxItem
+                {
+                    Content = device.Name,
+                    Tag = device
+                };
+                Output_Box.Items.Add(item);
+
+                if (defaultItem is null && string.Equals(device.Id, defaultId, StringComparison.OrdinalIgnoreCase))
+                {
+                    defaultItem = item;
+                }
+            }
+        }
+
+        if (defaultItem is not null)
+            Output_Box.SelectedItem = defaultItem;
+    }
+
+    private void Output_Box_SelectionChanged(object _, SelectionChangedEventArgs e)
+    {
+        DeviceInformation selectedDevice = (DeviceInformation) ((ComboBoxItem) Output_Box.SelectedItem).Tag;
+        if (selectedDevice is not null)
+        {
+            ViewModel.MediaPlayer.AudioDevice = selectedDevice;
+        }
+    }
+
+    private void PlaybackSpeedSlider_ValueChanged(object _, RangeBaseValueChangedEventArgs e) => ViewModel.MediaPlayer.PlaybackSession.PlaybackRate = PlaybackSpeedSlider.Value;
+
 }

@@ -25,5 +25,18 @@
             x:Name="TraySwitch"
             RelativePanel.Below="Description"
             Toggled="TraySwitch_Toggled" />
+        <TextBlock
+            x:Name="Header1"
+            RelativePanel.Below="TraySwitch"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Text="Discord RPC" />
+        <TextBlock
+            x:Name="Description1"
+            RelativePanel.Below="Header1"
+            Text="Show current track title, status, and elapsed playback time on your Discord profile" />
+        <ToggleSwitch
+            x:Name="RPCSwitch"
+            RelativePanel.Below="Description1"
+            Toggled="RPCSwitch_Toggled" />
     </RelativePanel>
 </Page>
