@@ -181,9 +181,25 @@ public partial class MediaViewModel : BaseViewModel
         UpdateDiscordPresence();
     }
 
-    public void Previous() => _mediaPlaybackList.MovePrevious();
+    public void Previous()
+    {
+        var items = _mediaPlaybackList.Items;
+        var currentIndex = items.IndexOf(_mediaPlaybackList.CurrentItem);
+        if (currentIndex < 0 || (currentIndex == 0 && !_mediaPlaybackList.AutoRepeatEnabled && !_mediaPlaybackList.ShuffleEnabled))
+            return;
 
-    public void Next() => _mediaPlaybackList.MoveNext();
+        _mediaPlaybackList.MovePrevious();
+    }
+
+    public void Next()
+    {
+        var items = _mediaPlaybackList.Items;
+        var currentIndex = items.IndexOf(_mediaPlaybackList.CurrentItem);
+        if (currentIndex < 0 || (currentIndex == items.Count - 1 && !_mediaPlaybackList.AutoRepeatEnabled && !_mediaPlaybackList.ShuffleEnabled))
+            return;
+
+        _mediaPlaybackList.MoveNext();
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShuffleFontWeight))]
