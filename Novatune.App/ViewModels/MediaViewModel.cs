@@ -74,8 +74,8 @@ public partial class MediaViewModel : BaseViewModel
         _positionTimer.Tick += (_, _) =>
         {
             var session = MediaPlayer.PlaybackSession;
-            MediaDuration = session.NaturalDuration.TotalSeconds;
-            PlaybackPosition = session.Position.TotalSeconds;
+            MediaDuration = _mediaPlaybackList.Items.Count == 0 ? 0 : session.NaturalDuration.TotalSeconds;
+            PlaybackPosition = _mediaPlaybackList.Items.Count == 0 ? 0 : session.Position.TotalSeconds;
 
             if (!IsUserInteracting)
                 TimelinePosition = PlaybackPosition;
@@ -379,6 +379,9 @@ public partial class MediaViewModel : BaseViewModel
 
         if (Playlist.Count == 0)
         {
+            MediaDuration = 0;
+            PlaybackPosition = 0;
+            TimelinePosition = 0;
             MediaPlayer.Pause();
             MediaPlayer.Source = null;
             MediaPlayer.Source = _mediaPlaybackList;
@@ -401,6 +404,9 @@ public partial class MediaViewModel : BaseViewModel
     {
         _mediaPlaybackList.Items.Clear();
         Playlist.Clear();
+        MediaDuration = 0;
+        PlaybackPosition = 0;
+        TimelinePosition = 0;
         _discordRpc.ClearPresence();
     }
 

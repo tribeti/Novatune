@@ -22,15 +22,23 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TitleBar x:Name="titleBar" Grid.Row="0">
-            <TitleBar.LeftHeader>
-                <Border x:Name="TitleBarLeftSpacer" Width="0" />
-            </TitleBar.LeftHeader>
+        <TitleBar
+            x:Name="titleBar"
+            Title="Novatune"
+            Grid.Row="0">
+            <TitleBar.Resources>
+                <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+            </TitleBar.Resources>
+
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="/Assets/icon.ico" />
+            </TitleBar.IconSource>
 
             <TitleBar.Content>
                 <AutoSuggestBox
                     x:Name="SearchBox"
-                    MinWidth="400"
+                    MaxWidth="580"
+                    HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     GotFocus="SearchBox_GotFocus"
                     PlaceholderText="Search for online media"
