@@ -45,12 +45,12 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
 		<PackageReference Include="DiscordRPC-NativeAOT" Version="1.0.2" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.12" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.14" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.6.4" />
 		<PackageReference Include="WinUIEx" Version="2.9.3" />
-		<PackageReference Include="YoutubeExplode" Version="6.6.2" />
+		<PackageReference Include="YoutubeExplode" Version="6.6.3" />
 
 		<!--delete bloat-->
 		<PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="*">
@@ -114,7 +114,7 @@
 	<PropertyGroup>
 		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
 		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">True</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>Novatune</AssemblyName>
