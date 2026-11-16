@@ -17,6 +17,7 @@ public sealed partial class SettingPage : Page
         InitializeComponent();
         TraySwitch.IsOn = _settingsService.Settings.MinimizeOnClose;
         RPCSwitch.IsOn = _settingsService.Settings.EnableDiscordRpc;
+        ThemeSelector.SelectedIndex = (int) _settingsService.Settings.Theme;
     }
 
     private void TraySwitch_Toggled(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -35,6 +36,17 @@ public sealed partial class SettingPage : Page
             _settingsService.Settings.EnableDiscordRpc = RPCSwitch.IsOn;
             _settingsService.Save();
             _mediaViewModel.UpdateDiscordPresence();
+        }
+    }
+
+    private void ThemeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (this.IsLoaded)
+        {
+            var theme = (AppTheme) ThemeSelector.SelectedIndex;
+            _settingsService.Settings.Theme = theme;
+            _settingsService.Save();
+            (App.Current.MainWindow as MainWindow)?.ApplyTheme(theme);
         }
     }
 }

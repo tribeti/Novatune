@@ -31,6 +31,8 @@ public sealed partial class MainWindow : Window
         var settingsService = App.Current.Services.GetService<SettingsService>()!;
 
         InitializeComponent();
+        // theme
+        ApplyTheme(settingsService.Settings.Theme);
         // title bar
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
@@ -90,6 +92,16 @@ public sealed partial class MainWindow : Window
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
+        };
+    }
+
+    public void ApplyTheme(AppTheme theme)
+    {
+        Root.RequestedTheme = theme switch
+        {
+            AppTheme.Light => ElementTheme.Light,
+            AppTheme.Dark => ElementTheme.Dark,
+            _ => ElementTheme.Default,
         };
     }
 

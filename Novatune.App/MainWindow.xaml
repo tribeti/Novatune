@@ -55,7 +55,6 @@
 
                                 <TextBlock
                                     Grid.Column="0"
-                                    MaxWidth="300"
                                     VerticalAlignment="Center"
                                     FontWeight="SemiBold"
                                     Text="{x:Bind Title}"
@@ -291,7 +290,7 @@
                     </Button.Content>
                     <Button.Flyout>
                         <Flyout>
-                            <Grid>
+                            <Grid Width="200">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />

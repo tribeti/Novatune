@@ -1,0 +1,214 @@
+---
+name: winapp-find-ui
+description: Find the right WinUI 3 control and a real, compiling sample from the WinUI Gallery or Community Toolkit with winapp find-ui. Use when building WinUI UI and unsure which control fits (cards, tabs, swipe lists, inline messages) or when asked for a sample. Not for WPF, WinForms, or a running app.
+---
+
+**If you can't run `winapp` yourself** (no shell, or the command is denied), give the user the exact `winapp` command(s) for their project instead of only describing the steps.
+
+## This is an agent-first command
+
+`find-ui` was designed for **you, the agent** — not primarily for a human browsing a
+gallery. It exists because the failure mode it prevents is an agent-specific one:
+writing plausible-looking XAML for a control whose real markup, properties, or
+namespace differ from what you recall. Treat it as the source of truth for WinUI
+markup:
+
+- **Fetch a real sample before writing WinUI markup.** If you are about to hand-write
+  XAML for a control you have not just looked at, search for it first and fetch the
+  scenario with `--id`. The returned code comes from the shipping WinUI 3 Gallery and
+  Windows Community Toolkit, so it compiles.
+- **Prefer it over recall and over web search.** It returns code from a pinned,
+  cached corpus of the real galleries rather than a blog post of unknown vintage.
+- **Use `--json`.** Search, `--id`, and `--list` all emit stable structured shapes,
+  and *every* failure — including parser errors — is a flat `{"error": "..."}` on
+  stdout with a non-zero exit code, so you can branch on the result on every path.
+- **Pair it with `winapp find-api`.** `find-ui` gives you working markup; `find-api`
+  verifies any property you then change or add.
+
+Humans can and do run it directly, and everything below works fine typed by hand. But
+the ergonomics (compact search → `--id` fetch, `--json`, exit codes) are tuned for
+agent loops.
+
+## When to use
+
+Use this skill when building a **WinUI 3** UI and you need to discover which
+control fits an intent and get a real, working code example — without leaving the
+CLI or guessing at control names and APIs.
+
+`winapp find-ui` searches the **WinUI 3 Gallery** and the **Windows Community
+Toolkit** (plus a few curated **core** patterns) and returns a working code
+snippet plus where it came from. A third source, the **microsoft-ui-reactor
+ReactorGallery**, is **opt-in**: it is excluded from a normal search and is only
+searched when you pass `--source reactor`.
+
+- **WinUI-only.** The corpus is WinUI 3 Gallery + Windows Community Toolkit (+
+  Reactor when opted in). It does **not** cover WPF, WinForms, or other UI
+  frameworks.
+- **The Toolkit contributes more than controls.** Its helpers, converters,
+  behaviors, and extensions are searchable and fetchable the same way.
+  Converters, behaviors, and triggers are grouped under an umbrella entry
+  (`Converters`, `Behaviors`, `Header Behaviors`, `Triggers`) whose samples are
+  named for the specific type; helpers and extensions are not grouped, and each
+  is a top-level entry under its own name (`NetworkHelper`, `TextBoxExtensions`).
+  All are indexed by
+  the words in those type names, so `FileSizeToFriendlyStringConverter`,
+  `converters`, and `convert bool to visibility` all land. A description that
+  shares no words with the type name does not — `check internet connection`
+  misses `NetworkHelper`. Fall back to the **type name** or `--list`.
+- **Reactor is opt-in and for Reactor projects only.** Reactor is a C#-only
+  declarative/MVU framework — its samples can't paste into a standard `dotnet new
+  winui` XAML + code-behind app, so a default search deliberately omits it. Only
+  reach for `--source reactor` when you're actually building a Reactor app.
+- **Result shape varies by source.** Gallery and Toolkit scenarios return XAML,
+  C#, or both (one-sided samples are kept); Reactor scenarios are C#-only
+  declarative WinUI (no XAML). If an upstream Gallery-style sample still contains
+  unresolved `$(Name)` substitution placeholders, `find-ui` suppresses that
+  language block rather than presenting it as pasteable code.
+- Distinct from `winapp ui search`, which searches a *running app's* UI tree via
+  UI Automation — unrelated to control/sample discovery.
+
+**Front-load lookups, then code.** Search for each feature you need up front, pick
+the right control and scenario id, fetch its full code with `--id`, then write your
+XAML — don't interleave search-and-code.
+
+## Workflow
+
+```bash
+# 1. Search compactly to find the control + its scenario ids (WinUI-only)
+winapp find-ui "tabbed layout"
+
+# 2. Fetch the full XAML + C# (and prerequisite notes) for the best match
+winapp find-ui --id gallery-tabview-1
+
+# 3. Batch: fetch several scenarios at once
+winapp find-ui --id gallery-tabview-1 --id toolkit-tabbedcommandbar-1
+```
+
+## Examples
+
+```bash
+# Natural-intent search
+winapp find-ui "a card with an image and title"
+winapp find-ui "swipeable list rows"
+
+# Restrict to one source
+winapp find-ui "settings card" --source toolkit
+winapp find-ui "color picker" --source gallery
+
+# Reactor is opt-in: excluded from a normal search, only searched with --source reactor
+# (use this only for a Reactor/MVU project — its C#-only samples don't fit standard XAML apps)
+winapp find-ui "flex layout" --source reactor
+
+# Return more candidates
+winapp find-ui "navigation" --max 6
+
+# Browse everything (heavy — prefer search; excludes opt-in Reactor)
+winapp find-ui --list
+
+# Force a corpus refresh from GitHub
+winapp find-ui "info bar" --refresh
+
+# Search the built-in core patterns fully offline (no network, no fetch)
+winapp find-ui "file picker" --source core
+```
+
+## Agent-friendly output
+
+Add `--json` for a structured, grounded result an agent can consume in one shot:
+
+```bash
+winapp find-ui "color picker" --json
+```
+
+- **Search** → `{ query, matchCount, matches: [ { source, control, score, description?, scenarios: [ { id, header } ] } ] }` — compact; use the `id` values to fetch code.
+- **`--id`** → `{ results: [ { id, found, content } ] }` — `content` is the code markdown block (XAML and/or C# for Gallery/Toolkit; C# only for Reactor).
+- **`--list`** → `{ count, items: [ { id, header } ] }`.
+- On error, `--json` emits `{ "error": "..." }` on stdout with a non-zero exit code.
+
+## Notes & tips
+
+- **One mode at a time.** A search query, `--id`, and `--list` are mutually
+  exclusive — combining them is rejected. `--source` applies to search only.
+- **Reactor is opt-in.** A normal search and `--list` cover Gallery + Toolkit +
+  core only. Pass `--source reactor` to search Reactor (reactor-only results);
+  a `reactor-<control>-<n>` `--id` still fetches even without the flag. Skipping
+  Reactor by default keeps its C#-only samples from outranking usable controls in
+  a standard XAML app.
+- **Add the `Namespace:` imports yourself.** Sample C# is a class-body fragment, so
+  its `using` directives are listed on a `**Namespace:**` line above the code rather
+  than inside it. Add each entry as a `using` in your C# file, and each `**Setup:**`
+  `xmlns` entry to your XAML root — without them the snippet won't resolve its types.
+  Treat the line as the non-obvious imports, not a complete set.
+- **An `Undefined handlers:` line means "wire this up", not "this sample is broken".**
+  A sample's XAML can hook an event
+  (`ScrollAnimationStarting="ScrollView_ScrollAnimationStarting"`) to a method that
+  lives in the gallery's page code-behind, which isn't published. The attribute is
+  kept because it's what the sample teaches; the line lists each one. Add a method
+  with that name (or rename the attribute) in your code-behind. Entries are matched
+  by shape, so a rare one may not be an event at all — ignore it.
+- **Everything works offline.** The Gallery/Toolkit/Reactor corpus ships inside the
+  CLI, so search, `--list`, and `--id` all work with no network access — including
+  on a first run in a sandbox or behind a proxy that blocks
+  `raw.githubusercontent.com`. When GitHub is reachable the CLI refreshes from it
+  and caches per-user under `<global .winapp>/cache/find-ui` (refreshed at most
+  every 24 hours, or on demand with `--refresh`); the built-in corpus is a floor,
+  never a ceiling, so live data always wins. `--source core` searches the curated
+  built-in patterns and never touches the network at all.
+- **Check the corpus provenance when it matters.** `--json` carries `"corpus"`:
+  `"network"` (fetched this run), `"cache"` (this machine's earlier fetch), or
+  `"embedded"` (served from a corpus built into the CLI — a core-only request
+  (`--source core`, or an `--id` set that is all core patterns), or a
+  Gallery/Toolkit/Reactor result whose fetch failed or whose local cache predates
+  the bake). A Gallery/Toolkit/Reactor `"embedded"` result may lag upstream — re-run
+  with `--refresh` if a sample looks out of date; core patterns ship with the CLI and
+  `--refresh` cannot change them. The field is absent only when no corpus could be
+  loaded at all.
+- **Scenario ids** are stable within a cached corpus and **case-insensitive** —
+  `GALLERY-TABVIEW-1` resolves the same as `gallery-tabview-1`. Gallery/Toolkit/Reactor ids
+  look like `gallery-<control>-<n>` / `toolkit-<control>-<n>` /
+  `reactor-<control>-<n>`; the `<source>-` prefix disambiguates controls that
+  exist in more than one gallery (e.g. `ColorPicker`). Curated **core** patterns
+  use a plain descriptive id with **no** `<source>-<control>-<n>` shape (e.g.
+  `file-picker-desktop`, `live-charts`); fetch them the same way with `--id`, and
+  browse them with `--source core`.
+- **`--json` is always JSON.** With `--json`, every failure — including argument/parser
+  errors such as a non-integer `--max` — is emitted as a flat `{"error": "..."}` object
+  on stdout with a non-zero exit code, so an agent can parse the result on every path.
+- **Exit codes** are script-friendly: `0` on a hit, `1` on no match / error.
+- Keep queries **focused** (one feature per query) — the lexical ranker rewards
+  specific phrasing. Batch multiple focused queries rather than one broad one.
+
+## Upstream is the source of truth
+
+Which samples exist is upstream's call. winapp adds no samples of its own to the
+Gallery or Toolkit corpus and does not rewrite an individual sample's
+implementation to its own taste.
+
+Snippets are still processed: they're cleaned of names that only
+resolve inside the gallery apps, but substance is never deleted. Samples are returned in full — nothing is cut
+short. So treat a result as **upstream's sample, mechanically extracted** — not as a
+byte-for-byte copy of the file in their repo. Most samples paste and compile as-is
+once you add the `Namespace:` imports; a few also reference a page or type of their
+own that you'll need to define.
+
+Where a control has a known pitfall, or two controls are easy to confuse, the CLI
+says so in the **Important** and **Family** notes attached to the result. Read
+those — they carry guidance that isn't in the sample itself, and they're winapp's,
+not upstream's.
+
+If a sample is missing or genuinely wrong **upstream**, report it against the
+source the result is tagged with: `[gallery]` →
+[WinUI-Gallery](https://github.com/microsoft/WinUI-Gallery/issues), `[toolkit]` →
+[Windows Community Toolkit](https://github.com/CommunityToolkit/Windows/issues).
+If the defect looks like a cut-off snippet or markup that won't
+parse, that's winapp's extraction — report it here instead.
+
+## Related skills
+
+- **winapp-ui-automation** — inspect and drive a *running* app's UI tree (a
+  different job from discovering controls to write).
+
+## CLI reference
+
+Run `winapp find-ui --help` for current command options, or `winapp --cli-schema`
+for the complete machine-readable command schema.

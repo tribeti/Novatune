@@ -8,11 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <RelativePanel
-        Margin="24"
-        Padding="24"
-        Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
-        CornerRadius="8">
+    <RelativePanel Margin="48,36,48,0" Background="Transparent">
+
+        <!--  background setting  -->
         <TextBlock
             x:Name="Header"
             Style="{StaticResource BodyLargeStrongTextBlockStyle}"
@@ -23,8 +21,11 @@
             Text="Close button should minimize app" />
         <ToggleSwitch
             x:Name="TraySwitch"
-            RelativePanel.Below="Description"
+            RelativePanel.AlignRightWithPanel="True"
+            RelativePanel.AlignVerticalCenterWith="Description"
             Toggled="TraySwitch_Toggled" />
+
+        <!--  discord setting  -->
         <TextBlock
             x:Name="Header1"
             RelativePanel.Below="TraySwitch"
@@ -36,7 +37,28 @@
             Text="Show current track title, status, and elapsed playback time on your Discord profile" />
         <ToggleSwitch
             x:Name="RPCSwitch"
-            RelativePanel.Below="Description1"
+            RelativePanel.AlignRightWithPanel="True"
+            RelativePanel.AlignVerticalCenterWith="Description1"
             Toggled="RPCSwitch_Toggled" />
+
+        <!--  theme setting  -->
+        <TextBlock
+            x:Name="Header2"
+            RelativePanel.Below="RPCSwitch"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Text="Theme" />
+        <TextBlock
+            x:Name="Description2"
+            RelativePanel.Below="Header2"
+            Text="Choose light or dark mode, or follow the Windows setting" />
+        <ComboBox
+            x:Name="ThemeSelector"
+            RelativePanel.AlignRightWithPanel="True"
+            RelativePanel.AlignVerticalCenterWith="Description2"
+            SelectionChanged="ThemeSelector_SelectionChanged">
+            <ComboBoxItem Content="Use Windows setting" />
+            <ComboBoxItem Content="Light" />
+            <ComboBoxItem Content="Dark" />
+        </ComboBox>
     </RelativePanel>
 </Page>

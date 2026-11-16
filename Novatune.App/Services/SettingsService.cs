@@ -4,10 +4,18 @@ using System.Text.Json;
 
 namespace Novatune.App.Services;
 
+public enum AppTheme
+{
+    Default = 0,
+    Light = 1,
+    Dark = 2
+}
+
 public class AppSettings
 {
     public bool MinimizeOnClose { get; set; } = false;
     public bool EnableDiscordRpc { get; set; } = false;
+    public AppTheme Theme { get; set; } = AppTheme.Default;
 }
 
 public class SettingsService

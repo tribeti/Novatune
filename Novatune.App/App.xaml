@@ -12,7 +12,9 @@
                 <ResourceDictionary Source="/Styles/IconButtonStyle.xaml" />
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
+
             <converters:TimelineConverter x:Key="TimelineFormatter" />
+
             <!--  Other app resources here  -->
         </ResourceDictionary>
     </Application.Resources>
