@@ -20,10 +20,12 @@
         <RelativePanel Padding="36">
             <TextBlock
                 x:Name="Title3"
+                x:Uid="LibraryTitle"
                 Padding="0,16,0,16"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="Online Playlist" />
             <Button
+                x:Uid="AddPlaylistButton"
                 Click="AddPlaylist_Click"
                 Content="Add playlist"
                 RelativePanel.AlignRightWithPanel="True"
@@ -52,6 +54,7 @@
                                 <Button.ContextFlyout>
                                     <MenuFlyout>
                                         <MenuFlyoutItem
+                                            x:Uid="PlayAllItem"
                                             Click="PlayPlaylist_Click"
                                             Tag="{x:Bind}"
                                             Text="Play All">
@@ -60,6 +63,7 @@
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                         <MenuFlyoutItem
+                                            x:Uid="RefreshItem"
                                             Click="RefreshPlaylist_Click"
                                             Tag="{x:Bind}"
                                             Text="Refresh">
@@ -68,6 +72,7 @@
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                         <MenuFlyoutItem
+                                            x:Uid="RemovePlaylistItem"
                                             Click="RemovePlaylist_Click"
                                             Tag="{x:Bind}"
                                             Text="Remove">

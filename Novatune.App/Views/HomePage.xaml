@@ -29,6 +29,7 @@
             Visibility="{x:Bind ViewModel.QueueVisibility, Mode=OneWay}">
             <Button
                 x:Name="AddMedia"
+                x:Uid="AddMediaButton"
                 Margin="8"
                 AutomationProperties.Name="Add local media"
                 Command="{x:Bind ViewModel.AddLocalMediaCommand}"
@@ -41,6 +42,7 @@
 
             <Button
                 x:Name="ClearList"
+                x:Uid="ClearListButton"
                 Margin="8"
                 AutomationProperties.Name="Clear Playlist"
                 Click="ClearList_Click"

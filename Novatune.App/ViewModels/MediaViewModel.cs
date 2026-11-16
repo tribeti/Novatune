@@ -427,7 +427,7 @@ public partial class MediaViewModel : BaseViewModel
         var props = playbackItem.GetDisplayProperties();
         props.Type = MediaPlaybackType.Music;
         props.MusicProperties.Title = station.Name;
-        props.MusicProperties.Artist = "Radio";
+        props.MusicProperties.Artist = Strings.Get("Smtc_RadioArtist");
         playbackItem.ApplyDisplayProperties(props);
 
         var track = MediaItem.FromRadio(station, playbackItem);
@@ -525,7 +525,7 @@ public partial class MediaViewModel : BaseViewModel
 
         var streamUrl = stream.Url;
 
-        var playbackItem = CreatePlaybackItem(streamUrl, channel.Name, "TV", SourceKind.TV);
+        var playbackItem = CreatePlaybackItem(streamUrl, channel.Name, Strings.Get("Smtc_TvArtist"), SourceKind.TV);
         var track = MediaItem.FromTV(channel, streamUrl, playbackItem);
         AddToPlaybackList(track, playNow);
     }
@@ -720,15 +720,15 @@ public partial class MediaViewModel : BaseViewModel
 
         if (!IsPlaying)
         {
-            state = "Paused • Novatune";
+            state = Strings.Get("Discord_Paused");
         }
         else if (IsLive)
         {
             state = CurrentTrack.Kind switch
             {
-                SourceKind.Radio => "Listening to Radio",
-                SourceKind.TV => "Watching TV",
-                _ => "Live"
+                SourceKind.Radio => Strings.Get("Discord_ListeningToRadio"),
+                SourceKind.TV => Strings.Get("Discord_WatchingTV"),
+                _ => Strings.Get("Discord_Live")
             };
         }
         else

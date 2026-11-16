@@ -37,6 +37,7 @@
             <TitleBar.Content>
                 <AutoSuggestBox
                     x:Name="SearchBox"
+                    x:Uid="SearchBox"
                     MaxWidth="580"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
@@ -61,6 +62,7 @@
                                     TextTrimming="CharacterEllipsis" />
 
                                 <Button
+                                    x:Uid="AddToQueueButton"
                                     Grid.Column="1"
                                     Padding="6"
                                     VerticalAlignment="Center"
@@ -95,6 +97,7 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="HomePage"
+                    x:Uid="NavHome"
                     Content="Home"
                     Tag="Novatune.App.Views.HomePage">
                     <NavigationViewItem.Icon>
@@ -103,6 +106,7 @@
                 </NavigationViewItem>
                 <NavigationViewItem
                     x:Name="LibraryPage"
+                    x:Uid="NavLibrary"
                     Content="Library"
                     Tag="Novatune.App.Views.LibraryPage">
                     <NavigationViewItem.Icon>
@@ -155,6 +159,7 @@
 
                         <AppBarButton
                             x:Name="Play_Btn"
+                            x:Uid="PlayButton"
                             Click="Play_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignHorizontalCenterWithPanel="True"
@@ -171,6 +176,7 @@
 
                         <AppBarButton
                             x:Name="Previous_Btn"
+                            x:Uid="PreviousButton"
                             Click="Previous_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -181,6 +187,7 @@
 
                         <AppBarButton
                             x:Name="Shuffle_Btn"
+                            x:Uid="ShuffleButton"
                             Click="Shuffle_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -191,6 +198,7 @@
 
                         <AppBarButton
                             x:Name="Next_Btn"
+                            x:Uid="NextButton"
                             Click="Next_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -201,6 +209,7 @@
 
                         <AppBarButton
                             x:Name="Repeat_Btn"
+                            x:Uid="RepeatButton"
                             Click="Repeat_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -230,6 +239,7 @@
 
                         <AppBarButton
                             x:Name="Radio_Previous_Btn"
+                            x:Uid="RadioPreviousButton"
                             Click="Previous_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignVerticalCenterWithPanel="True"
@@ -240,6 +250,7 @@
 
                         <AppBarButton
                             x:Name="Radio_Next_Btn"
+                            x:Uid="RadioNextButton"
                             Click="Next_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignVerticalCenterWithPanel="True"
@@ -265,6 +276,7 @@
 
                 <Button
                     x:Name="Queue_Btn"
+                    x:Uid="QueueButton"
                     Click="Queue_Btn_Click"
                     RelativePanel.Below="Volume_Slider"
                     RelativePanel.LeftOf="MediaSetting_Btn"
@@ -298,6 +310,7 @@
 
                                 <ComboBox
                                     x:Name="Output_Box"
+                                    x:Uid="OutputBox"
                                     Grid.Row="0"
                                     Header="Audio Output Selection"
                                     Loaded="Output_Box_Loaded"
@@ -305,6 +318,7 @@
 
                                 <Slider
                                     x:Name="PlaybackSpeedSlider"
+                                    x:Uid="PlaybackSpeedSlider"
                                     Grid.Row="1"
                                     Margin="0,12,0,0"
                                     Header="Playback Speed"

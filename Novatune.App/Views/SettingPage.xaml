@@ -13,14 +13,17 @@
         <!--  background setting  -->
         <TextBlock
             x:Name="Header"
+            x:Uid="CloseBehaviorHeader"
             Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="Close behavior" />
         <TextBlock
             x:Name="Description"
+            x:Uid="CloseBehaviorDescription"
             RelativePanel.Below="Header"
             Text="Close button should minimize app" />
         <ToggleSwitch
             x:Name="TraySwitch"
+            x:Uid="TraySwitch"
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description"
             Toggled="TraySwitch_Toggled" />
@@ -28,15 +31,18 @@
         <!--  discord setting  -->
         <TextBlock
             x:Name="Header1"
+            x:Uid="DiscordHeader"
             RelativePanel.Below="TraySwitch"
             Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="Discord RPC" />
         <TextBlock
             x:Name="Description1"
+            x:Uid="DiscordDescription"
             RelativePanel.Below="Header1"
             Text="Show current track title, status, and elapsed playback time on your Discord profile" />
         <ToggleSwitch
             x:Name="RPCSwitch"
+            x:Uid="RpcSwitch"
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description1"
             Toggled="RPCSwitch_Toggled" />
@@ -44,11 +50,13 @@
         <!--  theme setting  -->
         <TextBlock
             x:Name="Header2"
+            x:Uid="ThemeHeader"
             RelativePanel.Below="RPCSwitch"
             Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="Theme" />
         <TextBlock
             x:Name="Description2"
+            x:Uid="ThemeDescription"
             RelativePanel.Below="Header2"
             Text="Choose light or dark mode, or follow the Windows setting" />
         <ComboBox
@@ -56,9 +64,31 @@
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description2"
             SelectionChanged="ThemeSelector_SelectionChanged">
-            <ComboBoxItem Content="Use Windows setting" />
-            <ComboBoxItem Content="Light" />
-            <ComboBoxItem Content="Dark" />
+            <ComboBoxItem x:Uid="ThemeDefaultItem" Content="Use Windows setting" />
+            <ComboBoxItem x:Uid="ThemeLightItem" Content="Light" />
+            <ComboBoxItem x:Uid="ThemeDarkItem" Content="Dark" />
+        </ComboBox>
+
+        <!--  language setting  -->
+        <TextBlock
+            x:Name="Header3"
+            x:Uid="LanguageHeader"
+            Margin="0,8,0,0"
+            RelativePanel.Below="Description2"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Text="Language" />
+        <TextBlock
+            x:Name="Description3"
+            x:Uid="LanguageDescription"
+            RelativePanel.Below="Header3"
+            Text="Choose the app display language." />
+        <ComboBox
+            x:Name="LanguageSelector"
+            RelativePanel.AlignRightWithPanel="True"
+            RelativePanel.AlignVerticalCenterWith="Description3"
+            SelectionChanged="LanguageSelector_SelectionChanged">
+            <ComboBoxItem x:Uid="LanguageEnglishItem" Content="English" />
+            <ComboBoxItem x:Uid="LanguageVietnameseItem" Content="Tiếng Việt" />
         </ComboBox>
     </RelativePanel>
 </Page>

@@ -61,10 +61,10 @@ public sealed partial class LibraryPage : Page
 
         var dialog = new ContentDialog
         {
-            Title = "Import YouTube Playlist",
+            Title = Strings.Get("Dialog_ImportPlaylistTitle"),
             Content = inputBox,
-            PrimaryButtonText = "Import",
-            CloseButtonText = "Cancel",
+            PrimaryButtonText = Strings.Get("Dialog_Import"),
+            CloseButtonText = Strings.Get("Dialog_Cancel"),
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = this.XamlRoot,
         };
@@ -80,7 +80,7 @@ public sealed partial class LibraryPage : Page
         // Show loading dialog
         var loadingDialog = new ContentDialog
         {
-            Title = "Importing playlist...",
+            Title = Strings.Get("Dialog_ImportingPlaylist"),
             Content = new ProgressRing { IsActive = true, Width = 48, Height = 48 },
             XamlRoot = this.XamlRoot,
         };
@@ -96,9 +96,9 @@ public sealed partial class LibraryPage : Page
             {
                 var errorDialog = new ContentDialog
                 {
-                    Title = "Error",
-                    Content = "Failed to load playlist. Please check the URL and try again.",
-                    CloseButtonText = "OK",
+                    Title = Strings.Get("Dialog_Error"),
+                    Content = Strings.Get("Dialog_FailedToLoadPlaylist"),
+                    CloseButtonText = Strings.Get("Dialog_Ok"),
                     XamlRoot = this.XamlRoot,
                 };
                 await errorDialog.ShowAsync();
@@ -120,9 +120,9 @@ public sealed partial class LibraryPage : Page
 
             var errorDialog = new ContentDialog
             {
-                Title = "Error",
-                Content = $"Import failed: {ex.Message}",
-                CloseButtonText = "OK",
+                Title = Strings.Get("Dialog_Error"),
+                Content = Strings.Format("Dialog_ImportFailed", ex.Message),
+                CloseButtonText = Strings.Get("Dialog_Ok"),
                 XamlRoot = this.XamlRoot,
             };
             await errorDialog.ShowAsync();
@@ -168,7 +168,7 @@ public sealed partial class LibraryPage : Page
         _isRefreshingPlaylist = true;
         var loadingDialog = new ContentDialog
         {
-            Title = "Refreshing playlist...",
+            Title = Strings.Get("Dialog_RefreshingPlaylist"),
             Content = new ProgressRing { IsActive = true },
             XamlRoot = this.XamlRoot,
         };
@@ -182,9 +182,9 @@ public sealed partial class LibraryPage : Page
             {
                 var errorDialog = new ContentDialog
                 {
-                    Title = "Error",
-                    Content = "Failed to refresh playlist. Please try again later.",
-                    CloseButtonText = "OK",
+                    Title = Strings.Get("Dialog_Error"),
+                    Content = Strings.Get("Dialog_FailedToRefreshPlaylist"),
+                    CloseButtonText = Strings.Get("Dialog_Ok"),
                     XamlRoot = this.XamlRoot,
                 };
 
@@ -203,9 +203,9 @@ public sealed partial class LibraryPage : Page
 
             var errorDialog = new ContentDialog
             {
-                Title = "Error",
-                Content = $"Refresh failed: {ex.Message}",
-                CloseButtonText = "OK",
+                Title = Strings.Get("Dialog_Error"),
+                Content = Strings.Format("Dialog_RefreshFailed", ex.Message),
+                CloseButtonText = Strings.Get("Dialog_Ok"),
                 XamlRoot = this.XamlRoot,
             };
 

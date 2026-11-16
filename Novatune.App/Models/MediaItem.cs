@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Novatune.App.Services;
 using System;
 using Windows.Media.Playback;
 
@@ -37,7 +38,7 @@ public partial class MediaItem : ObservableObject
         {
             Kind = SourceKind.Local,
             Title = title,
-            Subtitle = string.IsNullOrWhiteSpace(artist) ? "Local File" : artist,
+            Subtitle = string.IsNullOrWhiteSpace(artist) ? Strings.Get("Media_LocalFile") : artist,
             Thumbnail = img,
             PlaybackItem = item,
             SourcePathOrUrl = path
@@ -58,7 +59,7 @@ public partial class MediaItem : ObservableObject
         {
             Kind = SourceKind.Radio,
             Title = radio.Name,
-            Subtitle = string.IsNullOrWhiteSpace(radio.Tags) ? "Radio Station" : radio.Tags,
+            Subtitle = string.IsNullOrWhiteSpace(radio.Tags) ? Strings.Get("Media_RadioStation") : radio.Tags,
             Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
             PlaybackItem = item,
             SourcePathOrUrl = radio.UrlResolved
@@ -103,7 +104,7 @@ public partial class MediaItem : ObservableObject
         {
             Kind = SourceKind.TV,
             Title = channel.Name,
-            Subtitle = string.IsNullOrWhiteSpace(subtitle) ? "TV Channel" : subtitle,
+            Subtitle = string.IsNullOrWhiteSpace(subtitle) ? Strings.Get("Media_TVChannel") : subtitle,
             Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
             PlaybackItem = item,
             SourcePathOrUrl = streamUrl

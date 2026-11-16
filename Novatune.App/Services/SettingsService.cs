@@ -13,9 +13,12 @@ public enum AppTheme
 
 public class AppSettings
 {
+    public const string DefaultLanguage = "en-US";
+
     public bool MinimizeOnClose { get; set; } = false;
     public bool EnableDiscordRpc { get; set; } = false;
     public AppTheme Theme { get; set; } = AppTheme.Default;
+    public string Language { get; set; } = DefaultLanguage;
 }
 
 public class SettingsService
