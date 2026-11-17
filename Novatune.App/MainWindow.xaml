@@ -38,10 +38,10 @@
                 <AutoSuggestBox
                     x:Name="SearchBox"
                     x:Uid="SearchBox"
-                    AutomationProperties.AutomationId="SearchBox"
                     MaxWidth="580"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="SearchBox"
                     GotFocus="SearchBox_GotFocus"
                     PlaceholderText="Search for online media"
                     QueryIcon="Find"
@@ -64,10 +64,10 @@
 
                                 <Button
                                     x:Uid="AddToQueueButton"
-                                    AutomationProperties.AutomationId="AddToQueueButton"
                                     Grid.Column="1"
                                     Padding="6"
                                     VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="AddToQueueButton"
                                     AutomationProperties.Name="Add to queue"
                                     Click="AddtoQueue_Btn_Click"
                                     ClickMode="Press"
@@ -171,7 +171,7 @@
                             RelativePanel.Below="Media_Timeline"
                             ToolTipService.ToolTip="Play/Pause">
                             <AppBarButton.Icon>
-                                <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                                <FontIcon Foreground="{ThemeResource AccentFillColorDefaultBrush}" Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
                             </AppBarButton.Icon>
 
                             <AppBarButton.KeyboardAccelerators>
@@ -242,7 +242,7 @@
                             RelativePanel.AlignHorizontalCenterWithPanel="True"
                             RelativePanel.AlignVerticalCenterWithPanel="True"
                             ToolTipService.ToolTip="Play/Pause">
-                            <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                            <FontIcon Foreground="{ThemeResource AccentFillColorDefaultBrush}" Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
 
                             <AppBarButton.KeyboardAccelerators>
                                 <KeyboardAccelerator Key="Space" />
@@ -309,14 +309,7 @@
                     Style="{StaticResource IconOnlyButtonStyle}"
                     ToolTipService.ToolTip="Settings">
                     <Button.Content>
-                        <AnimatedIcon x:Name="SettingsAnimatedIcon">
-                            <AnimatedIcon.Source>
-                                <animatedvisuals:AnimatedSettingsVisualSource />
-                            </AnimatedIcon.Source>
-                            <AnimatedIcon.FallbackIconSource>
-                                <SymbolIconSource Symbol="Setting" />
-                            </AnimatedIcon.FallbackIconSource>
-                        </AnimatedIcon>
+                        <FontIcon Glyph="&#xF4C3;" />
                     </Button.Content>
                     <Button.Flyout>
                         <Flyout>
@@ -329,8 +322,8 @@
                                 <ComboBox
                                     x:Name="Output_Box"
                                     x:Uid="OutputBox"
-                                    AutomationProperties.AutomationId="Output_Box"
                                     Grid.Row="0"
+                                    AutomationProperties.AutomationId="Output_Box"
                                     Header="Audio Output Selection"
                                     Loaded="Output_Box_Loaded"
                                     SelectionChanged="Output_Box_SelectionChanged" />
@@ -338,9 +331,9 @@
                                 <Slider
                                     x:Name="PlaybackSpeedSlider"
                                     x:Uid="PlaybackSpeedSlider"
-                                    AutomationProperties.AutomationId="PlaybackSpeedSlider"
                                     Grid.Row="1"
                                     Margin="0,12,0,0"
+                                    AutomationProperties.AutomationId="PlaybackSpeedSlider"
                                     Header="Playback Speed"
                                     Maximum="2.0"
                                     Minimum="0.25"

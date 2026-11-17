@@ -17,6 +17,28 @@ public enum SourceKind
 
 public partial class MediaItem : ObservableObject
 {
+    private static readonly BitmapImage FallbackArt = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+
+    private static BitmapImage? CreateRemoteArt(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return null;
+
+        var absolute = url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            ? "https://" + url[7..]
+            : url;
+
+        if (!Uri.TryCreate(absolute, UriKind.Absolute, out var uri))
+            return null;
+
+        return new BitmapImage
+        {
+            DecodePixelWidth = 256,
+            DecodePixelType = DecodePixelType.Physical,
+            UriSource = uri
+        };
+    }
+
     public SourceKind Kind { get; init; }
 
     [ObservableProperty]
@@ -47,20 +69,12 @@ public partial class MediaItem : ObservableObject
 
     public static MediaItem FromRadio(RadioItem radio, MediaPlaybackItem item)
     {
-        BitmapImage? img = null;
-        if (!string.IsNullOrWhiteSpace(radio.Favicon))
-        {
-            var url = radio.Favicon.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + radio.Favicon[7..] : radio.Favicon;
-            if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
-                img = new BitmapImage(uri);
-        }
-
         return new MediaItem
         {
             Kind = SourceKind.Radio,
             Title = radio.Name,
             Subtitle = string.IsNullOrWhiteSpace(radio.Tags) ? Strings.Get("Media_RadioStation") : radio.Tags,
-            Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+            Thumbnail = CreateRemoteArt(radio.Favicon) ?? FallbackArt,
             PlaybackItem = item,
             SourcePathOrUrl = radio.UrlResolved
         };
@@ -68,19 +82,12 @@ public partial class MediaItem : ObservableObject
 
     public static MediaItem FromYoutube(YoutubeItem youtube, MediaPlaybackItem item)
     {
-        BitmapImage? img = null;
-        if (!string.IsNullOrWhiteSpace(youtube.ThumbnailUrl))
-        {
-            if (Uri.TryCreate(youtube.ThumbnailUrl, UriKind.Absolute, out var uri))
-                img = new BitmapImage(uri);
-        }
-
         return new MediaItem
         {
             Kind = SourceKind.Youtube,
             Title = youtube.Title,
             Subtitle = youtube.Author,
-            Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+            Thumbnail = CreateRemoteArt(youtube.ThumbnailUrl) ?? FallbackArt,
             PlaybackItem = item,
             SourcePathOrUrl = youtube.VideoUrl
         };
@@ -88,14 +95,6 @@ public partial class MediaItem : ObservableObject
 
     public static MediaItem FromTV(IptvChannel channel, string streamUrl, MediaPlaybackItem item)
     {
-        BitmapImage? img = null;
-        if (!string.IsNullOrWhiteSpace(channel.Logo))
-        {
-            var url = channel.Logo.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? "https://" + channel.Logo[7..] : channel.Logo;
-            if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
-                img = new BitmapImage(uri);
-        }
-
         var subtitle = channel.Categories.Count > 0
             ? string.Join(", ", channel.Categories)
             : channel.Country;
@@ -105,7 +104,7 @@ public partial class MediaItem : ObservableObject
             Kind = SourceKind.TV,
             Title = channel.Name,
             Subtitle = string.IsNullOrWhiteSpace(subtitle) ? Strings.Get("Media_TVChannel") : subtitle,
-            Thumbnail = img ?? new BitmapImage(new Uri("ms-appx:///Assets/LockScreenLogo.png")),
+            Thumbnail = CreateRemoteArt(channel.Logo) ?? FallbackArt,
             PlaybackItem = item,
             SourcePathOrUrl = streamUrl
         };

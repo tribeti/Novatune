@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Media.Devices;
 using WinUIEx;
@@ -37,8 +38,6 @@ public sealed partial class MainWindow : Window
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
-        // slider
-        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
         // window
         this.AppWindow.SetIcon("Assets/icon.ico");
         this.AppWindow.SetTaskbarIcon("Assets/icon.ico");
@@ -224,6 +223,10 @@ public sealed partial class MainWindow : Window
 
         try
         {
+            await Task.Delay(TimeSpan.FromMilliseconds(350), token);
+            if (!ReferenceEquals(_searchCts, cts))
+                return;
+
             var results = await SearchService.SearchAllAsync(sender.Text, token);
             if (!ReferenceEquals(_searchCts, cts))
                 return;

@@ -85,6 +85,10 @@
                 SelectionChanged="Queue_SelectionChanged"
                 SelectionMode="Single">
 
+                <ListView.ItemContainerTransitions>
+                    <TransitionCollection />
+                </ListView.ItemContainerTransitions>
+
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="models:MediaItem">
                         <Grid Margin="0,8">

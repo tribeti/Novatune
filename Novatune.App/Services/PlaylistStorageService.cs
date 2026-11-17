@@ -55,7 +55,11 @@ public class PlaylistStorageService
 
             try
             {
-                _playlists = await Task.Run(PlaylistDatabase.GetAllPlaylists).ConfigureAwait(false);
+                _playlists = await Task.Run(() =>
+                {
+                    PlaylistDatabase.InitializeDatabase();
+                    return PlaylistDatabase.GetAllPlaylists();
+                }).ConfigureAwait(false);
                 _isLoaded = true;
             }
             catch (Exception ex)
