@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>Tìm kiếm nội dung trực tuyến</value>
+  </data>
+  <data name="AddToQueueButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Thêm vào hàng đợi</value>
+  </data>
+  <data name="AddToQueueButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Thêm vào hàng đợi</value>
+  </data>
+  <data name="NavHome.Content" xml:space="preserve">
+    <value>Trang chủ</value>
+  </data>
+  <data name="NavLibrary.Content" xml:space="preserve">
+    <value>Thư viện</value>
+  </data>
+  <data name="PlayButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Phát/Tạm dừng</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bài trước</value>
+  </data>
+  <data name="ShuffleButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Trộn bài</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bài tiếp theo</value>
+  </data>
+  <data name="RepeatButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Lặp lại</value>
+  </data>
+  <data name="RadioPreviousButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bài trước</value>
+  </data>
+  <data name="RadioNextButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bài tiếp theo</value>
+  </data>
+  <data name="QueueButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Hàng đợi</value>
+  </data>
+  <data name="OutputBox.Header" xml:space="preserve">
+    <value>Chọn đầu ra âm thanh</value>
+  </data>
+  <data name="PlaybackSpeedSlider.Header" xml:space="preserve">
+    <value>Tốc độ phát</value>
+  </data>
+  <data name="AddMediaButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Thêm phương tiện cục bộ</value>
+  </data>
+  <data name="AddMediaButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Thêm phương tiện cục bộ</value>
+  </data>
+  <data name="ClearListButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Xóa danh sách phát</value>
+  </data>
+  <data name="ClearListButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Xóa danh sách phát</value>
+  </data>
+  <data name="LibraryTitle.Text" xml:space="preserve">
+    <value>Danh sách phát trực tuyến</value>
+  </data>
+  <data name="AddPlaylistButton.Content" xml:space="preserve">
+    <value>Thêm danh sách phát</value>
+  </data>
+  <data name="PlayAllItem.Text" xml:space="preserve">
+    <value>Phát tất cả</value>
+  </data>
+  <data name="RefreshItem.Text" xml:space="preserve">
+    <value>Làm mới</value>
+  </data>
+  <data name="RemovePlaylistItem.Text" xml:space="preserve">
+    <value>Xóa</value>
+  </data>
+  <data name="CloseBehaviorHeader.Text" xml:space="preserve">
+    <value>Hành vi khi đóng</value>
+  </data>
+  <data name="CloseBehaviorDescription.Text" xml:space="preserve">
+    <value>Nút đóng sẽ ẩn app xuống khay hệ thống</value>
+  </data>
+  <data name="DiscordHeader.Text" xml:space="preserve">
+    <value>Discord RPC</value>
+  </data>
+  <data name="DiscordDescription.Text" xml:space="preserve">
+    <value>Hiển thị tên bài hát, trạng thái và thời gian đã phát trên hồ sơ Discord của bạn</value>
+  </data>
+  <data name="ThemeHeader.Text" xml:space="preserve">
+    <value>Giao diện</value>
+  </data>
+  <data name="ThemeDescription.Text" xml:space="preserve">
+    <value>Chọn giao diện sáng hoặc tối, hoặc theo cài đặt Windows</value>
+  </data>
+  <data name="ThemeDefaultItem.Content" xml:space="preserve">
+    <value>Theo cài đặt Windows</value>
+  </data>
+  <data name="ThemeLightItem.Content" xml:space="preserve">
+    <value>Sáng</value>
+  </data>
+  <data name="ThemeDarkItem.Content" xml:space="preserve">
+    <value>Tối</value>
+  </data>
+  <data name="LanguageHeader.Text" xml:space="preserve">
+    <value>Ngôn ngữ</value>
+  </data>
+  <data name="LanguageDescription.Text" xml:space="preserve">
+    <value>Chọn ngôn ngữ hiển thị của ứng dụng.</value>
+  </data>
+  <data name="LanguageEnglishItem.Content" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageVietnameseItem.Content" xml:space="preserve">
+    <value>Tiếng Việt</value>
+  </data>
+  <data name="TraySwitch.OnContent" xml:space="preserve">
+    <value>Bật</value>
+  </data>
+  <data name="TraySwitch.OffContent" xml:space="preserve">
+    <value>Tắt</value>
+  </data>
+  <data name="RpcSwitch.OnContent" xml:space="preserve">
+    <value>Bật</value>
+  </data>
+  <data name="RpcSwitch.OffContent" xml:space="preserve">
+    <value>Tắt</value>
+  </data>
+  <data name="Tray_Play" xml:space="preserve">
+    <value>Phát</value>
+  </data>
+  <data name="Tray_Pause" xml:space="preserve">
+    <value>Tạm dừng</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Mở</value>
+  </data>
+  <data name="Tray_Quit" xml:space="preserve">
+    <value>Thoát</value>
+  </data>
+  <data name="Search_NoResults" xml:space="preserve">
+    <value>Không tìm thấy kết quả</value>
+  </data>
+  <data name="Search_TryDifferentKeywords" xml:space="preserve">
+    <value>Thử từ khóa khác</value>
+  </data>
+  <data name="Dialog_ImportPlaylistTitle" xml:space="preserve">
+    <value>Thêm danh sách phát YouTube</value>
+  </data>
+  <data name="Dialog_Import" xml:space="preserve">
+    <value>Thêm</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
+  <data name="Dialog_ImportingPlaylist" xml:space="preserve">
+    <value>Đang nhập danh sách phát...</value>
+  </data>
+  <data name="Dialog_Error" xml:space="preserve">
+    <value>Lỗi</value>
+  </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_FailedToLoadPlaylist" xml:space="preserve">
+    <value>Không thể tải danh sách phát. Vui lòng kiểm tra URL và thử lại.</value>
+  </data>
+  <data name="Dialog_ImportFailed" xml:space="preserve">
+    <value>Thêm thất bại: {0}</value>
+  </data>
+  <data name="Dialog_RefreshingPlaylist" xml:space="preserve">
+    <value>Đang làm mới danh sách phát...</value>
+  </data>
+  <data name="Dialog_FailedToRefreshPlaylist" xml:space="preserve">
+    <value>Không thể làm mới danh sách phát. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="Dialog_RefreshFailed" xml:space="preserve">
+    <value>Làm mới thất bại: {0}</value>
+  </data>
+  <data name="Media_LocalFile" xml:space="preserve">
+    <value>Tệp cục bộ</value>
+  </data>
+  <data name="Media_RadioStation" xml:space="preserve">
+    <value>Đài phát thanh</value>
+  </data>
+  <data name="Media_TVChannel" xml:space="preserve">
+    <value>Kênh truyền hình</value>
+  </data>
+  <data name="Smtc_RadioArtist" xml:space="preserve">
+    <value>Phát thanh</value>
+  </data>
+  <data name="Smtc_TvArtist" xml:space="preserve">
+    <value>Truyền hình</value>
+  </data>
+  <data name="Discord_Paused" xml:space="preserve">
+    <value>Tạm dừng • Novatune</value>
+  </data>
+  <data name="Discord_ListeningToRadio" xml:space="preserve">
+    <value>Đang nghe phát thanh</value>
+  </data>
+  <data name="Discord_WatchingTV" xml:space="preserve">
+    <value>Đang xem truyền hình</value>
+  </data>
+  <data name="Discord_Live" xml:space="preserve">
+    <value>Trực tiếp</value>
+  </data>
+</root>

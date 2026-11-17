@@ -18,6 +18,7 @@ public sealed partial class SettingPage : Page
         TraySwitch.IsOn = _settingsService.Settings.MinimizeOnClose;
         RPCSwitch.IsOn = _settingsService.Settings.EnableDiscordRpc;
         ThemeSelector.SelectedIndex = (int) _settingsService.Settings.Theme;
+        LanguageSelector.SelectedIndex = _settingsService.Settings.Language == AppSettings.DefaultLanguage ? 0 : 1;
     }
 
     private void TraySwitch_Toggled(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -48,5 +49,22 @@ public sealed partial class SettingPage : Page
             _settingsService.Save();
             (App.Current.MainWindow as MainWindow)?.ApplyTheme(theme);
         }
+    }
+
+    private void LanguageSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!this.IsLoaded)
+            return;
+
+        var language = LanguageSelector.SelectedIndex == 1 ? "vi-VN" : AppSettings.DefaultLanguage;
+        if (language == _settingsService.Settings.Language)
+            return;
+
+        _settingsService.Settings.Language = language;
+        _settingsService.Save();
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language;
+        Strings.Reset();
+        Microsoft.Windows.AppLifecycle.AppInstance.Restart("");
+        _mediaViewModel.UpdateDiscordPresence();
     }
 }

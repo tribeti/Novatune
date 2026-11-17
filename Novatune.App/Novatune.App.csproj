@@ -135,12 +135,17 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 
-	<!--delete lang pack-->
+	<!--delete unused lang pack -->
 	<Target Name="RemoveLanguageFolders" AfterTargets="Publish">
 		<ItemGroup>
-			<RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)en-us\*.mui" />
+			<RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)en-us\*.mui;$(PublishDir)vi-VN\*.mui;$(PublishDir)vi-vn\*.mui" />
 			<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
 		</ItemGroup>
 		<RemoveDir Directories="@(RemovingFolders)" />
 	</Target>
+	<ItemGroup>
+	  <PRIResource Update="Strings\en-US\Resources.resw">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	  </PRIResource>
+	</ItemGroup>
 </Project>

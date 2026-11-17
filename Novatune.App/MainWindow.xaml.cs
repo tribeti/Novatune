@@ -53,13 +53,13 @@ public sealed partial class MainWindow : Window
         manager.TrayIconContextMenu += (w, e) =>
         {
             var flyout = new MenuFlyout();
-            flyout.Items.Add(new MenuFlyoutItem { Text = ViewModel.IsPlaying ? "Pause" : "Play" });
-            flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
-            flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
+            flyout.Items.Add(new MenuFlyoutItem { Text = ViewModel.IsPlaying ? Strings.Get("Tray_Pause") : Strings.Get("Tray_Play") });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = Strings.Get("Tray_Open") });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = Strings.Get("Tray_Quit") });
             ((MenuFlyoutItem) flyout.Items[0]).Click += (s, __) =>
             {
                 ViewModel.PlayPause();
-                ((MenuFlyoutItem) s).Text = ViewModel.IsPlaying ? "Pause" : "Play";
+                ((MenuFlyoutItem) s).Text = ViewModel.IsPlaying ? Strings.Get("Tray_Pause") : Strings.Get("Tray_Play");
             };
 
             ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
@@ -172,7 +172,6 @@ public sealed partial class MainWindow : Window
     private void NavigationBar_Loaded(object sender, RoutedEventArgs e)
     {
         ContentFrame.Navigated += On_Navigated;
-        NavigationBar.SelectedItem = NavigationBar.MenuItems[0];
         NavView_Navigate(typeof(HomePage), new EntranceNavigationTransitionInfo());
     }
 
@@ -231,7 +230,7 @@ public sealed partial class MainWindow : Window
 
             sender.ItemsSource = results.Count > 0
                 ? results
-                : new List<MediaItem> { new() { Title = "No results found", Subtitle = "Try different keywords", Kind = SourceKind.Local } };
+                : new List<MediaItem> { new() { Title = Strings.Get("Search_NoResults"), Subtitle = Strings.Get("Search_TryDifferentKeywords"), Kind = SourceKind.Local } };
             _suggestion = results;
         }
         catch (OperationCanceledException) { }
