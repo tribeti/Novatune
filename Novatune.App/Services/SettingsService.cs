@@ -53,16 +53,17 @@ public class SettingsService
         return new AppSettings();
     }
 
-    public void Save()
+    public bool Save()
     {
         try
         {
             string json = JsonSerializer.Serialize(Settings, SettingsJsonContext.Default.AppSettings);
             File.WriteAllText(_settingsPath, json);
+            return true;
         }
         catch
         {
-
+            return false;
         }
     }
 }

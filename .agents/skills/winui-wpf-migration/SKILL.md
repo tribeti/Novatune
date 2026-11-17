@@ -61,7 +61,7 @@ Application.Current.Dispatcher.Invoke(() => { /* UI work */ });
 // WinUI 3
 dispatcherQueue.TryEnqueue(() => { /* UI work */ });
 ```
-Get via `DispatcherQueue.GetForCurrentThread()`. No `Application.Current.Dispatcher` in WinUI 3.
+Capture the queue on the UI thread once (`DispatcherQueue.GetForCurrentThread()` — returns null on threads without a queue) and pass that instance to worker code; don't call `GetForCurrentThread()` inside the worker. No `Application.Current.Dispatcher` in WinUI 3. Unlike `Dispatcher.Invoke`, `TryEnqueue` is fire-and-forget: it does not wait for the callback to finish — if you must read state the callback sets, signal a `TaskCompletionSource` from inside it and `await` that — and check its `bool` return (`false` means the queue is shut down).
 
 #### Step 6: Replace Imaging
 **Critical:** `PresentationCore.dll` and `System.Windows.Media.Imaging` crash the WinUI XAML compiler. This is an architectural incompatibility — no workaround exists.
@@ -79,8 +79,8 @@ Delete custom `ObservableObject`/`RelayCommand`/`DelegateCommand`. Use Community
 
 #### Step 8: Replace Resources
 - `.resx` → `.resw` (copy + rename to `Strings\en-us\`)
-- `{x:Static}` → `x:Uid` for localized strings
-- `Properties.Resources.Key` → `ResourceLoader.GetString("Key")`
+- `{x:Static}` → `x:Uid` for localized strings — rename each key to `Uid.Property` form (`SaveButton.Content`, `WelcomeMessage.Text`), one `.resw` entry per localized XAML property; bare WPF keys won't resolve
+- `Properties.Resources.Key` → create/reuse a `ResourceLoader` instance (`private readonly ResourceLoader _loader = new();`) and call `_loader.GetString("Key")` — `GetString` is an instance method in WinUI 3
 
 ### Critical Rules
 

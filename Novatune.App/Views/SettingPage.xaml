@@ -24,6 +24,7 @@
         <ToggleSwitch
             x:Name="TraySwitch"
             x:Uid="TraySwitch"
+            AutomationProperties.AutomationId="TraySwitch"
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description"
             Toggled="TraySwitch_Toggled" />
@@ -43,6 +44,7 @@
         <ToggleSwitch
             x:Name="RPCSwitch"
             x:Uid="RpcSwitch"
+            AutomationProperties.AutomationId="RPCSwitch"
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description1"
             Toggled="RPCSwitch_Toggled" />
@@ -61,6 +63,8 @@
             Text="Choose light or dark mode, or follow the Windows setting" />
         <ComboBox
             x:Name="ThemeSelector"
+            x:Uid="ThemeSelector"
+            AutomationProperties.AutomationId="ThemeSelector"
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description2"
             SelectionChanged="ThemeSelector_SelectionChanged">
@@ -84,6 +88,8 @@
             Text="Choose the app display language." />
         <ComboBox
             x:Name="LanguageSelector"
+            x:Uid="LanguageSelector"
+            AutomationProperties.AutomationId="LanguageSelector"
             RelativePanel.AlignRightWithPanel="True"
             RelativePanel.AlignVerticalCenterWith="Description3"
             SelectionChanged="LanguageSelector_SelectionChanged">

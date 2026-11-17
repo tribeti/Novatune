@@ -24,7 +24,8 @@ API/control lookup, performance, sandbox, and troubleshooting.
 Windows (no admin needed):
 
 ```powershell
-New-Item -ItemType Junction -Path .claude\skills -Target .agents\skills
+New-Item -ItemType Directory -Force -Path .claude | Out-Null
+New-Item -ItemType Junction -Path .claude\skills -Target (Resolve-Path .agents\skills).Path
 ```
 
 macOS / Linux:

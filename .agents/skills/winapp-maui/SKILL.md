@@ -148,8 +148,10 @@ Example for x64 — pack the resolved manifest and sign. Store a self-signed (or
   env:
     SIGN_PFX_PASSWORD: ${{ secrets.SIGN_PFX_PASSWORD }}
   run: |
-    Get-ChildItem .\publish\win-x64 -Filter *.exe |
-      ForEach-Object { winapp sign $_.FullName $env:SIGN_PFX_PATH --password $env:SIGN_PFX_PASSWORD --quiet }
+    Get-ChildItem .\publish\win-x64 -Filter *.exe | ForEach-Object {
+      winapp sign $_.FullName $env:SIGN_PFX_PATH --password $env:SIGN_PFX_PASSWORD --quiet
+      if ($LASTEXITCODE -ne 0) { throw "winapp sign failed for $($_.Name) (exit $LASTEXITCODE)" }
+    }
 
 - name: Pack signed MSIX (x64)
   shell: pwsh
@@ -176,17 +178,9 @@ Example for x64 — pack the resolved manifest and sign. Store a self-signed (or
 - A **self-signed** cert produces a valid signature but does **not** clear SmartScreen reputation for other users — only an OV/EV cert from a trusted CA builds reputation. See `winapp-signing`.
 - Add `devcert.pfx` and decoded PFX paths to `.gitignore`; never commit certificates.
 
-### End-to-end validation script
+### End-to-end validation
 
-For a practical repo-level check of the MAUI workflow, run:
-
-```powershell
-.\scripts\test-samples.ps1 -Samples maui-app
-```
-
-This executes `samples\maui-app\test.Tests.ps1`, which creates a MAUI app from scratch, publishes the Windows head, packages with the generated resizetizer manifest, and signs the unpackaged executable.
-
-The repository also includes a concrete MAUI sample project under `samples\maui-app\`.
+In the upstream [winappCli](https://github.com/microsoft/winappCli) repository (where these skills are vendored from), `scripts\test-samples.ps1 -Samples maui-app` and the `samples\maui-app\` project exercise this workflow end to end: they create a MAUI app from scratch, publish the Windows head, package it with the generated resizetizer manifest, and sign the unpackaged executable. That script and those samples are **not** part of downstream repos — validate this workflow against your own project's build/publish pipeline instead.
 
 ## Tips
 

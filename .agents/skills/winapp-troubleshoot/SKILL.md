@@ -25,7 +25,7 @@ ETW performance capture is separate from debugger output and crash analysis.
 | "Access denied" / "elevation required" | `cert install` without admin | Run terminal as Administrator for `winapp cert install` |
 | "Package installation failed" | Cert not trusted, or stale package registration | For a certificate error, `winapp cert install ./devcert.pfx` (admin). For registration conflicts, see the rows below rather than deleting packages by name |
 | "Certificate not trusted" | Dev cert not installed on machine | `winapp cert install ./devcert.pfx` (admin) |
-| "Build tools not found" | First run, tools not yet downloaded | Run `winapp update` to download tools; ensure internet access |
+| "Build tools not found" | First run, tools not yet downloaded | Run `winapp update` to download tools; ensure internet access. `winapp update` requires `winapp.yaml` — run `winapp init` first if absent, or run any `winapp tool` command (e.g. `winapp tool makeappx --help`) to trigger the download without a config |
 | "Failed to add package identity" | Stale debug identity or untrusted cert | Run `winapp unregister` with your app's input (or `--manifest` for `create-debug-identity`); install a certificate only if the error asks for it |
 | "Certificate file already exists" | `devcert.pfx` already present | Use `winapp cert generate --if-exists overwrite` or `--if-exists skip` |
 | "Manifest already exists" | `Package.appxmanifest` already present | Use `winapp manifest generate --if-exists overwrite` or edit manifest directly |

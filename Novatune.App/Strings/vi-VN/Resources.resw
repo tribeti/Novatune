@@ -318,4 +318,61 @@
   <data name="Discord_Live" xml:space="preserve">
     <value>Trực tiếp</value>
   </data>
+  <data name="Dialog_RestartTitle" xml:space="preserve">
+    <value>Cần khởi động lại</value>
+  </data>
+  <data name="Dialog_RestartConfirm" xml:space="preserve">
+    <value>Đổi ngôn ngữ sẽ khởi động lại ứng dụng và dừng phiên phát hiện tại. Tiếp tục?</value>
+  </data>
+  <data name="Dialog_Restart" xml:space="preserve">
+    <value>Khởi động lại</value>
+  </data>
+  <data name="Dialog_SaveFailed" xml:space="preserve">
+    <value>Không thể lưu cài đặt. Chưa đổi ngôn ngữ.</value>
+  </data>
+  <data name="SearchBox.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Tìm kiếm</value>
+  </data>
+  <data name="PlayButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Phát/Tạm dừng</value>
+  </data>
+  <data name="PreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bài trước</value>
+  </data>
+  <data name="ShuffleButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Trộn bài</value>
+  </data>
+  <data name="NextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bài tiếp theo</value>
+  </data>
+  <data name="RepeatButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Lặp lại</value>
+  </data>
+  <data name="RadioPlayButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Phát/Tạm dừng</value>
+  </data>
+  <data name="RadioPlayButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Phát/Tạm dừng</value>
+  </data>
+  <data name="RadioPreviousButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bài trước</value>
+  </data>
+  <data name="RadioNextButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bài tiếp theo</value>
+  </data>
+  <data name="QueueButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Hàng đợi</value>
+  </data>
+  <data name="MediaSettingButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Cài đặt</value>
+  </data>
+  <data name="MediaSettingButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Cài đặt</value>
+  </data>
+  <data name="ThemeSelector.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Giao diện</value>
+  </data>
+  <data name="LanguageSelector.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ngôn ngữ</value>
+  </data>
 </root>

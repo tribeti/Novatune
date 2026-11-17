@@ -131,7 +131,7 @@ If the platform brushes already work in contrast themes (they usually do), keep 
 WinUI exposes icons through two parallel API trees:
 
 - **`IconElement`** — a `FrameworkElement`. Drop it directly into the visual tree. Cannot live in a `ResourceDictionary`.
-- **`IconSource`** — non-element. Share via `ResourceDictionary` and consume from properties that end in `IconSource` (`TabViewItem.IconSource`, `InfoBar.IconSource`, etc.). Wrap with `IconSourceElement` to use as an element.
+- **`IconSource`** — non-element. Share via `ResourceDictionary` and consume from properties that end in `IconSource` (`TabViewItem.IconSource`, `InfoBar.IconSource`, etc.). Wrap with `IconSourceElement` to use as an element. Exception: `ImageIconSource` does not render inside `IconSourceElement` — use it only on controls whose `IconSource` property explicitly supports it (per the [`ImageIconSource` docs](https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.controls.imageiconsource)).
 
 Whether a control's icon slot wants an element or a source is encoded in the property name: `Icon` → `IconElement`, `IconSource` → `IconSource`. Both trees expose the same six concrete types:
 

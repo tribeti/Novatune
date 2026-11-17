@@ -13,7 +13,8 @@ Load this when authoring **custom** theme dictionaries, brushes, styles, templat
     <SolidColorBrush x:Key="AppSurfaceBrush" Color="#FF1F1F1F" />
   </ResourceDictionary>
   <ResourceDictionary x:Key="HighContrast">
-    <!-- empty if platform defaults already work in Contrast themes -->
+    <!-- any custom brush referenced via ThemeResource must resolve here too; only SystemColor*Brush is allowed -->
+    <StaticResource x:Key="AppSurfaceBrush" ResourceKey="SystemColorWindowColorBrush" />
   </ResourceDictionary>
 </ResourceDictionary.ThemeDictionaries>
 ```

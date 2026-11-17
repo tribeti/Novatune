@@ -175,7 +175,8 @@ async Task InitializeWebView()
     webView.CoreWebView2.NavigationStarting += (s, e) =>
     {
         var uri = new Uri(e.Uri);
-        if (uri.Host != "trusted.example.com")
+        // pin the scheme and the full origin (host + port), not just the host
+        if (uri.Scheme != "https" || uri.Host != "trusted.example.com" || uri.Port != 443)
             e.Cancel = true;
     };
 }
@@ -391,7 +392,7 @@ string price = $"${cost:F2}";
 </Grid>
 ```
 
-Use `Start`/`End` alignment, not `Left`/`Right`. Avoid hard-coding `Margin` or `Padding` that assumes LTR layout.
+WinUI's `HorizontalAlignment`/`VerticalAlignment` have no `Start`/`End` values — use `Stretch` or centered alignment and let `FlowDirection` mirror the layout (above). Avoid hard-coding `HorizontalAlignment="Left"/"Right"` or `Margin`/`Padding` that assumes LTR layout.
 
 ### Pluralization Handling
 
@@ -399,6 +400,8 @@ Use `Start`/`End` alignment, not `Left`/`Right`. Avoid hard-coding `Margin` or `
 string key = count == 1 ? "ItemCount_One" : "ItemCount_Other";
 string message = string.Format(_resourceLoader.GetString(key), count);
 ```
+
+`count == 1` only matches English-like plural rules. Other locales have different plural categories (Russian and Polish distinguish 1 / 2–4 / 5+; Arabic has six) — use locale-aware plural rules (CLDR) and provide the `.resw` keys each language requires instead of hard-coding `count == 1`.
 
 ### Testing Localization
 

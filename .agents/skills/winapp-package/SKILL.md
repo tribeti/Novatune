@@ -204,7 +204,11 @@ Use the `microsoft/setup-winapp` action to install winapp on GitHub-hosted runne
 - uses: microsoft/setup-winapp@v1
 
 - name: Package
-  run: winapp package ./dist --cert ${{ secrets.CERT_PATH }} --cert-password ${{ secrets.CERT_PASSWORD }} --quiet
+  shell: pwsh
+  env:
+    CERT_PATH: ${{ secrets.CERT_PATH }}
+    CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+  run: winapp package ./dist --cert "$env:CERT_PATH" --cert-password "$env:CERT_PASSWORD" --quiet
 ```
 
 **Tips for CI/CD pipelines:**

@@ -118,8 +118,8 @@ winapp ui inspect -a myapp --interactive; winapp ui screenshot -a myapp
 # Click and verify the page changed
 winapp ui invoke btn-settings-a1b2 -a myapp; winapp ui wait-for pn-settingspage-c3d4 -a myapp --timeout 3000; winapp ui screenshot -a myapp
 
-# Fill a form and submit
-winapp ui set-value txt-searchbox-e5f6 "hello" -a myapp; winapp ui invoke btn-submit-7a90 -a myapp; winapp ui screenshot -a myapp
+# Fill a form and submit — guard each step the next one depends on
+winapp ui set-value txt-searchbox-e5f6 "hello" -a myapp; if ($LASTEXITCODE -ne 0) { throw 'set-value failed; not submitting' }; winapp ui invoke btn-submit-7a90 -a myapp; winapp ui screenshot -a myapp
 ```
 
 ### Find visible text and click it
@@ -441,7 +441,7 @@ winapp ui list-windows -a myapp
 # Note: untitled zero-size windows are hidden by default; use --show-hidden to include them
 
 # 3. Target the dialog, type the file path, and confirm
-winapp ui set-value txt-1148-c4d5 "C:\path\to\file.png" -w <dialog-hwnd>
+winapp ui set-value txt-1148-c4d5 "C:\path\to\file.png" -w <dialog-hwnd>; if ($LASTEXITCODE -ne 0) { throw 'set-value failed; not confirming dialog' }
 winapp ui invoke btn-open-e6f7 -w <dialog-hwnd>
 ```
 Note: The filename input in standard file dialogs typically has AutomationId `1148`. Use `inspect -w <dialog-hwnd> --interactive` to discover the actual slugs.

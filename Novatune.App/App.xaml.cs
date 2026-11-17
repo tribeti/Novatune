@@ -33,7 +33,8 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         var settingsService = Services.GetService<SettingsService>()!;
-        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = settingsService.Settings.Language;
+        var language = settingsService.Settings.Language;
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language is AppSettings.DefaultLanguage or "vi-VN" ? language : AppSettings.DefaultLanguage;
 
         MainWindow = new MainWindow();
         MainWindow.Activate();
