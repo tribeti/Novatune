@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Novatune.App.Models;
 using Novatune.App.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -74,16 +75,21 @@ public partial class MediaViewModel : BaseViewModel
         _positionTimer.Tick += (_, _) =>
         {
             var session = MediaPlayer.PlaybackSession;
-            MediaDuration = _mediaPlaybackList.Items.Count == 0 ? 0 : session.NaturalDuration.TotalSeconds;
-            PlaybackPosition = _mediaPlaybackList.Items.Count == 0 ? 0 : session.Position.TotalSeconds;
+            var durationSeconds = _mediaPlaybackList.Items.Count == 0 ? 0 : session.NaturalDuration.TotalSeconds;
+            var positionSeconds = _mediaPlaybackList.Items.Count == 0 ? 0 : session.Position.TotalSeconds;
 
-            if (!IsUserInteracting)
-                TimelinePosition = PlaybackPosition;
+            if (Math.Abs(durationSeconds - MediaDuration) > 0.001)
+                MediaDuration = durationSeconds;
+
+            PlaybackPosition = positionSeconds;
+
+            if (!IsUserInteracting && Math.Abs(positionSeconds - TimelinePosition) > 0.001)
+                TimelinePosition = positionSeconds;
 
             if (CurrentTrack is not null && !IsLive)
             {
-                var duration = session.NaturalDuration;
-                CurrentTrack.SavedPosition = duration > TimeSpan.Zero && duration - session.Position < TimeSpan.FromSeconds(20)
+                var naturalDuration = session.NaturalDuration;
+                CurrentTrack.SavedPosition = naturalDuration > TimeSpan.Zero && naturalDuration - session.Position < TimeSpan.FromSeconds(20)
                     ? TimeSpan.Zero
                     : session.Position;
             }
@@ -481,10 +487,12 @@ public partial class MediaViewModel : BaseViewModel
         if (playlist?.Videos is null || playlist.Videos.Count == 0)
             return;
 
+        var existingUrls = new HashSet<string?>(Playlist.Select(t => t.SourcePathOrUrl));
+
         bool isFirst = true;
         foreach (var video in playlist.Videos)
         {
-            if (Playlist.Any(t => t.SourcePathOrUrl == video.VideoUrl))
+            if (!existingUrls.Add(video.VideoUrl))
                 continue;
 
             var playbackItem = CreatePlaybackItem(video.VideoUrl, video.Title, video.Author, SourceKind.Youtube);
