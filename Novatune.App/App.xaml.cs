@@ -43,8 +43,10 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
         services.AddSingleton<MediaViewModel>();
+        services.AddSingleton<LibraryViewModel>();
         services.AddSingleton<SettingsService>();
         services.AddSingleton<PlaylistStorageService>();
+        services.AddSingleton<LibraryService>();
         services.AddSingleton<DiscordRpcService>();
         return services.BuildServiceProvider();
     }

@@ -189,6 +189,36 @@
   <data name="RemovePlaylistItem.Text" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="FavoriteAdd" xml:space="preserve">
+    <value>Add to favourites</value>
+  </data>
+  <data name="FavoriteRemove" xml:space="preserve">
+    <value>Remove from favourites</value>
+  </data>
+  <data name="FavoritesTitle.Text" xml:space="preserve">
+    <value>Favourites</value>
+  </data>
+  <data name="FavoritesEmpty.Text" xml:space="preserve">
+    <value>Nothing here yet. Use the heart button on any track in the queue to save it.</value>
+  </data>
+  <data name="RecentTitle.Text" xml:space="preserve">
+    <value>Recently Played</value>
+  </data>
+  <data name="RecentEmpty.Text" xml:space="preserve">
+    <value>Songs and stations you play will show up here.</value>
+  </data>
+  <data name="PlayEntryItem.Text" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="RemoveFavoriteItem.Text" xml:space="preserve">
+    <value>Remove from favourites</value>
+  </data>
+  <data name="AddFavoriteItem.Text" xml:space="preserve">
+    <value>Add to favourites</value>
+  </data>
+  <data name="Dialog_LibraryPlayFailed" xml:space="preserve">
+    <value>Couldn't play this item. The file or stream may no longer be available.</value>
+  </data>
   <data name="CloseBehaviorHeader.Text" xml:space="preserve">
     <value>Close behavior</value>
   </data>

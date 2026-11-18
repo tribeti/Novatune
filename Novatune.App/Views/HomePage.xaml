@@ -95,6 +95,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -118,10 +119,24 @@
                                 TextTrimming="CharacterEllipsis" />
 
                             <Button
-                                x:Name="RemoveItem"
+                                x:Name="FavoriteItem"
                                 Grid.Row="0"
                                 Grid.RowSpan="2"
                                 Grid.Column="1"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Click="FavoriteItem_Click"
+                                Content="{x:Bind local:HomePage.FavoriteGlyph(IsFavorite), Mode=OneWay}"
+                                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                ToolTipService.ToolTip="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}" />
+
+                            <Button
+                                x:Name="RemoveItem"
+                                Grid.Row="0"
+                                Grid.RowSpan="2"
+                                Grid.Column="2"
                                 VerticalAlignment="Center"
                                 Background="Transparent"
                                 BorderThickness="0"
