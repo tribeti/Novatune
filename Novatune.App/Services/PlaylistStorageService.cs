@@ -78,7 +78,9 @@ public class PlaylistStorageService
 
     public async Task AddAsync(YoutubePlaylist playlist)
     {
+        await LoadAsync().ConfigureAwait(false);
         await _semaphore.WaitAsync().ConfigureAwait(false);
+
         try
         {
             await Task.Run(() => PlaylistDatabase.UpsertPlaylist(playlist)).ConfigureAwait(false);
@@ -101,7 +103,9 @@ public class PlaylistStorageService
 
     public async Task RemoveAsync(string playlistId)
     {
+        await LoadAsync().ConfigureAwait(false);
         await _semaphore.WaitAsync().ConfigureAwait(false);
+
         try
         {
             await Task.Run(() => PlaylistDatabase.DeletePlaylist(playlistId)).ConfigureAwait(false);

@@ -14,15 +14,6 @@
             </ResourceDictionary.MergedDictionaries>
 
             <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Light">
-                    <Color x:Key="SystemAccentColor">#32CD32</Color>
-                    <Color x:Key="SystemAccentColorLight1">#5CD65C</Color>
-                    <Color x:Key="SystemAccentColorLight2">#85E085</Color>
-                    <Color x:Key="SystemAccentColorLight3">#ADEBAD</Color>
-                    <Color x:Key="SystemAccentColorDark1">#28A428</Color>
-                    <Color x:Key="SystemAccentColorDark2">#1E7B1E</Color>
-                    <Color x:Key="SystemAccentColorDark3">#145214</Color>
-                </ResourceDictionary>
                 <ResourceDictionary x:Key="Default">
                     <Color x:Key="SystemAccentColor">#32CD32</Color>
                     <Color x:Key="SystemAccentColorLight1">#5CD65C</Color>

@@ -259,6 +259,8 @@ public sealed partial class MainWindow : Window
     {
         if (args.ChosenSuggestion is MediaItem item)
         {
+            _searchCts?.Cancel();
+
             if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
             {
                 ViewModel.AddRadio(radio);
