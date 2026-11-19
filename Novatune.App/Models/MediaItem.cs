@@ -19,7 +19,7 @@ public partial class MediaItem : ObservableObject
 {
     private static readonly BitmapImage FallbackArt = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
-    private static BitmapImage? CreateRemoteArt(string? url)
+    internal static BitmapImage? CreateRemoteArt(string? url)
     {
         if (string.IsNullOrWhiteSpace(url))
             return null;

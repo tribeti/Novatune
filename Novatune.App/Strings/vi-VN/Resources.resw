@@ -201,9 +201,6 @@
   <data name="RecentTitle.Text" xml:space="preserve">
     <value>Nghe gần đây</value>
   </data>
-  <data name="RecentEmpty.Text" xml:space="preserve">
-    <value>Bài hát và đài bạn phát sẽ xuất hiện ở đây.</value>
-  </data>
   <data name="PlayEntryItem.Text" xml:space="preserve">
     <value>Phát</value>
   </data>

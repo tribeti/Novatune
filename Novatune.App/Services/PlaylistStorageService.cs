@@ -74,8 +74,6 @@ public class PlaylistStorageService
         }
     }
 
-    public Task SaveAsync() => Task.CompletedTask;
-
     public async Task AddAsync(YoutubePlaylist playlist)
     {
         await LoadAsync().ConfigureAwait(false);

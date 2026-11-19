@@ -223,11 +223,6 @@
                 VerticalScrollBarVisibility="Hidden"
                 VerticalScrollMode="Disabled">
                 <Grid>
-                    <TextBlock
-                        x:Uid="RecentEmpty"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Style="{StaticResource BodyTextBlockStyle}"
-                        Visibility="{x:Bind local:LibraryPage.InvertedBoolToVisibility(Vm.HasRecent), Mode=OneWay}" />
                     <ItemsRepeater ItemsSource="{x:Bind Vm.Recent}">
                         <ItemsRepeater.Layout>
                             <StackLayout Orientation="Horizontal" Spacing="12" />

@@ -289,23 +289,5 @@ public sealed partial class LibraryPage : Page
     /// invalid values (e.g. local files have no thumbnail URL). Returning null
     /// lets the placeholder icon behind the Image show through.
     /// </summary>
-    public static ImageSource? EntryThumbnail(string? url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-            return null;
-
-        var absolute = url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-            ? "https://" + url[7..]
-            : url;
-
-        if (!Uri.TryCreate(absolute, UriKind.Absolute, out var uri))
-            return null;
-
-        return new Microsoft.UI.Xaml.Media.Imaging.BitmapImage
-        {
-            DecodePixelWidth = 256,
-            DecodePixelType = Microsoft.UI.Xaml.Media.Imaging.DecodePixelType.Physical,
-            UriSource = uri
-        };
-    }
+    public static ImageSource? EntryThumbnail(string? url) => MediaItem.CreateRemoteArt(url);
 }

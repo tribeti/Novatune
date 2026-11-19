@@ -175,13 +175,6 @@ public partial class MediaViewModel : BaseViewModel
             MediaPlayer.Play();
     }
 
-    [RelayCommand]
-    public void Seek(double seconds)
-    {
-        MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
-        PlaybackPosition = seconds;
-    }
-
     public void CommitSeek()
     {
         MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(TimelinePosition);

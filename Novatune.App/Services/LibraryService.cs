@@ -121,7 +121,7 @@ public class LibraryService
             await _semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                await Task.Run(() => LibraryDatabase.AddHistory(entry)).ConfigureAwait(false);
+                LibraryDatabase.AddHistory(entry);
             }
             catch (Exception ex)
             {

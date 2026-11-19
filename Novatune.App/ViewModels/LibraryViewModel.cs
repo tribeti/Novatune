@@ -25,9 +25,6 @@ public partial class LibraryViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool HasFavorites { get; set; }
 
-    [ObservableProperty]
-    public partial bool HasRecent { get; set; }
-
     public LibraryViewModel(LibraryService libraryService, MediaViewModel mediaViewModel)
     {
         _libraryService = libraryService;
@@ -57,8 +54,6 @@ public partial class LibraryViewModel : BaseViewModel
 
         while (Recent.Count > RecentDisplayLimit)
             Recent.RemoveAt(Recent.Count - 1);
-
-        HasRecent = true;
     }
 
     /// <summary>Refreshes favourites and history from the database.</summary>
@@ -75,14 +70,12 @@ public partial class LibraryViewModel : BaseViewModel
             Recent.Add(recent);
 
         HasFavorites = Favorites.Count > 0;
-        HasRecent = Recent.Count > 0;
     }
 
-    /// <summary>Replays a library entry now; returns true when playback was started.</summary>
-    public async Task<bool> PlayEntryAsync(LibraryEntry entry)
+    /// <summary>Replays a library entry now.</summary>
+    public async Task PlayEntryAsync(LibraryEntry entry)
     {
         await _mediaViewModel.PlayFromLibraryAsync(entry);
-        return true;
     }
 
     public async Task ToggleFavoriteAsync(MediaItem? item)

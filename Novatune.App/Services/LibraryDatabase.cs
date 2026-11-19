@@ -17,7 +17,7 @@ namespace Novatune.App.Services;
 public static class LibraryDatabase
 {
     /// <summary>Maximum number of play-history rows kept.</summary>
-    public const int HistoryCap = 200;
+    public const int HistoryCap = 50;
 
     private static readonly string _dbPath = BuildDbPath();
 
@@ -95,7 +95,7 @@ public static class LibraryDatabase
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
-            result.Add(ReadEntry(reader, isHistory: false));
+            result.Add(ReadEntry(reader));
 
         return result;
     }
@@ -129,19 +129,6 @@ public static class LibraryDatabase
         cmd.Parameters.AddWithValue("@Kind", (int)kind);
         cmd.Parameters.AddWithValue("@SourcePathOrUrl", sourcePathOrUrl ?? string.Empty);
         return cmd.ExecuteNonQuery() > 0;
-    }
-
-    public static bool IsFavorite(SourceKind kind, string sourcePathOrUrl)
-    {
-        using var db = CreateConnection();
-        db.Open();
-
-        using var cmd = new SqliteCommand(
-            "SELECT 1 FROM Favorites WHERE Kind = @Kind AND SourcePathOrUrl = @SourcePathOrUrl LIMIT 1;", db);
-
-        cmd.Parameters.AddWithValue("@Kind", (int)kind);
-        cmd.Parameters.AddWithValue("@SourcePathOrUrl", sourcePathOrUrl ?? string.Empty);
-        return cmd.ExecuteScalar() is not null;
     }
 
     #endregion
@@ -215,7 +202,7 @@ public static class LibraryDatabase
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
-            result.Add(ReadEntry(reader, isHistory: true));
+            result.Add(ReadEntry(reader));
 
         return result;
     }
@@ -224,7 +211,7 @@ public static class LibraryDatabase
 
     #region Helpers
 
-    private static LibraryEntry ReadEntry(SqliteDataReader reader, bool isHistory)
+    private static LibraryEntry ReadEntry(SqliteDataReader reader)
     {
         return new LibraryEntry
         {

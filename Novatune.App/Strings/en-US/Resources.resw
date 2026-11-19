@@ -204,9 +204,6 @@
   <data name="RecentTitle.Text" xml:space="preserve">
     <value>Recently Played</value>
   </data>
-  <data name="RecentEmpty.Text" xml:space="preserve">
-    <value>Songs and stations you play will show up here.</value>
-  </data>
   <data name="PlayEntryItem.Text" xml:space="preserve">
     <value>Play</value>
   </data>

@@ -260,19 +260,7 @@ public sealed partial class MainWindow : Window
         if (args.ChosenSuggestion is MediaItem item)
         {
             _searchCts?.Cancel();
-
-            if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
-            {
-                ViewModel.AddRadio(radio);
-            }
-            else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
-            {
-                ViewModel.AddYoutube(youtube);
-            }
-            else if (item.Kind == SourceKind.TV && item.SourceItem is IptvChannel tvChannel)
-            {
-                ViewModel.AddTV(tvChannel);
-            }
+            AddSearchResult(item, playNow: true);
 
             sender.Text = string.Empty;
             sender.ItemsSource = Array.Empty<MediaItem>();
@@ -291,20 +279,32 @@ public sealed partial class MainWindow : Window
 
     private void AddtoQueue_Btn_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button button || button.Tag is not MediaItem item)
-            return;
+        if (sender is Button button && button.Tag is MediaItem item)
+            AddSearchResult(item, playNow: false);
+    }
 
-        if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
+    private void AddSearchResult(MediaItem item, bool playNow)
+    {
+        switch (item.Kind)
         {
-            ViewModel.AddRadioToQueue(radio);
-        }
-        else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
-        {
-            ViewModel.AddYoutubeToQueue(youtube);
-        }
-        else if (item.Kind == SourceKind.TV && item.SourceItem is IptvChannel tvChannel)
-        {
-            ViewModel.AddTVToQueue(tvChannel);
+            case SourceKind.Radio when item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved):
+                if (playNow)
+                    ViewModel.AddRadio(radio);
+                else
+                    ViewModel.AddRadioToQueue(radio);
+                break;
+            case SourceKind.Youtube when item.SourceItem is YoutubeItem youtube:
+                if (playNow)
+                    ViewModel.AddYoutube(youtube);
+                else
+                    ViewModel.AddYoutubeToQueue(youtube);
+                break;
+            case SourceKind.TV when item.SourceItem is IptvChannel tvChannel:
+                if (playNow)
+                    ViewModel.AddTV(tvChannel);
+                else
+                    ViewModel.AddTVToQueue(tvChannel);
+                break;
         }
     }
 
@@ -338,11 +338,8 @@ public sealed partial class MainWindow : Window
 
     private void Output_Box_SelectionChanged(object _, SelectionChangedEventArgs e)
     {
-        DeviceInformation selectedDevice = (DeviceInformation) ((ComboBoxItem) Output_Box.SelectedItem).Tag;
-        if (selectedDevice is not null)
-        {
-            ViewModel.MediaPlayer.AudioDevice = selectedDevice;
-        }
+        if (Output_Box.SelectedItem is ComboBoxItem { Tag: DeviceInformation device })
+            ViewModel.MediaPlayer.AudioDevice = device;
     }
 
     private void PlaybackSpeedSlider_ValueChanged(object _, RangeBaseValueChangedEventArgs e) => ViewModel.MediaPlayer.PlaybackSession.PlaybackRate = PlaybackSpeedSlider.Value;
