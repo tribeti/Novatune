@@ -124,6 +124,7 @@
                                 Grid.RowSpan="2"
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="FavoriteItem"
                                 AutomationProperties.Name="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}"
                                 Background="Transparent"
                                 BorderThickness="0"

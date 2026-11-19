@@ -123,10 +123,9 @@ public static class LibraryDatabase
         using var db = CreateConnection();
         db.Open();
 
-        using var cmd = new SqliteCommand(
-            "DELETE FROM Favorites WHERE Kind = @Kind AND SourcePathOrUrl = @SourcePathOrUrl;", db);
+        using var cmd = new SqliteCommand("DELETE FROM Favorites WHERE Kind = @Kind AND SourcePathOrUrl = @SourcePathOrUrl;", db);
 
-        cmd.Parameters.AddWithValue("@Kind", (int)kind);
+        cmd.Parameters.AddWithValue("@Kind", (int) kind);
         cmd.Parameters.AddWithValue("@SourcePathOrUrl", sourcePathOrUrl ?? string.Empty);
         return cmd.ExecuteNonQuery() > 0;
     }
@@ -154,7 +153,7 @@ public static class LibraryDatabase
         {
             using var reader = dupeCmd.ExecuteReader();
             if (reader.Read() &&
-                reader.GetInt32(0) == (int)entry.Kind &&
+                reader.GetInt32(0) == (int) entry.Kind &&
                 reader.GetString(1) == entry.SourcePathOrUrl)
             {
                 return;
@@ -215,7 +214,7 @@ public static class LibraryDatabase
     {
         return new LibraryEntry
         {
-            Kind = (SourceKind)reader.GetInt32(0),
+            Kind = (SourceKind) reader.GetInt32(0),
             Title = reader.GetString(1),
             Subtitle = reader.GetString(2),
             SourcePathOrUrl = reader.GetString(3),
@@ -226,7 +225,7 @@ public static class LibraryDatabase
 
     private static void BindEntry(SqliteCommand cmd, LibraryEntry entry, string timestampName = "@SavedAt")
     {
-        cmd.Parameters.AddWithValue("@Kind", (int)entry.Kind);
+        cmd.Parameters.AddWithValue("@Kind", (int) entry.Kind);
         cmd.Parameters.AddWithValue("@Title", entry.Title);
         cmd.Parameters.AddWithValue("@Subtitle", entry.Subtitle);
         cmd.Parameters.AddWithValue("@SourcePathOrUrl", entry.SourcePathOrUrl);

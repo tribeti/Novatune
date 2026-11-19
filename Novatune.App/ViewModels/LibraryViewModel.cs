@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Novatune.App.Models;
 using Novatune.App.Services;
-using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 

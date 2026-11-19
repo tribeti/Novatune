@@ -146,6 +146,7 @@
                                 <Button
                                     Padding="8"
                                     HorizontalAlignment="Left"
+                                    AutomationProperties.AutomationId="FavoriteEntryButton"
                                     Background="Transparent"
                                     Click="LibraryEntry_Click"
                                     DataContext="{x:Bind}"
@@ -232,6 +233,7 @@
                                 <Button
                                     Padding="8"
                                     HorizontalAlignment="Left"
+                                    AutomationProperties.AutomationId="RecentEntryButton"
                                     Background="Transparent"
                                     Click="LibraryEntry_Click"
                                     DataContext="{x:Bind}"

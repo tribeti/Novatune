@@ -748,7 +748,7 @@ public partial class MediaViewModel : BaseViewModel
         BitmapImage? bitmap = null;
         try
         {
-            var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 100);
+            using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 100);
             if (thumbnail is not null)
             {
                 bitmap = new BitmapImage

@@ -18,7 +18,7 @@ public class LibraryEntry
     public DateTime SavedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>Stable identity used for de-duplication across kinds.</summary>
-    public string Key => $"{(int)Kind}|{SourcePathOrUrl}";
+    public string Key => $"{(int) Kind}|{SourcePathOrUrl}";
 
     /// <summary>
     /// Maps a currently playing track to a persisted library record,
