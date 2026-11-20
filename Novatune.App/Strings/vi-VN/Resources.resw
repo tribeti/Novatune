@@ -186,6 +186,33 @@
   <data name="RefreshItem.Text" xml:space="preserve">
     <value>Làm mới</value>
   </data>
+  <data name="FavoriteAdd" xml:space="preserve">
+    <value>Thêm vào yêu thích</value>
+  </data>
+  <data name="FavoriteRemove" xml:space="preserve">
+    <value>Xóa khỏi yêu thích</value>
+  </data>
+  <data name="FavoritesTitle.Text" xml:space="preserve">
+    <value>Yêu thích</value>
+  </data>
+  <data name="FavoritesEmpty.Text" xml:space="preserve">
+    <value>Chưa có gì ở đây. Dùng nút trái tim trên bài hát trong hàng đợi để lưu lại.</value>
+  </data>
+  <data name="RecentTitle.Text" xml:space="preserve">
+    <value>Nghe gần đây</value>
+  </data>
+  <data name="PlayEntryItem.Text" xml:space="preserve">
+    <value>Phát</value>
+  </data>
+  <data name="RemoveFavoriteItem.Text" xml:space="preserve">
+    <value>Xóa khỏi yêu thích</value>
+  </data>
+  <data name="AddFavoriteItem.Text" xml:space="preserve">
+    <value>Thêm vào yêu thích</value>
+  </data>
+  <data name="Dialog_LibraryPlayFailed" xml:space="preserve">
+    <value>Không phát được mục này. Tệp hoặc luồng có thể không còn tồn tại.</value>
+  </data>
   <data name="RemovePlaylistItem.Text" xml:space="preserve">
     <value>Xóa</value>
   </data>

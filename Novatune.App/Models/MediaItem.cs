@@ -19,7 +19,7 @@ public partial class MediaItem : ObservableObject
 {
     private static readonly BitmapImage FallbackArt = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
 
-    private static BitmapImage? CreateRemoteArt(string? url)
+    internal static BitmapImage? CreateRemoteArt(string? url)
     {
         if (string.IsNullOrWhiteSpace(url))
             return null;
@@ -49,6 +49,9 @@ public partial class MediaItem : ObservableObject
     public partial BitmapImage? Thumbnail { get; set; }
     [ObservableProperty]
     public partial bool IsCurrent { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsFavorite { get; set; }
     public MediaPlaybackItem PlaybackItem { get; set; } = null!;
     public string? SourcePathOrUrl { get; set; }
     public object? SourceItem { get; set; }
@@ -76,7 +79,8 @@ public partial class MediaItem : ObservableObject
             Subtitle = string.IsNullOrWhiteSpace(radio.Tags) ? Strings.Get("Media_RadioStation") : radio.Tags,
             Thumbnail = CreateRemoteArt(radio.Favicon) ?? FallbackArt,
             PlaybackItem = item,
-            SourcePathOrUrl = radio.UrlResolved
+            SourcePathOrUrl = radio.UrlResolved,
+            SourceItem = radio
         };
     }
 
@@ -89,7 +93,8 @@ public partial class MediaItem : ObservableObject
             Subtitle = youtube.Author,
             Thumbnail = CreateRemoteArt(youtube.ThumbnailUrl) ?? FallbackArt,
             PlaybackItem = item,
-            SourcePathOrUrl = youtube.VideoUrl
+            SourcePathOrUrl = youtube.VideoUrl,
+            SourceItem = youtube
         };
     }
 
@@ -106,7 +111,25 @@ public partial class MediaItem : ObservableObject
             Subtitle = string.IsNullOrWhiteSpace(subtitle) ? Strings.Get("Media_TVChannel") : subtitle,
             Thumbnail = CreateRemoteArt(channel.Logo) ?? FallbackArt,
             PlaybackItem = item,
-            SourcePathOrUrl = streamUrl
+            SourcePathOrUrl = streamUrl,
+            SourceItem = channel
+        };
+    }
+
+    /// <summary>
+    /// Rebuilds a playable track from a persisted library entry (favourite / history).
+    /// Local entries must go through the local-file path instead (see MediaViewModel).
+    /// </summary>
+    public static MediaItem FromLibraryEntry(LibraryEntry entry, MediaPlaybackItem item)
+    {
+        return new MediaItem
+        {
+            Kind = entry.Kind,
+            Title = entry.Title,
+            Subtitle = entry.Subtitle,
+            Thumbnail = CreateRemoteArt(entry.ThumbnailUrl) ?? FallbackArt,
+            PlaybackItem = item,
+            SourcePathOrUrl = entry.SourcePathOrUrl
         };
     }
 }

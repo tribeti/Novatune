@@ -87,11 +87,14 @@
                                         Height="120"
                                         Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                         CornerRadius="8">
-                                        <Image
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            Source="{x:Bind ThumbnailUrl}"
-                                            Stretch="UniformToFill" />
+                                        <Grid>
+                                            <FontIcon Foreground="{ThemeResource TextFillColorSecondaryBrush}" Glyph="&#xE8D6;" />
+                                            <Image
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Source="{x:Bind local:LibraryPage.EntryThumbnail(ThumbnailUrl)}"
+                                                Stretch="UniformToFill" />
+                                        </Grid>
                                     </Border>
                                     <TextBlock
                                         Margin="0,8,0,0"
@@ -111,6 +114,185 @@
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
+            </ScrollViewer>
+
+            <TextBlock
+                x:Name="FavoritesTitle"
+                x:Uid="FavoritesTitle"
+                Padding="0,32,0,16"
+                RelativePanel.Below="OnlineList"
+                Style="{StaticResource TitleTextBlockStyle}" />
+            <ScrollViewer
+                x:Name="FavoritesList"
+                HorizontalScrollBarVisibility="Hidden"
+                HorizontalScrollMode="Enabled"
+                IsVerticalScrollChainingEnabled="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.Below="FavoritesTitle"
+                VerticalScrollBarVisibility="Hidden"
+                VerticalScrollMode="Disabled">
+                <Grid>
+                    <TextBlock
+                        x:Uid="FavoritesEmpty"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Visibility="{x:Bind local:LibraryPage.InvertedBoolToVisibility(Vm.HasFavorites), Mode=OneWay}" />
+                    <ItemsRepeater ItemsSource="{x:Bind Vm.Favorites}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Horizontal" Spacing="12" />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="models:LibraryEntry">
+                                <Button
+                                    Padding="8"
+                                    HorizontalAlignment="Left"
+                                    AutomationProperties.AutomationId="FavoriteEntryButton"
+                                    Background="Transparent"
+                                    Click="LibraryEntry_Click"
+                                    DataContext="{x:Bind}"
+                                    ToolTipService.ToolTip="{x:Bind Title}">
+                                    <Button.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem
+                                                x:Uid="PlayEntryItem"
+                                                Click="PlayEntry_Click"
+                                                Tag="{x:Bind}"
+                                                Text="Play">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xF5B0;" />
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem
+                                                x:Uid="RemoveFavoriteItem"
+                                                Click="RemoveFavorite_Click"
+                                                Tag="{x:Bind}"
+                                                Text="Remove from favourites">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xE711;" />
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                        </MenuFlyout>
+                                    </Button.ContextFlyout>
+                                    <StackPanel Width="180">
+                                        <Border
+                                            Height="120"
+                                            Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                            CornerRadius="8">
+                                            <Grid>
+                                                <FontIcon Foreground="{ThemeResource TextFillColorSecondaryBrush}" Glyph="&#xE8D6;" />
+                                                <Image
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Source="{x:Bind local:LibraryPage.EntryThumbnail(ThumbnailUrl)}"
+                                                    Stretch="UniformToFill" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock
+                                            Margin="0,8,0,0"
+                                            FontWeight="SemiBold"
+                                            Style="{StaticResource BodyTextBlockStyle}"
+                                            Text="{x:Bind Title}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="NoWrap" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Subtitle}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="NoWrap" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </Grid>
+            </ScrollViewer>
+
+            <TextBlock
+                x:Name="RecentTitle"
+                x:Uid="RecentTitle"
+                Padding="0,32,0,16"
+                RelativePanel.Below="FavoritesList"
+                Style="{StaticResource TitleTextBlockStyle}" />
+            <ScrollViewer
+                x:Name="RecentList"
+                HorizontalScrollBarVisibility="Hidden"
+                HorizontalScrollMode="Enabled"
+                IsVerticalScrollChainingEnabled="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.Below="RecentTitle"
+                VerticalScrollBarVisibility="Hidden"
+                VerticalScrollMode="Disabled">
+                <Grid>
+                    <ItemsRepeater ItemsSource="{x:Bind Vm.Recent}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Orientation="Horizontal" Spacing="12" />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="models:LibraryEntry">
+                                <Button
+                                    Padding="8"
+                                    HorizontalAlignment="Left"
+                                    AutomationProperties.AutomationId="RecentEntryButton"
+                                    Background="Transparent"
+                                    Click="LibraryEntry_Click"
+                                    DataContext="{x:Bind}"
+                                    ToolTipService.ToolTip="{x:Bind Title}">
+                                    <Button.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem
+                                                x:Uid="PlayEntryItem"
+                                                Click="PlayEntry_Click"
+                                                Tag="{x:Bind}"
+                                                Text="Play">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xF5B0;" />
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                            <MenuFlyoutItem
+                                                x:Uid="AddFavoriteItem"
+                                                Click="AddFavorite_Click"
+                                                Tag="{x:Bind}"
+                                                Text="Add to favourites">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xEB52;" />
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                        </MenuFlyout>
+                                    </Button.ContextFlyout>
+                                    <StackPanel Width="180">
+                                        <Border
+                                            Height="120"
+                                            Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                            CornerRadius="8">
+                                            <Grid>
+                                                <FontIcon Foreground="{ThemeResource TextFillColorSecondaryBrush}" Glyph="&#xE8D6;" />
+                                                <Image
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Source="{x:Bind local:LibraryPage.EntryThumbnail(ThumbnailUrl)}"
+                                                    Stretch="UniformToFill" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock
+                                            Margin="0,8,0,0"
+                                            FontWeight="SemiBold"
+                                            Style="{StaticResource BodyTextBlockStyle}"
+                                            Text="{x:Bind Title}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="NoWrap" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Subtitle}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="NoWrap" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </Grid>
             </ScrollViewer>
         </RelativePanel>
     </ScrollViewer>
