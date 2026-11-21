@@ -11,6 +11,16 @@ public enum AppTheme
     Dark = 2
 }
 
+public enum AppAccentColor
+{
+    None = 0,
+    FluentBlue = 1,
+    Green = 2,
+    Orange = 3,
+    Purple = 4,
+    Rose = 5
+}
+
 public class AppSettings
 {
     public const string DefaultLanguage = "en-US";
@@ -18,6 +28,7 @@ public class AppSettings
     public bool MinimizeOnClose { get; set; } = false;
     public bool EnableDiscordRpc { get; set; } = false;
     public AppTheme Theme { get; set; } = AppTheme.Default;
+    public AppAccentColor AccentColor { get; set; } = AppAccentColor.None;
     public string Language { get; set; } = DefaultLanguage;
 }
 

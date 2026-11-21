@@ -19,6 +19,7 @@ public sealed partial class SettingPage : Page
         TraySwitch.IsOn = _settingsService.Settings.MinimizeOnClose;
         RPCSwitch.IsOn = _settingsService.Settings.EnableDiscordRpc;
         ThemeSelector.SelectedIndex = (int) _settingsService.Settings.Theme;
+        AccentSelector.SelectedIndex = (int) _settingsService.Settings.AccentColor;
         LanguageSelector.SelectedIndex = _settingsService.Settings.Language == AppSettings.DefaultLanguage ? 0 : 1;
     }
 
@@ -49,6 +50,17 @@ public sealed partial class SettingPage : Page
             _settingsService.Settings.Theme = theme;
             _settingsService.Save();
             (App.Current.MainWindow as MainWindow)?.ApplyTheme(theme);
+        }
+    }
+
+    private void AccentSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (this.IsLoaded)
+        {
+            var accent = (AppAccentColor) AccentSelector.SelectedIndex;
+            _settingsService.Settings.AccentColor = accent;
+            _settingsService.Save();
+            (App.Current.MainWindow as MainWindow)?.ApplyAccentColor(accent);
         }
     }
 
