@@ -243,6 +243,30 @@
   <data name="ThemeDarkItem.Content" xml:space="preserve">
     <value>Tối</value>
   </data>
+  <data name="AccentHeader.Text" xml:space="preserve">
+    <value>Màu nhấn</value>
+  </data>
+  <data name="AccentDescription.Text" xml:space="preserve">
+    <value>Chọn màu nhấn của ứng dụng, hoặc theo cài đặt Windows</value>
+  </data>
+  <data name="AccentNoneItemText.Text" xml:space="preserve">
+    <value>Không có</value>
+  </data>
+  <data name="AccentBlueItemText.Text" xml:space="preserve">
+    <value>Xanh Fluent</value>
+  </data>
+  <data name="AccentGreenItemText.Text" xml:space="preserve">
+    <value>Xanh lá</value>
+  </data>
+  <data name="AccentOrangeItemText.Text" xml:space="preserve">
+    <value>Cam</value>
+  </data>
+  <data name="AccentPurpleItemText.Text" xml:space="preserve">
+    <value>Tím</value>
+  </data>
+  <data name="AccentRoseItemText.Text" xml:space="preserve">
+    <value>Hồng</value>
+  </data>
   <data name="LanguageHeader.Text" xml:space="preserve">
     <value>Ngôn ngữ</value>
   </data>
@@ -401,5 +425,8 @@
   </data>
   <data name="LanguageSelector.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Ngôn ngữ</value>
+  </data>
+  <data name="AccentSelector.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Màu nhấn</value>
   </data>
 </root>

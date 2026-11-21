@@ -73,12 +73,107 @@
             <ComboBoxItem x:Uid="ThemeDarkItem" Content="Dark" />
         </ComboBox>
 
+        <!--  accent color setting  -->
+        <TextBlock
+            x:Name="Header4"
+            x:Uid="AccentHeader"
+            Margin="0,8,0,0"
+            RelativePanel.Below="Description2"
+            Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+            Text="Accent color" />
+        <TextBlock
+            x:Name="Description4"
+            x:Uid="AccentDescription"
+            RelativePanel.Below="Header4"
+            Text="Choose an accent color for the app, or follow the Windows setting" />
+        <ComboBox
+            x:Name="AccentSelector"
+            x:Uid="AccentSelector"
+            AutomationProperties.AutomationId="AccentSelector"
+            RelativePanel.AlignRightWithPanel="True"
+            RelativePanel.AlignVerticalCenterWith="Description4"
+            SelectionChanged="AccentSelector_SelectionChanged">
+            <ComboBoxItem x:Uid="AccentNoneItem">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Ellipse
+                        Width="16"
+                        Height="16"
+                        Stroke="{ThemeResource ControlStrokeColorSecondaryBrush}"
+                        StrokeThickness="1" />
+                    <TextBlock
+                        x:Uid="AccentNoneItemText"
+                        VerticalAlignment="Center"
+                        Text="None" />
+                </StackPanel>
+            </ComboBoxItem>
+            <ComboBoxItem x:Uid="AccentBlueItem">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Ellipse
+                        Width="16"
+                        Height="16"
+                        Fill="{StaticResource AccentFluentBlueBrush}" />
+                    <TextBlock
+                        x:Uid="AccentBlueItemText"
+                        VerticalAlignment="Center"
+                        Text="Fluent blue" />
+                </StackPanel>
+            </ComboBoxItem>
+            <ComboBoxItem x:Uid="AccentGreenItem">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Ellipse
+                        Width="16"
+                        Height="16"
+                        Fill="{StaticResource AccentGreenBrush}" />
+                    <TextBlock
+                        x:Uid="AccentGreenItemText"
+                        VerticalAlignment="Center"
+                        Text="Green" />
+                </StackPanel>
+            </ComboBoxItem>
+            <ComboBoxItem x:Uid="AccentOrangeItem">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Ellipse
+                        Width="16"
+                        Height="16"
+                        Fill="{StaticResource AccentOrangeBrush}" />
+                    <TextBlock
+                        x:Uid="AccentOrangeItemText"
+                        VerticalAlignment="Center"
+                        Text="Orange" />
+                </StackPanel>
+            </ComboBoxItem>
+            <ComboBoxItem x:Uid="AccentPurpleItem">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Ellipse
+                        Width="16"
+                        Height="16"
+                        Fill="{StaticResource AccentPurpleBrush}" />
+                    <TextBlock
+                        x:Uid="AccentPurpleItemText"
+                        VerticalAlignment="Center"
+                        Text="Purple" />
+                </StackPanel>
+            </ComboBoxItem>
+            <ComboBoxItem x:Uid="AccentRoseItem">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Ellipse
+                        Width="16"
+                        Height="16"
+                        Fill="{StaticResource AccentRoseBrush}" />
+                    <TextBlock
+                        x:Uid="AccentRoseItemText"
+                        VerticalAlignment="Center"
+                        Text="Rose" />
+                </StackPanel>
+            </ComboBoxItem>
+        </ComboBox>
+
         <!--  language setting  -->
         <TextBlock
             x:Name="Header3"
             x:Uid="LanguageHeader"
             Margin="0,8,0,0"
-            RelativePanel.Below="Description2"
+            RelativePanel.Below="Description4"
             Style="{StaticResource BodyLargeStrongTextBlockStyle}"
             Text="Language" />
         <TextBlock

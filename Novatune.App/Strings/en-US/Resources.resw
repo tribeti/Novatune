@@ -243,6 +243,30 @@
   <data name="ThemeDarkItem.Content" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="AccentHeader.Text" xml:space="preserve">
+    <value>Accent color</value>
+  </data>
+  <data name="AccentDescription.Text" xml:space="preserve">
+    <value>Choose an accent color for the app, or follow the Windows setting</value>
+  </data>
+  <data name="AccentNoneItemText.Text" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="AccentBlueItemText.Text" xml:space="preserve">
+    <value>Fluent blue</value>
+  </data>
+  <data name="AccentGreenItemText.Text" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="AccentOrangeItemText.Text" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="AccentPurpleItemText.Text" xml:space="preserve">
+    <value>Purple</value>
+  </data>
+  <data name="AccentRoseItemText.Text" xml:space="preserve">
+    <value>Rose</value>
+  </data>
   <data name="LanguageHeader.Text" xml:space="preserve">
     <value>Language</value>
   </data>
@@ -401,5 +425,8 @@
   </data>
   <data name="LanguageSelector.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Language</value>
+  </data>
+  <data name="AccentSelector.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Accent color</value>
   </data>
 </root>

@@ -30,6 +30,8 @@ public sealed partial class MainWindow : Window
         // services
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
         var settingsService = App.Current.Services.GetService<SettingsService>()!;
+        // app color
+        ApplyAccentResources(settingsService.Settings.AccentColor);
 
         InitializeComponent();
         // theme
@@ -102,6 +104,50 @@ public sealed partial class MainWindow : Window
             AppTheme.Dark => ElementTheme.Dark,
             _ => ElementTheme.Default,
         };
+    }
+
+    private static readonly string[] AccentShades = [string.Empty, "Light1", "Light2", "Light3", "Dark1", "Dark2", "Dark3"];
+
+    public static void ApplyAccentResources(AppAccentColor accent)
+    {
+        var prefix = accent switch
+        {
+            AppAccentColor.FluentBlue => "AccentFluentBlue",
+            AppAccentColor.Green => "AccentGreen",
+            AppAccentColor.Orange => "AccentOrange",
+            AppAccentColor.Purple => "AccentPurple",
+            AppAccentColor.Rose => "AccentRose",
+            _ => null,
+        };
+
+        var themeDictionaries = App.Current.Resources.ThemeDictionaries;
+        if (!themeDictionaries.TryGetValue("Default", out var value) || value is not ResourceDictionary dict)
+        {
+            dict = [];
+            themeDictionaries["Default"] = dict;
+        }
+
+        foreach (var shade in AccentShades)
+        {
+            var key = $"SystemAccentColor{shade}";
+            if (prefix is not null && App.Current.Resources.TryGetValue(prefix + shade, out var color))
+                dict[key] = color;
+            else
+                dict.Remove(key);
+        }
+    }
+
+    public void ApplyAccentColor(AppAccentColor accent)
+    {
+        ApplyAccentResources(accent);
+        RefreshThemeResources();
+    }
+
+    private void RefreshThemeResources()
+    {
+        var original = Root.RequestedTheme;
+        Root.RequestedTheme = original == ElementTheme.Light ? ElementTheme.Dark : ElementTheme.Light;
+        Root.RequestedTheme = original;
     }
 
     public void ShowAndActivate()

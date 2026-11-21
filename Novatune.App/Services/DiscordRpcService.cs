@@ -1,5 +1,4 @@
 using DiscordRPC;
-using DiscordRPC.Logging;
 using System;
 
 namespace Novatune.App.Services;
@@ -14,25 +13,7 @@ public sealed partial class DiscordRpcService : IDisposable
     public DiscordRpcService(SettingsService settingsService)
     {
         _settingsService = settingsService;
-        _client = new DiscordRpcClient(ApplicationId)
-        {
-            Logger = new ConsoleLogger(LogLevel.Warning, true)
-        };
-
-        _client.OnReady += (_, e) =>
-        {
-            System.Diagnostics.Debug.WriteLine($"[DiscordRPC] Ready: {e.User.Username}");
-        };
-
-        _client.OnError += (_, e) =>
-        {
-            System.Diagnostics.Debug.WriteLine($"[DiscordRPC] Error: {e.Message}");
-        };
-
-        _client.OnConnectionFailed += (_, e) =>
-        {
-            System.Diagnostics.Debug.WriteLine($"[DiscordRPC] Connection failed: {e.Type}");
-        };
+        _client = new DiscordRpcClient(ApplicationId);
 
         // Chỉ init khi user đã bật RPC trong settings.
         if (_settingsService.Settings.EnableDiscordRpc)
