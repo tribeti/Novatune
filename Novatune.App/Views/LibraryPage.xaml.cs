@@ -63,56 +63,24 @@ public sealed partial class LibraryPage : Page
 
     private async void AddPlaylist_Click(object sender, RoutedEventArgs e)
     {
-        var inputBox = new TextBox
-        {
-            PlaceholderText = "https://youtube.com/playlist?list=...",
-            AcceptsReturn = false,
-            TextWrapping = TextWrapping.Wrap,
-        };
-
-        var dialog = new ContentDialog
-        {
-            Title = Strings.Get("Dialog_ImportPlaylistTitle"),
-            Content = inputBox,
-            PrimaryButtonText = Strings.Get("Dialog_Import"),
-            CloseButtonText = Strings.Get("Dialog_Cancel"),
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot,
-        };
-
-        var result = await dialog.ShowAsync();
-        if (result != ContentDialogResult.Primary)
+        var url = await DialogService.ShowInputAsync(
+            Strings.Get("Dialog_ImportPlaylistTitle"),
+            "https://youtube.com/playlist?list=...",
+            Strings.Get("Dialog_Import"),
+            Strings.Get("Dialog_Cancel"));
+        if (url is null)
             return;
 
-        var url = inputBox.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(url))
-            return;
-
-        // Show loading dialog
-        var loadingDialog = new ContentDialog
-        {
-            Title = Strings.Get("Dialog_ImportingPlaylist"),
-            Content = new ProgressRing { IsActive = true, Width = 48, Height = 48 },
-            XamlRoot = this.XamlRoot,
-        };
-
-        _ = loadingDialog.ShowAsync();
+        var loading = DialogService.ShowLoading(Strings.Get("Dialog_ImportingPlaylist"));
 
         try
         {
             var playlist = await YoutubeService.GetPlaylistAsync(url);
-            loadingDialog.Hide();
+            await loading.HideAsync();
 
             if (playlist is null)
             {
-                var errorDialog = new ContentDialog
-                {
-                    Title = Strings.Get("Dialog_Error"),
-                    Content = Strings.Get("Dialog_FailedToLoadPlaylist"),
-                    CloseButtonText = Strings.Get("Dialog_Ok"),
-                    XamlRoot = this.XamlRoot,
-                };
-                await errorDialog.ShowAsync();
+                await DialogService.ShowErrorAsync(Strings.Get("Dialog_FailedToLoadPlaylist"));
                 return;
             }
 
@@ -126,17 +94,9 @@ public sealed partial class LibraryPage : Page
         }
         catch (Exception ex)
         {
-            loadingDialog.Hide();
             Debug.WriteLine($"Import playlist failed: {ex.Message}");
-
-            var errorDialog = new ContentDialog
-            {
-                Title = Strings.Get("Dialog_Error"),
-                Content = Strings.Format("Dialog_ImportFailed", ex.Message),
-                CloseButtonText = Strings.Get("Dialog_Ok"),
-                XamlRoot = this.XamlRoot,
-            };
-            await errorDialog.ShowAsync();
+            await loading.HideAsync();
+            await DialogService.ShowErrorAsync(Strings.Format("Dialog_ImportFailed", ex.Message));
         }
     }
 
@@ -177,31 +137,15 @@ public sealed partial class LibraryPage : Page
             return;
 
         _isRefreshingPlaylist = true;
-        var loadingDialog = new ContentDialog
-        {
-            Title = Strings.Get("Dialog_RefreshingPlaylist"),
-            Content = new ProgressRing { IsActive = true },
-            XamlRoot = this.XamlRoot,
-        };
-
-        var loadingTask = loadingDialog.ShowAsync();
+        var loading = DialogService.ShowLoading(Strings.Get("Dialog_RefreshingPlaylist"));
 
         try
         {
             var refreshedPlaylist = await YoutubeService.GetPlaylistAsync(playlist.PlaylistUrl);
             if (refreshedPlaylist is null)
             {
-                var errorDialog = new ContentDialog
-                {
-                    Title = Strings.Get("Dialog_Error"),
-                    Content = Strings.Get("Dialog_FailedToRefreshPlaylist"),
-                    CloseButtonText = Strings.Get("Dialog_Ok"),
-                    XamlRoot = this.XamlRoot,
-                };
-
-                loadingDialog.Hide();
-                await loadingTask;
-                await errorDialog.ShowAsync();
+                await loading.HideAsync();
+                await DialogService.ShowErrorAsync(Strings.Get("Dialog_FailedToRefreshPlaylist"));
                 return;
             }
 
@@ -211,22 +155,12 @@ public sealed partial class LibraryPage : Page
         catch (Exception ex)
         {
             Debug.WriteLine($"Refresh playlist failed: {ex.Message}");
-
-            var errorDialog = new ContentDialog
-            {
-                Title = Strings.Get("Dialog_Error"),
-                Content = Strings.Format("Dialog_RefreshFailed", ex.Message),
-                CloseButtonText = Strings.Get("Dialog_Ok"),
-                XamlRoot = this.XamlRoot,
-            };
-
-            loadingDialog.Hide();
-            await loadingTask;
-            await errorDialog.ShowAsync();
+            await loading.HideAsync();
+            await DialogService.ShowErrorAsync(Strings.Format("Dialog_RefreshFailed", ex.Message));
         }
         finally
         {
-            loadingDialog.Hide();
+            await loading.HideAsync();
             _isRefreshingPlaylist = false;
         }
 
@@ -254,15 +188,7 @@ public sealed partial class LibraryPage : Page
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to play library entry: {ex.Message}");
-
-            var errorDialog = new ContentDialog
-            {
-                Title = Strings.Get("Dialog_Error"),
-                Content = Strings.Get("Dialog_LibraryPlayFailed"),
-                CloseButtonText = Strings.Get("Dialog_Ok"),
-                XamlRoot = this.XamlRoot,
-            };
-            await errorDialog.ShowAsync();
+            await DialogService.ShowErrorAsync(Strings.Get("Dialog_LibraryPlayFailed"));
         }
     }
 

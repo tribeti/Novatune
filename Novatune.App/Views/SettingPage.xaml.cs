@@ -76,16 +76,12 @@ public sealed partial class SettingPage : Page
         // restarting tears down the current playback session - ask before losing it
         if (_mediaViewModel.IsPlaying || _mediaViewModel.Playlist.Count > 0)
         {
-            var confirm = new ContentDialog
-            {
-                Title = Strings.Get("Dialog_RestartTitle"),
-                Content = Strings.Get("Dialog_RestartConfirm"),
-                PrimaryButtonText = Strings.Get("Dialog_Restart"),
-                CloseButtonText = Strings.Get("Dialog_Cancel"),
-                DefaultButton = ContentDialogButton.Primary,
-                XamlRoot = XamlRoot,
-            };
-            if (await confirm.ShowAsync() != ContentDialogResult.Primary)
+            var confirmed = await DialogService.ShowConfirmAsync(
+                Strings.Get("Dialog_RestartTitle"),
+                Strings.Get("Dialog_RestartConfirm"),
+                Strings.Get("Dialog_Restart"),
+                Strings.Get("Dialog_Cancel"));
+            if (!confirmed)
             {
                 RestoreLanguageSelection();
                 return;
@@ -98,14 +94,7 @@ public sealed partial class SettingPage : Page
         {
             _settingsService.Settings.Language = previousLanguage;
             RestoreLanguageSelection();
-            var errorDialog = new ContentDialog
-            {
-                Title = Strings.Get("Dialog_Error"),
-                Content = Strings.Get("Dialog_SaveFailed"),
-                CloseButtonText = Strings.Get("Dialog_Ok"),
-                XamlRoot = XamlRoot,
-            };
-            await errorDialog.ShowAsync();
+            await DialogService.ShowErrorAsync(Strings.Get("Dialog_SaveFailed"));
             return;
         }
 

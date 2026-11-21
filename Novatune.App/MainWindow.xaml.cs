@@ -32,7 +32,7 @@ public sealed partial class MainWindow : Window
         var settingsService = App.Current.Services.GetService<SettingsService>()!;
         // app color
         ApplyAccentResources(settingsService.Settings.AccentColor);
-        
+
         InitializeComponent();
         // theme
         ApplyTheme(settingsService.Settings.Theme);
