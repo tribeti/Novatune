@@ -5,6 +5,12 @@
     },
     "Novatune.App (Unpackaged)": {
       "commandName": "Project"
+    },
+    "WinApp DevTools": {
+      "commandName": "Executable",
+      "executablePath": "winapp",
+      "commandLineArgs": "run . --devtools on",
+      "workingDirectory": "$(ProjectDir)"
     }
   }
 }

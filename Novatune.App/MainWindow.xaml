@@ -37,9 +37,11 @@
             <TitleBar.Content>
                 <AutoSuggestBox
                     x:Name="SearchBox"
+                    x:Uid="SearchBox"
                     MaxWidth="580"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="SearchBox"
                     GotFocus="SearchBox_GotFocus"
                     PlaceholderText="Search for online media"
                     QueryIcon="Find"
@@ -55,16 +57,17 @@
 
                                 <TextBlock
                                     Grid.Column="0"
-                                    MaxWidth="300"
                                     VerticalAlignment="Center"
                                     FontWeight="SemiBold"
                                     Text="{x:Bind Title}"
                                     TextTrimming="CharacterEllipsis" />
 
                                 <Button
+                                    x:Uid="AddToQueueButton"
                                     Grid.Column="1"
                                     Padding="6"
                                     VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="AddToQueueButton"
                                     AutomationProperties.Name="Add to queue"
                                     Click="AddtoQueue_Btn_Click"
                                     ClickMode="Press"
@@ -96,6 +99,8 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="HomePage"
+                    x:Uid="NavHome"
+                    AutomationProperties.AutomationId="HomePage"
                     Content="Home"
                     Tag="Novatune.App.Views.HomePage">
                     <NavigationViewItem.Icon>
@@ -104,6 +109,8 @@
                 </NavigationViewItem>
                 <NavigationViewItem
                     x:Name="LibraryPage"
+                    x:Uid="NavLibrary"
+                    AutomationProperties.AutomationId="LibraryPage"
                     Content="Library"
                     Tag="Novatune.App.Views.LibraryPage">
                     <NavigationViewItem.Icon>
@@ -156,13 +163,15 @@
 
                         <AppBarButton
                             x:Name="Play_Btn"
+                            x:Uid="PlayButton"
+                            AutomationProperties.AutomationId="Play_Btn"
                             Click="Play_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignHorizontalCenterWithPanel="True"
                             RelativePanel.Below="Media_Timeline"
                             ToolTipService.ToolTip="Play/Pause">
                             <AppBarButton.Icon>
-                                <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                                <FontIcon Foreground="{ThemeResource AccentFillColorDefaultBrush}" Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
                             </AppBarButton.Icon>
 
                             <AppBarButton.KeyboardAccelerators>
@@ -172,6 +181,8 @@
 
                         <AppBarButton
                             x:Name="Previous_Btn"
+                            x:Uid="PreviousButton"
+                            AutomationProperties.AutomationId="Previous_Btn"
                             Click="Previous_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -182,6 +193,8 @@
 
                         <AppBarButton
                             x:Name="Shuffle_Btn"
+                            x:Uid="ShuffleButton"
+                            AutomationProperties.AutomationId="Shuffle_Btn"
                             Click="Shuffle_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -192,6 +205,8 @@
 
                         <AppBarButton
                             x:Name="Next_Btn"
+                            x:Uid="NextButton"
+                            AutomationProperties.AutomationId="Next_Btn"
                             Click="Next_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -202,6 +217,8 @@
 
                         <AppBarButton
                             x:Name="Repeat_Btn"
+                            x:Uid="RepeatButton"
+                            AutomationProperties.AutomationId="Repeat_Btn"
                             Click="Repeat_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.Below="Media_Timeline"
@@ -218,11 +235,14 @@
                     <RelativePanel>
                         <AppBarButton
                             x:Name="Radio_Play_Btn"
+                            x:Uid="RadioPlayButton"
+                            AutomationProperties.AutomationId="Radio_Play_Btn"
                             Click="Play_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignHorizontalCenterWithPanel="True"
-                            RelativePanel.AlignVerticalCenterWithPanel="True">
-                            <FontIcon Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
+                            RelativePanel.AlignVerticalCenterWithPanel="True"
+                            ToolTipService.ToolTip="Play/Pause">
+                            <FontIcon Foreground="{ThemeResource AccentFillColorDefaultBrush}" Glyph="{x:Bind ViewModel.PlayGlyph, Mode=OneWay}" />
 
                             <AppBarButton.KeyboardAccelerators>
                                 <KeyboardAccelerator Key="Space" />
@@ -231,6 +251,8 @@
 
                         <AppBarButton
                             x:Name="Radio_Previous_Btn"
+                            x:Uid="RadioPreviousButton"
+                            AutomationProperties.AutomationId="Radio_Previous_Btn"
                             Click="Previous_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignVerticalCenterWithPanel="True"
@@ -241,6 +263,8 @@
 
                         <AppBarButton
                             x:Name="Radio_Next_Btn"
+                            x:Uid="RadioNextButton"
+                            AutomationProperties.AutomationId="Radio_Next_Btn"
                             Click="Next_Btn_Click"
                             LabelPosition="Collapsed"
                             RelativePanel.AlignVerticalCenterWithPanel="True"
@@ -266,6 +290,8 @@
 
                 <Button
                     x:Name="Queue_Btn"
+                    x:Uid="QueueButton"
+                    AutomationProperties.AutomationId="Queue_Btn"
                     Click="Queue_Btn_Click"
                     RelativePanel.Below="Volume_Slider"
                     RelativePanel.LeftOf="MediaSetting_Btn"
@@ -276,22 +302,18 @@
 
                 <Button
                     x:Name="MediaSetting_Btn"
+                    x:Uid="MediaSettingButton"
+                    AutomationProperties.AutomationId="MediaSetting_Btn"
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.Below="Volume_Slider"
-                    Style="{StaticResource IconOnlyButtonStyle}">
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTipService.ToolTip="Settings">
                     <Button.Content>
-                        <AnimatedIcon x:Name="SettingsAnimatedIcon">
-                            <AnimatedIcon.Source>
-                                <animatedvisuals:AnimatedSettingsVisualSource />
-                            </AnimatedIcon.Source>
-                            <AnimatedIcon.FallbackIconSource>
-                                <SymbolIconSource Symbol="Setting" />
-                            </AnimatedIcon.FallbackIconSource>
-                        </AnimatedIcon>
+                        <FontIcon Glyph="&#xF4C3;" />
                     </Button.Content>
                     <Button.Flyout>
                         <Flyout>
-                            <Grid>
+                            <Grid Width="200">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
@@ -299,15 +321,19 @@
 
                                 <ComboBox
                                     x:Name="Output_Box"
+                                    x:Uid="OutputBox"
                                     Grid.Row="0"
+                                    AutomationProperties.AutomationId="Output_Box"
                                     Header="Audio Output Selection"
                                     Loaded="Output_Box_Loaded"
                                     SelectionChanged="Output_Box_SelectionChanged" />
 
                                 <Slider
                                     x:Name="PlaybackSpeedSlider"
+                                    x:Uid="PlaybackSpeedSlider"
                                     Grid.Row="1"
                                     Margin="0,12,0,0"
+                                    AutomationProperties.AutomationId="PlaybackSpeedSlider"
                                     Header="Playback Speed"
                                     Maximum="2.0"
                                     Minimum="0.25"

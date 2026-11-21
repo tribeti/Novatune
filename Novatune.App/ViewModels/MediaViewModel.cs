@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Novatune.App.Models;
 using Novatune.App.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -47,11 +48,14 @@ public partial class MediaViewModel : BaseViewModel
 
     private readonly DiscordRpcService _discordRpc;
     private readonly SettingsService _settingsService;
+    private readonly LibraryService _libraryService;
 
-    public MediaViewModel(DiscordRpcService discordRpc, SettingsService settingsService)
+    public MediaViewModel(DiscordRpcService discordRpc, SettingsService settingsService, LibraryService libraryService)
     {
         _discordRpc = discordRpc;
         _settingsService = settingsService;
+        _libraryService = libraryService;
+        _ = _libraryService.InitializeAsync();
         MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
@@ -74,16 +78,21 @@ public partial class MediaViewModel : BaseViewModel
         _positionTimer.Tick += (_, _) =>
         {
             var session = MediaPlayer.PlaybackSession;
-            MediaDuration = _mediaPlaybackList.Items.Count == 0 ? 0 : session.NaturalDuration.TotalSeconds;
-            PlaybackPosition = _mediaPlaybackList.Items.Count == 0 ? 0 : session.Position.TotalSeconds;
+            var durationSeconds = _mediaPlaybackList.Items.Count == 0 ? 0 : session.NaturalDuration.TotalSeconds;
+            var positionSeconds = _mediaPlaybackList.Items.Count == 0 ? 0 : session.Position.TotalSeconds;
 
-            if (!IsUserInteracting)
-                TimelinePosition = PlaybackPosition;
+            if (Math.Abs(durationSeconds - MediaDuration) > 0.001)
+                MediaDuration = durationSeconds;
+
+            PlaybackPosition = positionSeconds;
+
+            if (!IsUserInteracting && Math.Abs(positionSeconds - TimelinePosition) > 0.001)
+                TimelinePosition = positionSeconds;
 
             if (CurrentTrack is not null && !IsLive)
             {
-                var duration = session.NaturalDuration;
-                CurrentTrack.SavedPosition = duration > TimeSpan.Zero && duration - session.Position < TimeSpan.FromSeconds(20)
+                var naturalDuration = session.NaturalDuration;
+                CurrentTrack.SavedPosition = naturalDuration > TimeSpan.Zero && naturalDuration - session.Position < TimeSpan.FromSeconds(20)
                     ? TimeSpan.Zero
                     : session.Position;
             }
@@ -164,13 +173,6 @@ public partial class MediaViewModel : BaseViewModel
             MediaPlayer.Pause();
         else
             MediaPlayer.Play();
-    }
-
-    [RelayCommand]
-    public void Seek(double seconds)
-    {
-        MediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(seconds);
-        PlaybackPosition = seconds;
     }
 
     public void CommitSeek()
@@ -336,6 +338,7 @@ public partial class MediaViewModel : BaseViewModel
 
                 var track = MediaItem.FromLocal(res.File.Path, res.Title, res.Artist, bitmap, res.PlaybackItem);
 
+                track.IsFavorite = _libraryService.IsFavorite(track.Kind, track.SourcePathOrUrl ?? string.Empty);
                 Playlist.Add(track);
                 _mediaPlaybackList.Items.Add(track.PlaybackItem);
             }
@@ -427,7 +430,7 @@ public partial class MediaViewModel : BaseViewModel
         var props = playbackItem.GetDisplayProperties();
         props.Type = MediaPlaybackType.Music;
         props.MusicProperties.Title = station.Name;
-        props.MusicProperties.Artist = "Radio";
+        props.MusicProperties.Artist = Strings.Get("Smtc_RadioArtist");
         playbackItem.ApplyDisplayProperties(props);
 
         var track = MediaItem.FromRadio(station, playbackItem);
@@ -481,10 +484,12 @@ public partial class MediaViewModel : BaseViewModel
         if (playlist?.Videos is null || playlist.Videos.Count == 0)
             return;
 
+        var existingUrls = new HashSet<string?>(Playlist.Select(t => t.SourcePathOrUrl));
+
         bool isFirst = true;
         foreach (var video in playlist.Videos)
         {
-            if (Playlist.Any(t => t.SourcePathOrUrl == video.VideoUrl))
+            if (!existingUrls.Add(video.VideoUrl))
                 continue;
 
             var playbackItem = CreatePlaybackItem(video.VideoUrl, video.Title, video.Author, SourceKind.Youtube);
@@ -525,13 +530,14 @@ public partial class MediaViewModel : BaseViewModel
 
         var streamUrl = stream.Url;
 
-        var playbackItem = CreatePlaybackItem(streamUrl, channel.Name, "TV", SourceKind.TV);
+        var playbackItem = CreatePlaybackItem(streamUrl, channel.Name, Strings.Get("Smtc_TvArtist"), SourceKind.TV);
         var track = MediaItem.FromTV(channel, streamUrl, playbackItem);
         AddToPlaybackList(track, playNow);
     }
 
     private void AddToPlaybackList(MediaItem track, bool playNow)
     {
+        track.IsFavorite = _libraryService.IsFavorite(track.Kind, track.SourcePathOrUrl ?? string.Empty);
         Playlist.Add(track);
         _mediaPlaybackList.Items.Add(track.PlaybackItem);
 
@@ -648,6 +654,8 @@ public partial class MediaViewModel : BaseViewModel
                 CurrentImage = currentTrack.Thumbnail;
                 CurrentTrack = currentTrack;
 
+                TrackStarted?.Invoke(LibraryEntry.FromTrack(currentTrack));
+
                 if (!IsLive && currentTrack.SavedPosition > TimeSpan.Zero)
                     MediaPlayer.PlaybackSession.Position = currentTrack.SavedPosition;
             }
@@ -681,6 +689,84 @@ public partial class MediaViewModel : BaseViewModel
                 Debug.WriteLine($"ItemFailed cleanup unexpected exception: {ex}");
             }
         });
+    }
+
+    #endregion
+
+    #region Library (playback surface for persisted media)
+
+    /// <summary>
+    /// Raised on the UI thread whenever playback moves to a new track.
+    /// LibraryViewModel subscribes to record play history.
+    /// </summary>
+    public event Action<LibraryEntry>? TrackStarted;
+
+    /// <summary>
+    /// Replays a persisted library entry (favourite or history item) immediately.
+    /// Local entries are re-opened from disk; everything else is bound by URL.
+    /// </summary>
+    public async Task PlayFromLibraryAsync(LibraryEntry entry)
+    {
+        if (entry.Kind == SourceKind.Local)
+        {
+            var track = await CreateLocalTrackAsync(entry);
+            AddToPlaybackList(track, playNow: true);
+        }
+        else
+        {
+            var playbackItem = CreatePlaybackItem(entry.SourcePathOrUrl, entry.Title, entry.Subtitle, entry.Kind);
+            var track = MediaItem.FromLibraryEntry(entry, playbackItem);
+            track.IsFavorite = _libraryService.IsFavorite(entry.Kind, entry.SourcePathOrUrl);
+            AddToPlaybackList(track, playNow: true);
+        }
+    }
+
+    private async Task<MediaItem> CreateLocalTrackAsync(LibraryEntry entry)
+    {
+        var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(entry.SourcePathOrUrl);
+
+        var source = MediaSource.CreateFromStorageFile(file);
+        source.CustomProperties["Kind"] = SourceKind.Local.ToString();
+
+        bool isVideo = file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                       file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase) ||
+                       file.FileType.Equals(".wmv", StringComparison.OrdinalIgnoreCase);
+
+        var playbackItem = new MediaPlaybackItem(source);
+
+        var props = playbackItem.GetDisplayProperties();
+        props.Type = isVideo ? MediaPlaybackType.Video : MediaPlaybackType.Music;
+        if (isVideo)
+            props.VideoProperties.Title = entry.Title;
+        else
+        {
+            props.MusicProperties.Title = entry.Title;
+            props.MusicProperties.Artist = entry.Subtitle;
+        }
+        playbackItem.ApplyDisplayProperties(props);
+
+        BitmapImage? bitmap = null;
+        try
+        {
+            using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 100);
+            if (thumbnail is not null)
+            {
+                bitmap = new BitmapImage
+                {
+                    DecodePixelWidth = 100,
+                    DecodePixelType = DecodePixelType.Physical
+                };
+                await bitmap.SetSourceAsync(thumbnail);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Thumbnail for '{entry.Title}' unavailable: {ex.Message}");
+        }
+
+        var track = MediaItem.FromLocal(entry.SourcePathOrUrl, entry.Title, entry.Subtitle, bitmap, playbackItem);
+        track.IsFavorite = _libraryService.IsFavorite(SourceKind.Local, entry.SourcePathOrUrl);
+        return track;
     }
 
     #endregion
@@ -720,15 +806,15 @@ public partial class MediaViewModel : BaseViewModel
 
         if (!IsPlaying)
         {
-            state = "Paused • Novatune";
+            state = Strings.Get("Discord_Paused");
         }
         else if (IsLive)
         {
             state = CurrentTrack.Kind switch
             {
-                SourceKind.Radio => "Listening to Radio",
-                SourceKind.TV => "Watching TV",
-                _ => "Live"
+                SourceKind.Radio => Strings.Get("Discord_ListeningToRadio"),
+                SourceKind.TV => Strings.Get("Discord_WatchingTV"),
+                _ => Strings.Get("Discord_Live")
             };
         }
         else
