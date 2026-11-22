@@ -96,6 +96,7 @@ public sealed partial class MainWindow : Window
         };
     }
 
+    #region theme & color
     public void ApplyTheme(AppTheme theme)
     {
         Root.RequestedTheme = theme switch
@@ -149,6 +150,7 @@ public sealed partial class MainWindow : Window
         Root.RequestedTheme = original == ElementTheme.Light ? ElementTheme.Dark : ElementTheme.Light;
         Root.RequestedTheme = original;
     }
+    #endregion
 
     public void ShowAndActivate()
     {
@@ -183,6 +185,7 @@ public sealed partial class MainWindow : Window
     {
         [typeof(HomePage).FullName!] = typeof(HomePage),
         [typeof(LibraryPage).FullName!] = typeof(LibraryPage),
+        [typeof(TVPage).FullName!] = typeof(TVPage),
     };
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

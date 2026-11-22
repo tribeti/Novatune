@@ -108,6 +108,16 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem
+                    x:Name="TVPage"
+                    x:Uid="NavTV"
+                    AutomationProperties.AutomationId="TVPage"
+                    Content="TV"
+                    Tag="Novatune.App.Views.TVPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7F4;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
                     x:Name="LibraryPage"
                     x:Uid="NavLibrary"
                     AutomationProperties.AutomationId="LibraryPage"

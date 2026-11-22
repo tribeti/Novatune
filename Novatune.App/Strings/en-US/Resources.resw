@@ -129,6 +129,9 @@
   <data name="NavHome.Content" xml:space="preserve">
     <value>Home</value>
   </data>
+  <data name="NavTV.Content" xml:space="preserve">
+    <value>TV</value>
+  </data>
   <data name="NavLibrary.Content" xml:space="preserve">
     <value>Library</value>
   </data>

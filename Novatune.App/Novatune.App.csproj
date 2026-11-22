@@ -28,6 +28,7 @@
 		<None Remove="Views\HomePage.xaml" />
 		<None Remove="Views\LibraryPage.xaml" />
 		<None Remove="Views\SettingPage.xaml" />
+		<None Remove="Views\TVPage.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -89,6 +90,11 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="Views\HomePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Views\TVPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
