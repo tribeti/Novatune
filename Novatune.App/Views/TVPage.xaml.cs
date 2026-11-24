@@ -1,14 +1,17 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Novatune.App.ViewModels;
 
 namespace Novatune.App.Views;
 
 public sealed partial class TVPage : Page
 {
+    public MediaViewModel ViewModel { get; }
+
     public TVPage()
     {
         InitializeComponent();
+        ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
+        mediaPlayerElement.SetMediaPlayer(ViewModel.MediaPlayer);
     }
 }

@@ -18,14 +18,7 @@ public sealed partial class HomePage : Page
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
         _libraryViewModel = App.Current.Services.GetRequiredService<LibraryViewModel>();
         DataContext = ViewModel;
-
-        this.Loaded += OnLoaded;
-        this.Unloaded += OnUnloaded;
     }
-
-    private void OnLoaded(object sender, RoutedEventArgs e) => mediaPlayerElement.SetMediaPlayer(ViewModel.MediaPlayer);
-
-    private void OnUnloaded(object sender, RoutedEventArgs e) => mediaPlayerElement.SetMediaPlayer(null);
 
     private void Queue_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {

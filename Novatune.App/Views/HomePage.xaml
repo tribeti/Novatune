@@ -17,11 +17,6 @@
         OpenPaneLength="320"
         PaneBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
         PanePlacement="Right">
-        <MediaPlayerElement
-            x:Name="mediaPlayerElement"
-            AreTransportControlsEnabled="False"
-            Stretch="Uniform" />
-
         <SplitView.Pane>
             <RelativePanel HorizontalAlignment="Stretch">
                 <Button

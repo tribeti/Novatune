@@ -98,6 +98,7 @@ public partial class MediaViewModel : BaseViewModel
             }
         };
 
+        MediaPlayer.RealTimePlayback = true;
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
         _mediaPlaybackList.CurrentItemChanged += MediaPlaybackList_CurrentItemChanged;
         _mediaPlaybackList.ItemFailed += MediaPlaybackList_ItemFailed;
@@ -247,8 +248,6 @@ public partial class MediaViewModel : BaseViewModel
     public async Task AddLocalMedia()
     {
         var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary, ViewMode = PickerViewMode.List };
-        picker.FileTypeFilter.Add(".wmv");
-        picker.FileTypeFilter.Add(".mp4");
         picker.FileTypeFilter.Add(".mp3");
         picker.FileTypeFilter.Add(".flac");
         var hwnd = WindowNative.GetWindowHandle((App.Current as App)!.MainWindow);
@@ -264,33 +263,20 @@ public partial class MediaViewModel : BaseViewModel
             try
             {
                 var source = MediaSource.CreateFromStorageFile(file);
-
-                bool isVideo = file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase) ||
-                               file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase) ||
-                               file.FileType.Equals(".wmv", StringComparison.OrdinalIgnoreCase);
-
                 source.CustomProperties["Kind"] = SourceKind.Local.ToString();
-
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
                 thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 100);
 
                 var playbackItem = new MediaPlaybackItem(source);
 
                 var props = playbackItem.GetDisplayProperties();
-                props.Type = isVideo ? MediaPlaybackType.Video : MediaPlaybackType.Music;
+                props.Type = MediaPlaybackType.Music;
 
                 string title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
                 string artist = musicProps.Artist;
 
-                if (isVideo)
-                {
-                    props.VideoProperties.Title = file.DisplayName;
-                }
-                else
-                {
-                    props.MusicProperties.Title = title;
-                    props.MusicProperties.Artist = artist;
-                }
+                props.MusicProperties.Title = title;
+                props.MusicProperties.Artist = artist;
                 playbackItem.ApplyDisplayProperties(props);
 
                 return new
@@ -584,7 +570,9 @@ public partial class MediaViewModel : BaseViewModel
                 var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
                 if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
                 {
-                    args.SetAdaptiveMediaSource(amsResult.MediaSource);
+                    var ams = amsResult.MediaSource;
+                    ams.DesiredLiveOffset = TimeSpan.FromSeconds(30);
+                    args.SetAdaptiveMediaSource(ams);
                 }
                 else
                 {

@@ -6,9 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    NavigationCacheMode="Required"
     mc:Ignorable="d">
 
     <Grid>
-        <MediaPlayerElement />
+        <MediaPlayerElement
+            x:Name="mediaPlayerElement"
+            AreTransportControlsEnabled="False"
+            Stretch="Uniform" />
     </Grid>
 </Page>
