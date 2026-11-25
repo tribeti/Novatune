@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
@@ -8,23 +9,24 @@ namespace Novatune.App.Services;
 
 public sealed class DialogService
 {
+    private static readonly SemaphoreSlim _gate = new(1, 1);
+
     private static XamlRoot Root => App.Current.MainWindow!.Content.XamlRoot;
 
     public static async Task ShowErrorAsync(string message, string? title = null)
     {
-        var dialog = new ContentDialog
+        await ShowAsync(() => new ContentDialog
         {
             Title = title ?? Strings.Get("Dialog_Error"),
             Content = message,
             CloseButtonText = Strings.Get("Dialog_Ok"),
             XamlRoot = Root,
-        };
-        await dialog.ShowAsync();
+        });
     }
 
     public static async Task<bool> ShowConfirmAsync(string title, string message, string primaryText, string closeText)
     {
-        var dialog = new ContentDialog
+        var result = await ShowAsync(() => new ContentDialog
         {
             Title = title,
             Content = message,
@@ -32,8 +34,8 @@ public sealed class DialogService
             CloseButtonText = closeText,
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = Root,
-        };
-        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+        });
+        return result == ContentDialogResult.Primary;
     }
 
     public static async Task<string?> ShowInputAsync(string title, string placeholder, string primaryText, string closeText)
@@ -45,7 +47,7 @@ public sealed class DialogService
             TextWrapping = TextWrapping.Wrap,
         };
 
-        var dialog = new ContentDialog
+        var result = await ShowAsync(() => new ContentDialog
         {
             Title = title,
             Content = inputBox,
@@ -53,32 +55,68 @@ public sealed class DialogService
             CloseButtonText = closeText,
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = Root,
-        };
+        });
 
-        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        if (result != ContentDialogResult.Primary)
             return null;
 
         var text = inputBox.Text?.Trim();
         return string.IsNullOrWhiteSpace(text) ? null : text;
     }
 
-    public static LoadingDialog ShowLoading(string title)
+    public static async Task<LoadingDialog> ShowLoadingAsync(string title)
     {
-        var dialog = new ContentDialog
+        await _gate.WaitAsync();
+        try
         {
-            Title = title,
-            Content = new ProgressRing { IsActive = true, Width = 48, Height = 48 },
-            XamlRoot = Root,
-        };
-        return new LoadingDialog(dialog, dialog.ShowAsync());
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                Content = new ProgressRing { IsActive = true, Width = 48, Height = 48 },
+                XamlRoot = Root,
+            };
+            return new LoadingDialog(dialog, dialog.ShowAsync());
+        }
+        catch
+        {
+            _gate.Release();
+            throw;
+        }
     }
-}
 
-public sealed class LoadingDialog(ContentDialog dialog, IAsyncOperation<ContentDialogResult> operation)
-{
-    public async Task HideAsync()
+    private static async Task<ContentDialogResult> ShowAsync(Func<ContentDialog> create)
     {
-        dialog.Hide();
-        await operation;
+        await _gate.WaitAsync();
+        try
+        {
+            var dialog = create();
+            return await dialog.ShowAsync();
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public sealed class LoadingDialog(ContentDialog dialog, IAsyncOperation<ContentDialogResult> operation)
+    {
+        private bool _closed;
+
+        public async Task HideAsync()
+        {
+            if (_closed)
+                return;
+
+            _closed = true;
+            dialog.Hide();
+            try
+            {
+                await operation;
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
     }
 }

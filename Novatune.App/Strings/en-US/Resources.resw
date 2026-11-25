@@ -132,6 +132,9 @@
   <data name="QueueRemoveItemButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Remove from queue</value>
   </data>
+  <data name="MediaLoading.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Loading media</value>
+  </data>
   <data name="NavHome.Content" xml:space="preserve">
     <value>Home</value>
   </data>

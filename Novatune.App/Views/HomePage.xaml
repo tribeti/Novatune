@@ -23,6 +23,7 @@
                     x:Name="AddMedia"
                     x:Uid="AddMediaButton"
                     Margin="8"
+                    AutomationProperties.AutomationId="AddMedia"
                     AutomationProperties.Name="Add local media"
                     Command="{x:Bind ViewModel.AddLocalMediaCommand}"
                     RelativePanel.AlignLeftWithPanel="True"
@@ -36,6 +37,7 @@
                     x:Name="ClearList"
                     x:Uid="ClearListButton"
                     Margin="8"
+                    AutomationProperties.AutomationId="ClearList"
                     AutomationProperties.Name="Clear Playlist"
                     Click="ClearList_Click"
                     RelativePanel.AlignRightWithPanel="True"
@@ -66,6 +68,7 @@
                     RelativePanel.Below="MediaTitle" />
                 <ListView
                     x:Name="Queue"
+                    AutomationProperties.AutomationId="Queue"
                     HorizontalAlignment="Stretch"
                     AllowDrop="True"
                     Background="Transparent"

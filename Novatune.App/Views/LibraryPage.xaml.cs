@@ -71,7 +71,7 @@ public sealed partial class LibraryPage : Page
         if (url is null)
             return;
 
-        var loading = DialogService.ShowLoading(Strings.Get("Dialog_ImportingPlaylist"));
+        var loading = await DialogService.ShowLoadingAsync(Strings.Get("Dialog_ImportingPlaylist"));
 
         try
         {
@@ -137,7 +137,7 @@ public sealed partial class LibraryPage : Page
             return;
 
         _isRefreshingPlaylist = true;
-        var loading = DialogService.ShowLoading(Strings.Get("Dialog_RefreshingPlaylist"));
+        var loading = await DialogService.ShowLoadingAsync(Strings.Get("Dialog_RefreshingPlaylist"));
 
         try
         {

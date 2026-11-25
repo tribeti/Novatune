@@ -132,6 +132,9 @@
   <data name="QueueRemoveItemButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Xóa khỏi hàng đợi</value>
   </data>
+  <data name="MediaLoading.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Đang tải phát nhạc</value>
+  </data>
   <data name="NavHome.Content" xml:space="preserve">
     <value>Trang chủ</value>
   </data>

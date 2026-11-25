@@ -287,9 +287,19 @@
             </controls:SwitchPresenter>
 
             <RelativePanel Grid.Column="1" Margin="36,0,0,0">
+                <ProgressRing
+                    x:Name="MediaLoading"
+                    x:Uid="MediaLoading"
+                    Width="24"
+                    Height="24"
+                    Margin="0,6,12,0"
+                    AutomationProperties.AutomationId="MediaLoading"
+                    IsActive="{x:Bind ViewModel.IsMediaLoading, Mode=OneWay}" />
+
                 <FontIcon
                     x:Name="Volume"
                     Margin="0,6,12,0"
+                    RelativePanel.RightOf="MediaLoading"
                     Glyph="&#xE767;" />
 
                 <Slider

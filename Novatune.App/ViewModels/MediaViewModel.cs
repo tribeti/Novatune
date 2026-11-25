@@ -535,6 +535,7 @@ public partial class MediaViewModel : BaseViewModel
     {
         var deferral = args.GetDeferral();
         var url = sender.Token;
+        _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
 
         try
         {
@@ -544,21 +545,13 @@ public partial class MediaViewModel : BaseViewModel
 
             if (isYoutube)
             {
-                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
-                try
-                {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
-                    var streamInfo = manifest.GetAudioStreams().GetWithHighestBitrate();
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
+                var streamInfo = manifest.GetAudioStreams().GetWithHighestBitrate();
 
-                    if (streamInfo is not null)
-                    {
-                        args.SetUri(new Uri(streamInfo.Url));
-                    }
-                }
-                finally
+                if (streamInfo is not null)
                 {
-                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+                    args.SetUri(new Uri(streamInfo.Url));
                 }
             }
             else if (isHls)
@@ -584,8 +577,11 @@ public partial class MediaViewModel : BaseViewModel
         {
             Debug.WriteLine($"Binding failed: {ex.Message}");
         }
-
-        deferral.Complete();
+        finally
+        {
+            _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+            deferral.Complete();
+        }
     }
 
     public void PlayTrack(MediaItem track)
@@ -651,8 +647,6 @@ public partial class MediaViewModel : BaseViewModel
         });
     }
 
-    private bool _isShowingPlaybackFailureDialog;
-
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
     {
         Debug.WriteLine($"ItemFailed: {args.Error.ErrorCode}");
@@ -680,9 +674,8 @@ public partial class MediaViewModel : BaseViewModel
         });
     }
 
-    private async Task ShowPlaybackFailureDialogAsync(MediaItem? failedTrack, MediaPlaybackItemError error)
+    private static async Task ShowPlaybackFailureDialogAsync(MediaItem? failedTrack, MediaPlaybackItemError error)
     {
-        _isShowingPlaybackFailureDialog = true;
         try
         {
             var hResult = error.ExtendedError is null
@@ -703,10 +696,6 @@ public partial class MediaViewModel : BaseViewModel
         catch (Exception ex)
         {
             Debug.WriteLine($"Playback failure dialog failed: {ex.Message}");
-        }
-        finally
-        {
-            _isShowingPlaybackFailureDialog = false;
         }
     }
 
