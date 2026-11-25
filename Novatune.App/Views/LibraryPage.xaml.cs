@@ -204,6 +204,19 @@ public sealed partial class LibraryPage : Page
             await Vm.AddFavoriteAsync(entry);
     }
 
+    private async void ClearRecent_Click(object sender, RoutedEventArgs e)
+    {
+        bool confirmed = await DialogService.ShowConfirmAsync(
+            Strings.Get("Dialog_ClearRecentTitle"),
+            Strings.Get("Dialog_ClearRecentConfirm"),
+            Strings.Get("Dialog_ClearRecent"),
+            Strings.Get("Dialog_Cancel"));
+        if (!confirmed)
+            return;
+
+        await Vm.ClearRecentAsync();
+    }
+
     public static Visibility BoolToVisibility(bool value) =>
         value ? Visibility.Visible : Visibility.Collapsed;
 

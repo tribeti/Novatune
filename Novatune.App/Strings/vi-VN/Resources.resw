@@ -204,6 +204,18 @@
   <data name="RecentTitle.Text" xml:space="preserve">
     <value>Nghe gần đây</value>
   </data>
+  <data name="ClearRecentButton.Content" xml:space="preserve">
+    <value>Xóa tất cả</value>
+  </data>
+  <data name="Dialog_ClearRecentTitle" xml:space="preserve">
+    <value>Xóa lịch sử nghe?</value>
+  </data>
+  <data name="Dialog_ClearRecentConfirm" xml:space="preserve">
+    <value>Toàn bộ mục trong lịch sử nghe gần đây sẽ bị xóa.</value>
+  </data>
+  <data name="Dialog_ClearRecent" xml:space="preserve">
+    <value>Xóa</value>
+  </data>
   <data name="PlayEntryItem.Text" xml:space="preserve">
     <value>Phát</value>
   </data>

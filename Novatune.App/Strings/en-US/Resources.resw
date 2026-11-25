@@ -207,6 +207,18 @@
   <data name="RecentTitle.Text" xml:space="preserve">
     <value>Recently Played</value>
   </data>
+  <data name="ClearRecentButton.Content" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="Dialog_ClearRecentTitle" xml:space="preserve">
+    <value>Clear recently played?</value>
+  </data>
+  <data name="Dialog_ClearRecentConfirm" xml:space="preserve">
+    <value>This will remove all items from your Recently Played history.</value>
+  </data>
+  <data name="Dialog_ClearRecent" xml:space="preserve">
+    <value>Clear</value>
+  </data>
   <data name="PlayEntryItem.Text" xml:space="preserve">
     <value>Play</value>
   </data>

@@ -21,11 +21,12 @@
             <TextBlock
                 x:Name="Title3"
                 x:Uid="LibraryTitle"
-                Padding="0,16,0,16"
+                Padding="0,0,0,16"
                 Style="{StaticResource TitleTextBlockStyle}"
                 Text="Online Playlist" />
             <Button
                 x:Uid="AddPlaylistButton"
+                Margin="0,0,0,4"
                 Click="AddPlaylist_Click"
                 Content="Add playlist"
                 RelativePanel.AlignRightWithPanel="True"
@@ -214,6 +215,13 @@
                 Padding="0,32,0,16"
                 RelativePanel.Below="FavoritesList"
                 Style="{StaticResource TitleTextBlockStyle}" />
+            <Button
+                x:Uid="ClearRecentButton"
+                Margin="0,20,0,0"
+                Click="ClearRecent_Click"
+                Content="Clear all"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignVerticalCenterWith="RecentTitle" />
             <ScrollViewer
                 x:Name="RecentList"
                 HorizontalScrollBarVisibility="Hidden"

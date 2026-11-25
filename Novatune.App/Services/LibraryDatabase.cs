@@ -75,6 +75,14 @@ public static class LibraryDatabase
 
         using (var cmd = new SqliteCommand(createHistory, db))
             cmd.ExecuteNonQuery();
+
+        using var dedupeCmd = new SqliteCommand(
+            """
+            DELETE FROM PlayHistory WHERE Id NOT IN (
+                SELECT MAX(Id) FROM PlayHistory GROUP BY Kind, SourcePathOrUrl
+            );
+            """, db);
+        dedupeCmd.ExecuteNonQuery();
     }
 
     #region Favorites
@@ -135,8 +143,8 @@ public static class LibraryDatabase
     #region Play history
 
     /// <summary>
-    /// Records a play. Skips if the most recent entry is the same media
-    /// (e.g. re-selecting the current track), then trims the table to HistoryCap rows.
+    /// Records a play. Keeps at most one row per media: a replay removes the old
+    /// row and re-inserts at the top with a fresh PlayedAt, then trims to HistoryCap.
     /// </summary>
     public static void AddHistory(LibraryEntry entry)
     {
@@ -145,23 +153,9 @@ public static class LibraryDatabase
         using var db = CreateConnection();
         db.Open();
 
-        using (var dupeCmd = new SqliteCommand(
-            """
-            SELECT Kind, SourcePathOrUrl FROM PlayHistory
-            ORDER BY Id DESC LIMIT 1;
-            """, db))
-        {
-            using var reader = dupeCmd.ExecuteReader();
-            if (reader.Read() &&
-                reader.GetInt32(0) == (int) entry.Kind &&
-                reader.GetString(1) == entry.SourcePathOrUrl)
-            {
-                return;
-            }
-        }
-
         using (var cmd = new SqliteCommand(
             """
+            DELETE FROM PlayHistory WHERE Kind = @Kind AND SourcePathOrUrl = @SourcePathOrUrl;
             INSERT INTO PlayHistory (Kind, Title, Subtitle, SourcePathOrUrl, ThumbnailUrl, PlayedAt)
             VALUES (@Kind, @Title, @Subtitle, @SourcePathOrUrl, @ThumbnailUrl, @PlayedAt);
             """, db))
@@ -180,6 +174,16 @@ public static class LibraryDatabase
             trimCmd.Parameters.AddWithValue("@Cap", HistoryCap);
             trimCmd.ExecuteNonQuery();
         }
+    }
+
+    /// <summary>Deletes every play-history row.</summary>
+    public static void ClearHistory()
+    {
+        using var db = CreateConnection();
+        db.Open();
+
+        using var cmd = new SqliteCommand("DELETE FROM PlayHistory;", db);
+        cmd.ExecuteNonQuery();
     }
 
     public static List<LibraryEntry> GetHistory(int limit = 60)

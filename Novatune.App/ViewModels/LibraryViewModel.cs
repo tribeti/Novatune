@@ -71,6 +71,13 @@ public partial class LibraryViewModel : BaseViewModel
         HasFavorites = Favorites.Count > 0;
     }
 
+    /// <summary>Clears the entire play history from the database and the UI.</summary>
+    public async Task ClearRecentAsync()
+    {
+        await _libraryService.ClearHistoryAsync();
+        Recent.Clear();
+    }
+
     /// <summary>Replays a library entry now.</summary>
     public async Task PlayEntryAsync(LibraryEntry entry)
     {
