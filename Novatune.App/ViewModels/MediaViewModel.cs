@@ -651,6 +651,8 @@ public partial class MediaViewModel : BaseViewModel
         });
     }
 
+    private bool _isShowingPlaybackFailureDialog;
+
     private void MediaPlaybackList_ItemFailed(MediaPlaybackList sender, MediaPlaybackItemFailedEventArgs args)
     {
         Debug.WriteLine($"ItemFailed: {args.Error.ErrorCode}");
@@ -663,6 +665,9 @@ public partial class MediaViewModel : BaseViewModel
 
                 if (failedTrack is not null)
                     RemoveMedia(failedTrack);
+
+                if (args?.Error is { } itemError)
+                    _ = ShowPlaybackFailureDialogAsync(failedTrack, itemError);
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
@@ -673,6 +678,36 @@ public partial class MediaViewModel : BaseViewModel
                 Debug.WriteLine($"ItemFailed cleanup unexpected exception: {ex}");
             }
         });
+    }
+
+    private async Task ShowPlaybackFailureDialogAsync(MediaItem? failedTrack, MediaPlaybackItemError error)
+    {
+        _isShowingPlaybackFailureDialog = true;
+        try
+        {
+            var hResult = error.ExtendedError is null
+                ? "-"
+                : $"0x{error.ExtendedError.HResult:X8}";
+            var message = Strings.Format(
+                "Dialog_PlaybackFailedDetails",
+                failedTrack?.Title ?? Strings.Get("Dialog_UnknownTrack"),
+                failedTrack?.Kind.ToString() ?? "-",
+                error.ErrorCode.ToString(),
+                string.IsNullOrWhiteSpace(error.ExtendedError?.Message) ? "-" : error.ExtendedError.Message,
+                hResult,
+                string.IsNullOrWhiteSpace(failedTrack?.SourcePathOrUrl) ? "-" : failedTrack.SourcePathOrUrl,
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+            await DialogService.ShowErrorAsync(message, Strings.Get("Dialog_PlaybackFailedTitle"));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Playback failure dialog failed: {ex.Message}");
+        }
+        finally
+        {
+            _isShowingPlaybackFailureDialog = false;
+        }
     }
 
     #endregion

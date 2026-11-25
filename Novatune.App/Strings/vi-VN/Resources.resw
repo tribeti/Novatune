@@ -348,6 +348,23 @@
   <data name="Dialog_Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="Dialog_PlaybackFailedTitle" xml:space="preserve">
+    <value>Phát thất bại</value>
+  </data>
+  <data name="Dialog_PlaybackFailedDetails" xml:space="preserve">
+    <value>Bài hát: {0}
+Nguồn: {1}
+Lỗi: {2}
+Thông điệp: {3}
+HRESULT: {4}
+URL: {5}
+Thời điểm: {6}
+
+Vui lòng kèm các thông tin trên khi báo lỗi.</value>
+  </data>
+  <data name="Dialog_UnknownTrack" xml:space="preserve">
+    <value>Nguồn không xác định</value>
+  </data>
   <data name="Dialog_FailedToLoadPlaylist" xml:space="preserve">
     <value>Không thể tải danh sách phát. Vui lòng kiểm tra URL và thử lại.</value>
   </data>
