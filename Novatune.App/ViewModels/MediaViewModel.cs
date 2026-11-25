@@ -160,11 +160,7 @@ public partial class MediaViewModel : BaseViewModel
     public partial bool IsUserInteracting { get; set; } = false;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(QueueVisibility))]
-    [NotifyPropertyChangedFor(nameof(QueueColumnWidth))]
     public partial bool IsQueueVisible { get; set; } = true;
-    public Visibility QueueVisibility => IsQueueVisible ? Visibility.Visible : Visibility.Collapsed;
-    public GridLength QueueColumnWidth => IsQueueVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
 
     public void ToggleQueue() => IsQueueVisible = !IsQueueVisible;
 

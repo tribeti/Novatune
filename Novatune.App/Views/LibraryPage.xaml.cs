@@ -217,9 +217,6 @@ public sealed partial class LibraryPage : Page
         await Vm.ClearRecentAsync();
     }
 
-    public static Visibility BoolToVisibility(bool value) =>
-        value ? Visibility.Visible : Visibility.Collapsed;
-
     public static Visibility InvertedBoolToVisibility(bool value) =>
         value ? Visibility.Collapsed : Visibility.Visible;
 

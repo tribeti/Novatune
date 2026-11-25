@@ -129,15 +129,19 @@
 
                                 <Button
                                     x:Name="RemoveItem"
+                                    x:Uid="QueueRemoveItemButton"
                                     Grid.Row="0"
                                     Grid.RowSpan="2"
                                     Grid.Column="2"
                                     VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="RemoveItem"
+                                    AutomationProperties.Name="Remove from queue"
                                     Background="Transparent"
                                     BorderThickness="0"
                                     Click="RemoveItem_Click"
                                     Content="&#xE711;"
-                                    FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    ToolTipService.ToolTip="Remove from queue" />
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
