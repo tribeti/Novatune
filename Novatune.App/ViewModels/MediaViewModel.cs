@@ -556,12 +556,28 @@ public partial class MediaViewModel : BaseViewModel
             }
             else if (isHls)
             {
-                var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
-                if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
+                var amsTask = AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient).AsTask();
+                var amsResult = await Task.WhenAny(amsTask, Task.Delay(TimeSpan.FromSeconds(10))) == amsTask
+                    ? await amsTask
+                    : null;
+
+                if (amsResult?.Status == AdaptiveMediaSourceCreationStatus.Success)
                 {
                     var ams = amsResult.MediaSource;
-                    ams.DesiredLiveOffset = TimeSpan.FromSeconds(30);
-                    args.SetAdaptiveMediaSource(ams);
+                    if (ams.AudioOnlyPlayback)
+                    {
+                        args.SetUri(new Uri(url));
+                    }
+                    else
+                    {
+                        if (ams.AvailableBitrates.Count > 0)
+                            ams.InitialBitrate = ams.AvailableBitrates.Max();
+                        ams.DesiredLiveOffset = TimeSpan.FromSeconds(Math.Max(12, (ams.MinLiveOffset ?? TimeSpan.Zero).TotalSeconds));
+                        ams.AdvancedSettings.AllSegmentsIndependent = true;
+                        ams.DownloadFailed += Ams_DownloadFailed;
+                        ams.Diagnostics.DiagnosticAvailable += Ams_DiagnosticAvailable;
+                        args.SetAdaptiveMediaSource(ams);
+                    }
                 }
                 else
                 {
@@ -576,6 +592,8 @@ public partial class MediaViewModel : BaseViewModel
         catch (Exception ex)
         {
             Debug.WriteLine($"Binding failed: {ex.Message}");
+            if (Uri.TryCreate(url, UriKind.Absolute, out var fallbackUri))
+                args.SetUri(fallbackUri);
         }
         finally
         {
@@ -583,6 +601,12 @@ public partial class MediaViewModel : BaseViewModel
             deferral.Complete();
         }
     }
+
+    private void Ams_DownloadFailed(AdaptiveMediaSource sender, AdaptiveMediaSourceDownloadFailedEventArgs args) =>
+        Debug.WriteLine($"[AMS] download failed: {args.ResourceType} {args.ResourceUri} HResult=0x{args.ExtendedError?.HResult:X8} bytes={args.Statistics?.ContentBytesReceivedCount}");
+
+    private void Ams_DiagnosticAvailable(AdaptiveMediaSourceDiagnostics sender, AdaptiveMediaSourceDiagnosticAvailableEventArgs args) =>
+        Debug.WriteLine($"[AMS] diagnostic: {args.DiagnosticType} {args.ResourceUri} HResult=0x{args.ExtendedError?.HResult:X8}");
 
     public void PlayTrack(MediaItem track)
     {
