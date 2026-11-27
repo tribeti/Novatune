@@ -162,7 +162,7 @@ public sealed partial class MainWindow : Window
     {
         if (ContentFrame.Content is null)
         {
-            var pageType = typeof(HomePage);
+            var pageType = ViewModel.CurrentTrack is { } track ? PageForSource(track.Kind) : typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
         ViewModel.RestoreFromTray();
