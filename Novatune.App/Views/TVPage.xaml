@@ -12,6 +12,7 @@
     <Grid>
         <MediaPlayerElement
             x:Name="mediaPlayerElement"
+            AutomationProperties.AutomationId="TVPlayer"
             AreTransportControlsEnabled="False"
             Stretch="Uniform" />
     </Grid>

@@ -183,7 +183,7 @@ public sealed partial class LibraryPage : Page
         try
         {
             await Vm.PlayEntryAsync(entry);
-            this.Frame.Navigate(typeof(HomePage));
+            this.Frame.Navigate(MainWindow.PageForSource(entry.Kind));
         }
         catch (Exception ex)
         {

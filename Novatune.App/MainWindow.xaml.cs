@@ -94,6 +94,12 @@ public sealed partial class MainWindow : Window
                 GC.WaitForPendingFinalizers();
             }
         };
+
+        ViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MediaViewModel.CurrentTrack) && ViewModel.CurrentTrack is { } track)
+                NavView_Navigate(PageForSource(track.Kind), new EntranceNavigationTransitionInfo());
+        };
     }
 
     #region theme & color
@@ -187,6 +193,8 @@ public sealed partial class MainWindow : Window
         [typeof(LibraryPage).FullName!] = typeof(LibraryPage),
         [typeof(TVPage).FullName!] = typeof(TVPage),
     };
+
+    public static Type PageForSource(SourceKind kind) => kind == SourceKind.TV ? typeof(TVPage) : typeof(HomePage);
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
