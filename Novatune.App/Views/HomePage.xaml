@@ -66,89 +66,12 @@
                     RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.Below="MediaTitle" />
-                <ListView
-                    x:Name="Queue"
-                    AutomationProperties.AutomationId="Queue"
-                    HorizontalAlignment="Stretch"
-                    AllowDrop="True"
-                    Background="Transparent"
-                    ItemsSource="{x:Bind ViewModel.HomeQueue, Mode=OneWay}"
+                <local:QueueList
                     RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.Below="sep"
-                    SelectedItem="{x:Bind ViewModel.CurrentTrack, Mode=OneWay}"
-                    SelectionChanged="Queue_SelectionChanged"
-                    SelectionMode="Single">
-
-                    <ListView.ItemContainerTransitions>
-                        <TransitionCollection>
-                            <EntranceThemeTransition />
-                        </TransitionCollection>
-                    </ListView.ItemContainerTransitions>
-
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="models:MediaItem">
-                            <Grid Margin="0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <TextBlock
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    FontSize="16"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind Title}"
-                                    TextTrimming="CharacterEllipsis" />
-                                <TextBlock
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Margin="0,4,0,0"
-                                    FontSize="12"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Subtitle}"
-                                    TextTrimming="CharacterEllipsis" />
-
-                                <Button
-                                    x:Name="FavoriteItem"
-                                    Grid.Row="0"
-                                    Grid.RowSpan="2"
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    AutomationProperties.AutomationId="FavoriteItem"
-                                    AutomationProperties.Name="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Click="FavoriteItem_Click"
-                                    Content="{x:Bind local:HomePage.FavoriteGlyph(IsFavorite), Mode=OneWay}"
-                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                    ToolTipService.ToolTip="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}" />
-
-                                <Button
-                                    x:Name="RemoveItem"
-                                    x:Uid="QueueRemoveItemButton"
-                                    Grid.Row="0"
-                                    Grid.RowSpan="2"
-                                    Grid.Column="2"
-                                    VerticalAlignment="Center"
-                                    AutomationProperties.AutomationId="RemoveItem"
-                                    AutomationProperties.Name="Remove from queue"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Click="RemoveItem_Click"
-                                    Content="&#xE711;"
-                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                    ToolTipService.ToolTip="Remove from queue" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    ItemsSource="{x:Bind ViewModel.HomeQueue, Mode=OneWay}"
+                    SelectedTrack="{x:Bind ViewModel.CurrentTrack, Mode=OneWay}" />
             </RelativePanel>
         </SplitView.Pane>
     </SplitView>
