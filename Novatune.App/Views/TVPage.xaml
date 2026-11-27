@@ -6,14 +6,109 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Novatune.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Novatune.App.Models"
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
-    <Grid>
-        <MediaPlayerElement
-            x:Name="mediaPlayerElement"
-            AutomationProperties.AutomationId="TVPlayer"
-            AreTransportControlsEnabled="False"
-            Stretch="Uniform" />
-    </Grid>
+    <SplitView
+        x:Name="QueueSplitView"
+        DisplayMode="Inline"
+        IsPaneOpen="{x:Bind ViewModel.IsQueueVisible, Mode=OneWay}"
+        OpenPaneLength="320"
+        PaneBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+        PanePlacement="Right">
+        <SplitView.Content>
+            <MediaPlayerElement
+                x:Name="mediaPlayerElement"
+                AreTransportControlsEnabled="False"
+                AutomationProperties.AutomationId="TVPlayer"
+                Stretch="Uniform" />
+        </SplitView.Content>
+        <SplitView.Pane>
+            <RelativePanel HorizontalAlignment="Stretch">
+                <ListView
+                    x:Name="Queue"
+                    HorizontalAlignment="Stretch"
+                    AutomationProperties.AutomationId="Queue"
+                    Background="Transparent"
+                    ItemsSource="{x:Bind ViewModel.TvQueue, Mode=OneWay}"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.Below="ClearList"
+                    SelectedItem="{x:Bind ViewModel.CurrentTrack, Mode=OneWay}"
+                    SelectionChanged="Queue_SelectionChanged"
+                    SelectionMode="Single">
+
+                    <ListView.ItemContainerTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition />
+                        </TransitionCollection>
+                    </ListView.ItemContainerTransitions>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:MediaItem">
+                            <Grid Margin="0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind Title}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Margin="0,4,0,0"
+                                    FontSize="12"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind Subtitle}"
+                                    TextTrimming="CharacterEllipsis" />
+
+                                <Button
+                                    x:Name="FavoriteItem"
+                                    Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="FavoriteItem"
+                                    AutomationProperties.Name="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Click="FavoriteItem_Click"
+                                    Content="{x:Bind local:HomePage.FavoriteGlyph(IsFavorite), Mode=OneWay}"
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    ToolTipService.ToolTip="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}" />
+
+                                <Button
+                                    x:Name="RemoveItem"
+                                    x:Uid="QueueRemoveItemButton"
+                                    Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="RemoveItem"
+                                    AutomationProperties.Name="Remove from queue"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Click="RemoveItem_Click"
+                                    Content="&#xE711;"
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    ToolTipService.ToolTip="Remove from queue" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </RelativePanel>
+        </SplitView.Pane>
+    </SplitView>
 </Page>

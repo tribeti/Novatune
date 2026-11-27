@@ -8,6 +8,7 @@ using Novatune.App.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -36,6 +37,8 @@ public partial class MediaViewModel : BaseViewModel
     public MediaPlayer MediaPlayer { get; } = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
+    public ObservableCollection<MediaItem> TvQueue { get; } = [];
+    public ObservableCollection<MediaItem> HomeQueue { get; } = [];
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
     {
@@ -56,6 +59,32 @@ public partial class MediaViewModel : BaseViewModel
         _settingsService = settingsService;
         _libraryService = libraryService;
         _ = _libraryService.InitializeAsync();
+
+        // queue sync and filter
+        Playlist.CollectionChanged += (_, e) =>
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (MediaItem i in e.NewItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Add(i);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (MediaItem i in e.OldItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Remove(i);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (MediaItem i in e.OldItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Remove(i);
+                    foreach (MediaItem i in e.NewItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Add(i);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    TvQueue.Clear();
+                    HomeQueue.Clear();
+                    break;
+            }
+        };
         MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
@@ -385,14 +414,13 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
-    public void ClearPlaylist()
+    public void ClearQueue(Func<MediaItem, bool> where)
     {
-        _mediaPlaybackList.Items.Clear();
-        Playlist.Clear();
-        MediaDuration = 0;
-        PlaybackPosition = 0;
-        TimelinePosition = 0;
-        _discordRpc.ClearPresence();
+        foreach (var item in Playlist.Where(where).ToList())
+            RemoveMedia(item);
+
+        if (Playlist.Count == 0)
+            _discordRpc.ClearPresence();
     }
 
     public void AddRadio(RadioItem station) => AddRadio(station, playNow: true);

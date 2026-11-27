@@ -44,7 +44,7 @@ public sealed partial class HomePage : Page
         }
     }
 
-    private void ClearList_Click(object sender, RoutedEventArgs e) => ViewModel.ClearPlaylist();
+    private void ClearList_Click(object sender, RoutedEventArgs e) => ViewModel.ClearQueue(static k => k.Kind != SourceKind.TV);
 
     public static string FavoriteGlyph(bool isFavorite) => isFavorite ? "\uEB52" : "\uEB51";
 

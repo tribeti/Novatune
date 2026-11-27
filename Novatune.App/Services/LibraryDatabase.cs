@@ -184,7 +184,7 @@ public static class LibraryDatabase
 
         using var cmd = new SqliteCommand(
             "DELETE FROM PlayHistory WHERE Kind = @Kind AND SourcePathOrUrl = @SourcePathOrUrl;", db);
-        cmd.Parameters.AddWithValue("@Kind", (int)kind);
+        cmd.Parameters.AddWithValue("@Kind", (int) kind);
         cmd.Parameters.AddWithValue("@SourcePathOrUrl", sourcePathOrUrl);
         cmd.ExecuteNonQuery();
     }

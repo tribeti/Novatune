@@ -72,7 +72,7 @@
                     HorizontalAlignment="Stretch"
                     AllowDrop="True"
                     Background="Transparent"
-                    ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.HomeQueue, Mode=OneWay}"
                     RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignRightWithPanel="True"
                     RelativePanel.Below="sep"
