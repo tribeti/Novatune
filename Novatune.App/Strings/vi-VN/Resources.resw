@@ -234,6 +234,9 @@
   <data name="AddFavoriteItem.Text" xml:space="preserve">
     <value>Thêm vào yêu thích</value>
   </data>
+  <data name="RemoveHistoryItem.Text" xml:space="preserve">
+    <value>Xóa khỏi lịch sử</value>
+  </data>
   <data name="Dialog_LibraryPlayFailed" xml:space="preserve">
     <value>Không phát được mục này. Tệp hoặc luồng có thể không còn tồn tại.</value>
   </data>

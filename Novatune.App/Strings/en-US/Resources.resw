@@ -237,6 +237,9 @@
   <data name="AddFavoriteItem.Text" xml:space="preserve">
     <value>Add to favourites</value>
   </data>
+  <data name="RemoveHistoryItem.Text" xml:space="preserve">
+    <value>Remove from history</value>
+  </data>
   <data name="Dialog_LibraryPlayFailed" xml:space="preserve">
     <value>Couldn't play this item. The file or stream may no longer be available.</value>
   </data>

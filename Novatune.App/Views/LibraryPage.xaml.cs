@@ -204,6 +204,12 @@ public sealed partial class LibraryPage : Page
             await Vm.AddFavoriteAsync(entry);
     }
 
+    private async void RemoveHistory_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: LibraryEntry entry })
+            await Vm.RemoveFromRecentAsync(entry);
+    }
+
     private async void ClearRecent_Click(object sender, RoutedEventArgs e)
     {
         bool confirmed = await DialogService.ShowConfirmAsync(

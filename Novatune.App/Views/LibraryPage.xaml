@@ -266,6 +266,15 @@
                                                     <FontIcon Glyph="&#xEB52;" />
                                                 </MenuFlyoutItem.Icon>
                                             </MenuFlyoutItem>
+                                            <MenuFlyoutItem
+                                                x:Uid="RemoveHistoryItem"
+                                                Click="RemoveHistory_Click"
+                                                Tag="{x:Bind}"
+                                                Text="Remove from history">
+                                                <MenuFlyoutItem.Icon>
+                                                    <FontIcon Glyph="&#xE74D;" />
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
                                         </MenuFlyout>
                                     </Button.ContextFlyout>
                                     <StackPanel Width="180">

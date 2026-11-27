@@ -176,6 +176,19 @@ public static class LibraryDatabase
         }
     }
 
+    /// <summary>Deletes the play-history rows for one media.</summary>
+    public static void RemoveHistory(SourceKind kind, string sourcePathOrUrl)
+    {
+        using var db = CreateConnection();
+        db.Open();
+
+        using var cmd = new SqliteCommand(
+            "DELETE FROM PlayHistory WHERE Kind = @Kind AND SourcePathOrUrl = @SourcePathOrUrl;", db);
+        cmd.Parameters.AddWithValue("@Kind", (int)kind);
+        cmd.Parameters.AddWithValue("@SourcePathOrUrl", sourcePathOrUrl);
+        cmd.ExecuteNonQuery();
+    }
+
     /// <summary>Deletes every play-history row.</summary>
     public static void ClearHistory()
     {
