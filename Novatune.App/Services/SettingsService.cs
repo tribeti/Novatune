@@ -4,10 +4,32 @@ using System.Text.Json;
 
 namespace Novatune.App.Services;
 
+public enum AppTheme
+{
+    Default = 0,
+    Light = 1,
+    Dark = 2
+}
+
+public enum AppAccentColor
+{
+    None = 0,
+    FluentBlue = 1,
+    Green = 2,
+    Orange = 3,
+    Purple = 4,
+    Rose = 5
+}
+
 public class AppSettings
 {
+    public const string DefaultLanguage = "en-US";
+
     public bool MinimizeOnClose { get; set; } = false;
     public bool EnableDiscordRpc { get; set; } = false;
+    public AppTheme Theme { get; set; } = AppTheme.Default;
+    public AppAccentColor AccentColor { get; set; } = AppAccentColor.None;
+    public string Language { get; set; } = DefaultLanguage;
 }
 
 public class SettingsService
@@ -42,16 +64,17 @@ public class SettingsService
         return new AppSettings();
     }
 
-    public void Save()
+    public bool Save()
     {
         try
         {
             string json = JsonSerializer.Serialize(Settings, SettingsJsonContext.Default.AppSettings);
             File.WriteAllText(_settingsPath, json);
+            return true;
         }
         catch
         {
-
+            return false;
         }
     }
 }

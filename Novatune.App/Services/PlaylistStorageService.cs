@@ -55,7 +55,11 @@ public class PlaylistStorageService
 
             try
             {
-                _playlists = await Task.Run(PlaylistDatabase.GetAllPlaylists).ConfigureAwait(false);
+                _playlists = await Task.Run(() =>
+                {
+                    PlaylistDatabase.InitializeDatabase();
+                    return PlaylistDatabase.GetAllPlaylists();
+                }).ConfigureAwait(false);
                 _isLoaded = true;
             }
             catch (Exception ex)
@@ -70,11 +74,11 @@ public class PlaylistStorageService
         }
     }
 
-    public Task SaveAsync() => Task.CompletedTask;
-
     public async Task AddAsync(YoutubePlaylist playlist)
     {
+        await LoadAsync().ConfigureAwait(false);
         await _semaphore.WaitAsync().ConfigureAwait(false);
+
         try
         {
             await Task.Run(() => PlaylistDatabase.UpsertPlaylist(playlist)).ConfigureAwait(false);
@@ -97,7 +101,9 @@ public class PlaylistStorageService
 
     public async Task RemoveAsync(string playlistId)
     {
+        await LoadAsync().ConfigureAwait(false);
         await _semaphore.WaitAsync().ConfigureAwait(false);
+
         try
         {
             await Task.Run(() => PlaylistDatabase.DeletePlaylist(playlistId)).ConfigureAwait(false);

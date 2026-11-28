@@ -15,6 +15,4 @@ public class RadioItem
 
     [JsonPropertyName("tags")]
     public string Tags { get; set; } = string.Empty;
-
-    public override string ToString() => Name;
 }

@@ -14,6 +14,7 @@
 		<Nullable>enable</Nullable>
 		<WindowsPackageType>None</WindowsPackageType>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<WindowsAppSdkAutoInitialize>false</WindowsAppSdkAutoInitialize>
 		<PublishSingleFile>false</PublishSingleFile>
 		<SelfContained>true</SelfContained>
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
@@ -27,6 +28,7 @@
 		<None Remove="Views\HomePage.xaml" />
 		<None Remove="Views\LibraryPage.xaml" />
 		<None Remove="Views\SettingPage.xaml" />
+		<None Remove="Views\TVPage.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -41,14 +43,19 @@
 	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
 		<PackageReference Include="DiscordRPC-NativeAOT" Version="1.0.2" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.14" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.6.4" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinUIAnalyzer" Version="0.8.0">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.7.0" />
 		<PackageReference Include="WinUIEx" Version="2.9.3" />
 		<PackageReference Include="YoutubeExplode" Version="6.6.3" />
 
@@ -91,7 +98,17 @@
 		</Page>
 	</ItemGroup>
 	<ItemGroup>
+		<Page Update="Views\TVPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
 		<Page Update="Styles\IconButtonStyle.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Styles\AccentPalettes.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
@@ -133,12 +150,17 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 
-	<!--delete lang pack-->
+	<!--delete unused lang pack -->
 	<Target Name="RemoveLanguageFolders" AfterTargets="Publish">
 		<ItemGroup>
-			<RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)en-us\*.mui" />
+			<RemovingFiles Include="$(PublishDir)*\*.mui" Exclude="$(PublishDir)en-US\*.mui;$(PublishDir)en-us\*.mui;$(PublishDir)vi-VN\*.mui;$(PublishDir)vi-vn\*.mui" />
 			<RemovingFolders Include="@(RemovingFiles->'%(RootDir)%(Directory)')" />
 		</ItemGroup>
 		<RemoveDir Directories="@(RemovingFolders)" />
 	</Target>
+	<ItemGroup>
+	  <PRIResource Update="Strings\en-US\Resources.resw">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	  </PRIResource>
+	</ItemGroup>
 </Project>

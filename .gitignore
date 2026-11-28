@@ -367,3 +367,6 @@ FodyWeavers.xsd
 .idea/
 .kiro/
 .cursor/
+
+# Claude Code local compat link (junction/symlink -> .agents/skills), machine-specific
+.claude/

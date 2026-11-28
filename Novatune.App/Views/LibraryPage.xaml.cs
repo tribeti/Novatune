@@ -1,18 +1,22 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using Novatune.App.Models;
 using Novatune.App.Services;
 using Novatune.App.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Novatune.App.Views;
 
 public sealed partial class LibraryPage : Page
 {
     public ObservableCollection<YoutubePlaylist> OnlinePlaylistItems { get; } = [];
+    public LibraryViewModel Vm { get; }
 
     private readonly MediaViewModel ViewModel = App.Current.Services.GetRequiredService<MediaViewModel>();
     private readonly PlaylistStorageService _playlistStorage = App.Current.Services.GetRequiredService<PlaylistStorageService>();
@@ -20,8 +24,15 @@ public sealed partial class LibraryPage : Page
 
     public LibraryPage()
     {
-        this.InitializeComponent();
+        InitializeComponent();
+        Vm = App.Current.Services.GetRequiredService<LibraryViewModel>();
         LoadPlaylists();
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _ = Vm.LoadAsync();
     }
 
     private async void LoadPlaylists()
@@ -52,56 +63,24 @@ public sealed partial class LibraryPage : Page
 
     private async void AddPlaylist_Click(object sender, RoutedEventArgs e)
     {
-        var inputBox = new TextBox
-        {
-            PlaceholderText = "https://youtube.com/playlist?list=...",
-            AcceptsReturn = false,
-            TextWrapping = TextWrapping.Wrap,
-        };
-
-        var dialog = new ContentDialog
-        {
-            Title = "Import YouTube Playlist",
-            Content = inputBox,
-            PrimaryButtonText = "Import",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot,
-        };
-
-        var result = await dialog.ShowAsync();
-        if (result != ContentDialogResult.Primary)
+        var url = await DialogService.ShowInputAsync(
+            Strings.Get("Dialog_ImportPlaylistTitle"),
+            "https://youtube.com/playlist?list=...",
+            Strings.Get("Dialog_Import"),
+            Strings.Get("Dialog_Cancel"));
+        if (url is null)
             return;
 
-        var url = inputBox.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(url))
-            return;
-
-        // Show loading dialog
-        var loadingDialog = new ContentDialog
-        {
-            Title = "Importing playlist...",
-            Content = new ProgressRing { IsActive = true, Width = 48, Height = 48 },
-            XamlRoot = this.XamlRoot,
-        };
-
-        _ = loadingDialog.ShowAsync();
+        var loading = await DialogService.ShowLoadingAsync(Strings.Get("Dialog_ImportingPlaylist"));
 
         try
         {
             var playlist = await YoutubeService.GetPlaylistAsync(url);
-            loadingDialog.Hide();
+            await loading.HideAsync();
 
             if (playlist is null)
             {
-                var errorDialog = new ContentDialog
-                {
-                    Title = "Error",
-                    Content = "Failed to load playlist. Please check the URL and try again.",
-                    CloseButtonText = "OK",
-                    XamlRoot = this.XamlRoot,
-                };
-                await errorDialog.ShowAsync();
+                await DialogService.ShowErrorAsync(Strings.Get("Dialog_FailedToLoadPlaylist"));
                 return;
             }
 
@@ -115,17 +94,9 @@ public sealed partial class LibraryPage : Page
         }
         catch (Exception ex)
         {
-            loadingDialog.Hide();
             Debug.WriteLine($"Import playlist failed: {ex.Message}");
-
-            var errorDialog = new ContentDialog
-            {
-                Title = "Error",
-                Content = $"Import failed: {ex.Message}",
-                CloseButtonText = "OK",
-                XamlRoot = this.XamlRoot,
-            };
-            await errorDialog.ShowAsync();
+            await loading.HideAsync();
+            await DialogService.ShowErrorAsync(Strings.Format("Dialog_ImportFailed", ex.Message));
         }
     }
 
@@ -166,31 +137,15 @@ public sealed partial class LibraryPage : Page
             return;
 
         _isRefreshingPlaylist = true;
-        var loadingDialog = new ContentDialog
-        {
-            Title = "Refreshing playlist...",
-            Content = new ProgressRing { IsActive = true },
-            XamlRoot = this.XamlRoot,
-        };
-
-        var loadingTask = loadingDialog.ShowAsync();
+        var loading = await DialogService.ShowLoadingAsync(Strings.Get("Dialog_RefreshingPlaylist"));
 
         try
         {
             var refreshedPlaylist = await YoutubeService.GetPlaylistAsync(playlist.PlaylistUrl);
             if (refreshedPlaylist is null)
             {
-                var errorDialog = new ContentDialog
-                {
-                    Title = "Error",
-                    Content = "Failed to refresh playlist. Please try again later.",
-                    CloseButtonText = "OK",
-                    XamlRoot = this.XamlRoot,
-                };
-
-                loadingDialog.Hide();
-                await loadingTask;
-                await errorDialog.ShowAsync();
+                await loading.HideAsync();
+                await DialogService.ShowErrorAsync(Strings.Get("Dialog_FailedToRefreshPlaylist"));
                 return;
             }
 
@@ -200,24 +155,81 @@ public sealed partial class LibraryPage : Page
         catch (Exception ex)
         {
             Debug.WriteLine($"Refresh playlist failed: {ex.Message}");
-
-            var errorDialog = new ContentDialog
-            {
-                Title = "Error",
-                Content = $"Refresh failed: {ex.Message}",
-                CloseButtonText = "OK",
-                XamlRoot = this.XamlRoot,
-            };
-
-            loadingDialog.Hide();
-            await loadingTask;
-            await errorDialog.ShowAsync();
+            await loading.HideAsync();
+            await DialogService.ShowErrorAsync(Strings.Format("Dialog_RefreshFailed", ex.Message));
         }
         finally
         {
-            loadingDialog.Hide();
+            await loading.HideAsync();
             _isRefreshingPlaylist = false;
         }
 
     }
+
+    private void LibraryEntry_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.DataContext is LibraryEntry entry)
+            _ = PlayLibraryEntryAsync(entry);
+    }
+
+    private void PlayEntry_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: LibraryEntry entry })
+            _ = PlayLibraryEntryAsync(entry);
+    }
+
+    private async Task PlayLibraryEntryAsync(LibraryEntry entry)
+    {
+        try
+        {
+            await Vm.PlayEntryAsync(entry);
+            this.Frame.Navigate(MainWindow.PageForSource(entry.Kind));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to play library entry: {ex.Message}");
+            await DialogService.ShowErrorAsync(Strings.Get("Dialog_LibraryPlayFailed"));
+        }
+    }
+
+    private async void RemoveFavorite_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: LibraryEntry entry })
+            await Vm.RemoveFavoriteAsync(entry);
+    }
+
+    private async void AddFavorite_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: LibraryEntry entry })
+            await Vm.AddFavoriteAsync(entry);
+    }
+
+    private async void RemoveHistory_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: LibraryEntry entry })
+            await Vm.RemoveFromRecentAsync(entry);
+    }
+
+    private async void ClearRecent_Click(object sender, RoutedEventArgs e)
+    {
+        bool confirmed = await DialogService.ShowConfirmAsync(
+            Strings.Get("Dialog_ClearRecentTitle"),
+            Strings.Get("Dialog_ClearRecentConfirm"),
+            Strings.Get("Dialog_ClearRecent"),
+            Strings.Get("Dialog_Cancel"));
+        if (!confirmed)
+            return;
+
+        await Vm.ClearRecentAsync();
+    }
+
+    public static Visibility InvertedBoolToVisibility(bool value) =>
+        value ? Visibility.Collapsed : Visibility.Visible;
+
+    /// <summary>
+    /// Converts a stored thumbnail URL to an ImageSource, tolerating empty or
+    /// invalid values (e.g. local files have no thumbnail URL). Returning null
+    /// lets the placeholder icon behind the Image show through.
+    /// </summary>
+    public static ImageSource? EntryThumbnail(string? url) => MediaItem.CreateRemoteArt(url);
 }

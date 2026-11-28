@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Media.Devices;
 using WinUIEx;
@@ -29,14 +30,16 @@ public sealed partial class MainWindow : Window
         // services
         ViewModel = App.Current.Services.GetService<MediaViewModel>()!;
         var settingsService = App.Current.Services.GetService<SettingsService>()!;
+        // app color
+        ApplyAccentResources(settingsService.Settings.AccentColor);
 
         InitializeComponent();
+        // theme
+        ApplyTheme(settingsService.Settings.Theme);
         // title bar
         this.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
         this.SetTitleBar(titleBar);
-        // slider
-        this.Media_Timeline.Loaded += Media_Timeline_Loaded;
         // window
         this.AppWindow.SetIcon("Assets/icon.ico");
         this.AppWindow.SetTaskbarIcon("Assets/icon.ico");
@@ -51,13 +54,13 @@ public sealed partial class MainWindow : Window
         manager.TrayIconContextMenu += (w, e) =>
         {
             var flyout = new MenuFlyout();
-            flyout.Items.Add(new MenuFlyoutItem { Text = ViewModel.IsPlaying ? "Pause" : "Play" });
-            flyout.Items.Add(new MenuFlyoutItem() { Text = "Open" });
-            flyout.Items.Add(new MenuFlyoutItem() { Text = "Quit" });
+            flyout.Items.Add(new MenuFlyoutItem { Text = ViewModel.IsPlaying ? Strings.Get("Tray_Pause") : Strings.Get("Tray_Play") });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = Strings.Get("Tray_Open") });
+            flyout.Items.Add(new MenuFlyoutItem() { Text = Strings.Get("Tray_Quit") });
             ((MenuFlyoutItem) flyout.Items[0]).Click += (s, __) =>
             {
                 ViewModel.PlayPause();
-                ((MenuFlyoutItem) s).Text = ViewModel.IsPlaying ? "Pause" : "Play";
+                ((MenuFlyoutItem) s).Text = ViewModel.IsPlaying ? Strings.Get("Tray_Pause") : Strings.Get("Tray_Play");
             };
 
             ((MenuFlyoutItem) flyout.Items[1]).Click += (s, args) =>
@@ -93,11 +96,67 @@ public sealed partial class MainWindow : Window
         };
     }
 
+    #region theme & color
+    public void ApplyTheme(AppTheme theme)
+    {
+        Root.RequestedTheme = theme switch
+        {
+            AppTheme.Light => ElementTheme.Light,
+            AppTheme.Dark => ElementTheme.Dark,
+            _ => ElementTheme.Default,
+        };
+    }
+
+    private static readonly string[] AccentShades = [string.Empty, "Light1", "Light2", "Light3", "Dark1", "Dark2", "Dark3"];
+
+    public static void ApplyAccentResources(AppAccentColor accent)
+    {
+        var prefix = accent switch
+        {
+            AppAccentColor.FluentBlue => "AccentFluentBlue",
+            AppAccentColor.Green => "AccentGreen",
+            AppAccentColor.Orange => "AccentOrange",
+            AppAccentColor.Purple => "AccentPurple",
+            AppAccentColor.Rose => "AccentRose",
+            _ => null,
+        };
+
+        var themeDictionaries = App.Current.Resources.ThemeDictionaries;
+        if (!themeDictionaries.TryGetValue("Default", out var value) || value is not ResourceDictionary dict)
+        {
+            dict = [];
+            themeDictionaries["Default"] = dict;
+        }
+
+        foreach (var shade in AccentShades)
+        {
+            var key = $"SystemAccentColor{shade}";
+            if (prefix is not null && App.Current.Resources.TryGetValue(prefix + shade, out var color))
+                dict[key] = color;
+            else
+                dict.Remove(key);
+        }
+    }
+
+    public void ApplyAccentColor(AppAccentColor accent)
+    {
+        ApplyAccentResources(accent);
+        RefreshThemeResources();
+    }
+
+    private void RefreshThemeResources()
+    {
+        var original = Root.RequestedTheme;
+        Root.RequestedTheme = original == ElementTheme.Light ? ElementTheme.Dark : ElementTheme.Light;
+        Root.RequestedTheme = original;
+    }
+    #endregion
+
     public void ShowAndActivate()
     {
         if (ContentFrame.Content is null)
         {
-            var pageType = typeof(HomePage);
+            var pageType = ViewModel.CurrentTrack is { } track ? PageForSource(track.Kind) : typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
         ViewModel.RestoreFromTray();
@@ -126,7 +185,10 @@ public sealed partial class MainWindow : Window
     {
         [typeof(HomePage).FullName!] = typeof(HomePage),
         [typeof(LibraryPage).FullName!] = typeof(LibraryPage),
+        [typeof(TVPage).FullName!] = typeof(TVPage),
     };
+
+    public static Type PageForSource(SourceKind kind) => kind == SourceKind.TV ? typeof(TVPage) : typeof(HomePage);
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
@@ -160,7 +222,6 @@ public sealed partial class MainWindow : Window
     private void NavigationBar_Loaded(object sender, RoutedEventArgs e)
     {
         ContentFrame.Navigated += On_Navigated;
-        NavigationBar.SelectedItem = NavigationBar.MenuItems[0];
         NavView_Navigate(typeof(HomePage), new EntranceNavigationTransitionInfo());
     }
 
@@ -213,13 +274,17 @@ public sealed partial class MainWindow : Window
 
         try
         {
+            await Task.Delay(TimeSpan.FromMilliseconds(350), token);
+            if (!ReferenceEquals(_searchCts, cts))
+                return;
+
             var results = await SearchService.SearchAllAsync(sender.Text, token);
             if (!ReferenceEquals(_searchCts, cts))
                 return;
 
             sender.ItemsSource = results.Count > 0
                 ? results
-                : new List<MediaItem> { new() { Title = "No results found", Subtitle = "Try different keywords", Kind = SourceKind.Local } };
+                : new List<MediaItem> { new() { Title = Strings.Get("Search_NoResults"), Subtitle = Strings.Get("Search_TryDifferentKeywords"), Kind = SourceKind.Local } };
             _suggestion = results;
         }
         catch (OperationCanceledException) { }
@@ -245,18 +310,9 @@ public sealed partial class MainWindow : Window
     {
         if (args.ChosenSuggestion is MediaItem item)
         {
-            if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
-            {
-                ViewModel.AddRadio(radio);
-            }
-            else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
-            {
-                ViewModel.AddYoutube(youtube);
-            }
-            else if (item.Kind == SourceKind.TV && item.SourceItem is IptvChannel tvChannel)
-            {
-                ViewModel.AddTV(tvChannel);
-            }
+            _searchCts?.Cancel();
+            AddSearchResult(item, playNow: true);
+            NavView_Navigate(PageForSource(item.Kind), new EntranceNavigationTransitionInfo());
 
             sender.Text = string.Empty;
             sender.ItemsSource = Array.Empty<MediaItem>();
@@ -275,20 +331,32 @@ public sealed partial class MainWindow : Window
 
     private void AddtoQueue_Btn_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button button || button.Tag is not MediaItem item)
-            return;
+        if (sender is Button button && button.Tag is MediaItem item)
+            AddSearchResult(item, playNow: false);
+    }
 
-        if (item.Kind == SourceKind.Radio && item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved))
+    private void AddSearchResult(MediaItem item, bool playNow)
+    {
+        switch (item.Kind)
         {
-            ViewModel.AddRadioToQueue(radio);
-        }
-        else if (item.Kind == SourceKind.Youtube && item.SourceItem is YoutubeItem youtube)
-        {
-            ViewModel.AddYoutubeToQueue(youtube);
-        }
-        else if (item.Kind == SourceKind.TV && item.SourceItem is IptvChannel tvChannel)
-        {
-            ViewModel.AddTVToQueue(tvChannel);
+            case SourceKind.Radio when item.SourceItem is RadioItem radio && !string.IsNullOrWhiteSpace(radio.UrlResolved):
+                if (playNow)
+                    ViewModel.AddRadio(radio);
+                else
+                    ViewModel.AddRadioToQueue(radio);
+                break;
+            case SourceKind.Youtube when item.SourceItem is YoutubeItem youtube:
+                if (playNow)
+                    ViewModel.AddYoutube(youtube);
+                else
+                    ViewModel.AddYoutubeToQueue(youtube);
+                break;
+            case SourceKind.TV when item.SourceItem is IptvChannel tvChannel:
+                if (playNow)
+                    ViewModel.AddTV(tvChannel);
+                else
+                    ViewModel.AddTVToQueue(tvChannel);
+                break;
         }
     }
 
@@ -322,11 +390,8 @@ public sealed partial class MainWindow : Window
 
     private void Output_Box_SelectionChanged(object _, SelectionChangedEventArgs e)
     {
-        DeviceInformation selectedDevice = (DeviceInformation) ((ComboBoxItem) Output_Box.SelectedItem).Tag;
-        if (selectedDevice is not null)
-        {
-            ViewModel.MediaPlayer.AudioDevice = selectedDevice;
-        }
+        if (Output_Box.SelectedItem is ComboBoxItem { Tag: DeviceInformation device })
+            ViewModel.MediaPlayer.AudioDevice = device;
     }
 
     private void PlaybackSpeedSlider_ValueChanged(object _, RangeBaseValueChangedEventArgs e) => ViewModel.MediaPlayer.PlaybackSession.PlaybackRate = PlaybackSpeedSlider.Value;

@@ -13,7 +13,8 @@ public partial class App : Application
 {
     public Window? MainWindow { get; private set; }
     public IServiceProvider Services { get; }
-    public new static App Current => (App) Application.Current;
+    public static new App Current => (App) Application.Current;
+
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -21,7 +22,6 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-        PlaylistDatabase.InitializeDatabase();
         Services = ConfigureServices();
     }
 
@@ -31,6 +31,11 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        var settingsService = Services.GetService<SettingsService>()!;
+        var language = settingsService.Settings.Language;
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language is AppSettings.DefaultLanguage or "vi-VN" ? language : AppSettings.DefaultLanguage;
+
+        _ = Services.GetRequiredService<LibraryViewModel>();
         MainWindow = new MainWindow();
         MainWindow.Activate();
     }
@@ -39,8 +44,10 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
         services.AddSingleton<MediaViewModel>();
+        services.AddSingleton<LibraryViewModel>();
         services.AddSingleton<SettingsService>();
         services.AddSingleton<PlaylistStorageService>();
+        services.AddSingleton<LibraryService>();
         services.AddSingleton<DiscordRpcService>();
         return services.BuildServiceProvider();
     }
