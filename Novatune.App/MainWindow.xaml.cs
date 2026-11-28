@@ -94,12 +94,6 @@ public sealed partial class MainWindow : Window
                 GC.WaitForPendingFinalizers();
             }
         };
-
-        ViewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(MediaViewModel.CurrentTrack) && ViewModel.CurrentTrack is { } track)
-                NavView_Navigate(PageForSource(track.Kind), new EntranceNavigationTransitionInfo());
-        };
     }
 
     #region theme & color
@@ -318,6 +312,7 @@ public sealed partial class MainWindow : Window
         {
             _searchCts?.Cancel();
             AddSearchResult(item, playNow: true);
+            NavView_Navigate(PageForSource(item.Kind), new EntranceNavigationTransitionInfo());
 
             sender.Text = string.Empty;
             sender.ItemsSource = Array.Empty<MediaItem>();
