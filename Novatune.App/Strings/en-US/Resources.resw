@@ -126,8 +126,20 @@
   <data name="AddToQueueButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Add to queue</value>
   </data>
+  <data name="QueueRemoveItemButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Remove from queue</value>
+  </data>
+  <data name="QueueRemoveItemButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Remove from queue</value>
+  </data>
+  <data name="MediaLoading.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Loading media</value>
+  </data>
   <data name="NavHome.Content" xml:space="preserve">
     <value>Home</value>
+  </data>
+  <data name="NavTV.Content" xml:space="preserve">
+    <value>TV</value>
   </data>
   <data name="NavLibrary.Content" xml:space="preserve">
     <value>Library</value>
@@ -204,6 +216,18 @@
   <data name="RecentTitle.Text" xml:space="preserve">
     <value>Recently Played</value>
   </data>
+  <data name="ClearRecentButton.Content" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="Dialog_ClearRecentTitle" xml:space="preserve">
+    <value>Clear recently played?</value>
+  </data>
+  <data name="Dialog_ClearRecentConfirm" xml:space="preserve">
+    <value>This will remove all items from your Recently Played history.</value>
+  </data>
+  <data name="Dialog_ClearRecent" xml:space="preserve">
+    <value>Clear</value>
+  </data>
   <data name="PlayEntryItem.Text" xml:space="preserve">
     <value>Play</value>
   </data>
@@ -212,6 +236,9 @@
   </data>
   <data name="AddFavoriteItem.Text" xml:space="preserve">
     <value>Add to favourites</value>
+  </data>
+  <data name="RemoveHistoryItem.Text" xml:space="preserve">
+    <value>Remove from history</value>
   </data>
   <data name="Dialog_LibraryPlayFailed" xml:space="preserve">
     <value>Couldn't play this item. The file or stream may no longer be available.</value>
@@ -326,6 +353,23 @@
   </data>
   <data name="Dialog_Ok" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="Dialog_PlaybackFailedTitle" xml:space="preserve">
+    <value>Playback failed</value>
+  </data>
+  <data name="Dialog_PlaybackFailedDetails" xml:space="preserve">
+    <value>Track: {0}
+Source: {1}
+Error: {2}
+Message: {3}
+HRESULT: {4}
+URL: {5}
+Time: {6}
+
+Please include these details when reporting this issue.</value>
+  </data>
+  <data name="Dialog_UnknownTrack" xml:space="preserve">
+    <value>Unknown track</value>
   </data>
   <data name="Dialog_FailedToLoadPlaylist" xml:space="preserve">
     <value>Failed to load playlist. Please check the URL and try again.</value>

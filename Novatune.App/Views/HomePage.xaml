@@ -10,144 +10,69 @@
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="8*" />
-            <ColumnDefinition Width="{x:Bind ViewModel.QueueColumnWidth, Mode=OneWay}" />
-        </Grid.ColumnDefinitions>
+    <SplitView
+        x:Name="QueueSplitView"
+        DisplayMode="Inline"
+        IsPaneOpen="{x:Bind ViewModel.IsQueueVisible, Mode=OneWay}"
+        OpenPaneLength="320"
+        PaneBackground="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+        PanePlacement="Right">
+        <SplitView.Pane>
+            <RelativePanel HorizontalAlignment="Stretch">
+                <Button
+                    x:Name="AddMedia"
+                    x:Uid="AddMediaButton"
+                    Margin="8"
+                    AutomationProperties.AutomationId="AddMedia"
+                    AutomationProperties.Name="Add local media"
+                    Command="{x:Bind ViewModel.AddLocalMediaCommand}"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTipService.ToolTip="Add local media">
+                    <FontIcon Glyph="&#xE8B7;" />
+                </Button>
 
-        <MediaPlayerElement
-            x:Name="mediaPlayerElement"
-            Grid.Column="0"
-            AreTransportControlsEnabled="False"
-            Stretch="Uniform" />
+                <Button
+                    x:Name="ClearList"
+                    x:Uid="ClearListButton"
+                    Margin="8"
+                    AutomationProperties.AutomationId="ClearList"
+                    AutomationProperties.Name="Clear Playlist"
+                    Click="ClearList_Click"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTipService.ToolTip="Clear Playlist">
+                    <FontIcon Glyph="&#xE894;" />
+                </Button>
 
-        <RelativePanel
-            Grid.Column="1"
-            HorizontalAlignment="Stretch"
-            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-            Visibility="{x:Bind ViewModel.QueueVisibility, Mode=OneWay}">
-            <Button
-                x:Name="AddMedia"
-                x:Uid="AddMediaButton"
-                Margin="8"
-                AutomationProperties.Name="Add local media"
-                Command="{x:Bind ViewModel.AddLocalMediaCommand}"
-                RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignTopWithPanel="True"
-                Style="{StaticResource IconOnlyButtonStyle}"
-                ToolTipService.ToolTip="Add local media">
-                <FontIcon Glyph="&#xE8B7;" />
-            </Button>
-
-            <Button
-                x:Name="ClearList"
-                x:Uid="ClearListButton"
-                Margin="8"
-                AutomationProperties.Name="Clear Playlist"
-                Click="ClearList_Click"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.AlignTopWithPanel="True"
-                Style="{StaticResource IconOnlyButtonStyle}"
-                ToolTipService.ToolTip="Clear Playlist">
-                <FontIcon Glyph="&#xE894;" />
-            </Button>
-
-            <Image
-                x:Name="MediaLogo"
-                MaxHeight="120"
-                RelativePanel.AlignHorizontalCenterWithPanel="True"
-                RelativePanel.Below="AddMedia"
-                Source="{x:Bind ViewModel.CurrentImage, Mode=OneWay}" />
-            <TextBlock
-                x:Name="MediaTitle"
-                Padding="8"
-                FontSize="18"
-                RelativePanel.AlignHorizontalCenterWithPanel="True"
-                RelativePanel.Below="MediaLogo"
-                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
-                TextWrapping="WrapWholeWords" />
-            <MenuFlyoutSeparator
-                x:Name="sep"
-                RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.Below="MediaTitle" />
-            <ListView
-                x:Name="Queue"
-                HorizontalAlignment="Stretch"
-                AllowDrop="True"
-                Background="Transparent"
-                ItemsSource="{x:Bind ViewModel.Playlist, Mode=OneWay}"
-                RelativePanel.AlignLeftWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True"
-                RelativePanel.Below="sep"
-                SelectedItem="{x:Bind ViewModel.CurrentTrack, Mode=OneWay}"
-                SelectionChanged="Queue_SelectionChanged"
-                SelectionMode="Single">
-
-                <ListView.ItemContainerTransitions>
-                    <TransitionCollection />
-                </ListView.ItemContainerTransitions>
-
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:MediaItem">
-                        <Grid Margin="0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                FontSize="16"
-                                FontWeight="SemiBold"
-                                Text="{x:Bind Title}"
-                                TextTrimming="CharacterEllipsis" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Margin="0,4,0,0"
-                                FontSize="12"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind Subtitle}"
-                                TextTrimming="CharacterEllipsis" />
-
-                            <Button
-                                x:Name="FavoriteItem"
-                                Grid.Row="0"
-                                Grid.RowSpan="2"
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                AutomationProperties.AutomationId="FavoriteItem"
-                                AutomationProperties.Name="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Click="FavoriteItem_Click"
-                                Content="{x:Bind local:HomePage.FavoriteGlyph(IsFavorite), Mode=OneWay}"
-                                FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                ToolTipService.ToolTip="{x:Bind local:HomePage.FavoriteLabel(IsFavorite), Mode=OneWay}" />
-
-                            <Button
-                                x:Name="RemoveItem"
-                                Grid.Row="0"
-                                Grid.RowSpan="2"
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Click="RemoveItem_Click"
-                                Content="&#xE711;"
-                                FontFamily="{ThemeResource SymbolThemeFontFamily}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </RelativePanel>
-    </Grid>
+                <Image
+                    x:Name="MediaLogo"
+                    MaxHeight="120"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    RelativePanel.Below="AddMedia"
+                    Source="{x:Bind ViewModel.CurrentImage, Mode=OneWay}" />
+                <TextBlock
+                    x:Name="MediaTitle"
+                    Padding="8"
+                    FontSize="18"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    RelativePanel.Below="MediaLogo"
+                    Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
+                <MenuFlyoutSeparator
+                    x:Name="sep"
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.Below="MediaTitle" />
+                <local:QueueList
+                    RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.Below="sep"
+                    ItemsSource="{x:Bind ViewModel.HomeQueue, Mode=OneWay}"
+                    SelectedTrack="{x:Bind ViewModel.CurrentTrack, Mode=OneWay}" />
+            </RelativePanel>
+        </SplitView.Pane>
+    </SplitView>
 </Page>

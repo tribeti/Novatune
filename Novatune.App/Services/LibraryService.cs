@@ -134,6 +134,40 @@ public class LibraryService
         });
     }
 
+    public async Task RemoveHistoryAsync(SourceKind kind, string sourcePathOrUrl)
+    {
+        await _semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            await Task.Run(() => LibraryDatabase.RemoveHistory(kind, sourcePathOrUrl)).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to remove history entry: {ex.Message}");
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async Task ClearHistoryAsync()
+    {
+        await _semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            await Task.Run(LibraryDatabase.ClearHistory).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to clear history: {ex.Message}");
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
     public async Task<List<LibraryEntry>> GetHistoryAsync(int limit = 60)
     {
         await _semaphore.WaitAsync().ConfigureAwait(false);

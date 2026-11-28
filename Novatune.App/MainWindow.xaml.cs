@@ -96,6 +96,7 @@ public sealed partial class MainWindow : Window
         };
     }
 
+    #region theme & color
     public void ApplyTheme(AppTheme theme)
     {
         Root.RequestedTheme = theme switch
@@ -149,12 +150,13 @@ public sealed partial class MainWindow : Window
         Root.RequestedTheme = original == ElementTheme.Light ? ElementTheme.Dark : ElementTheme.Light;
         Root.RequestedTheme = original;
     }
+    #endregion
 
     public void ShowAndActivate()
     {
         if (ContentFrame.Content is null)
         {
-            var pageType = typeof(HomePage);
+            var pageType = ViewModel.CurrentTrack is { } track ? PageForSource(track.Kind) : typeof(HomePage);
             ContentFrame.Navigate(pageType, null, new EntranceNavigationTransitionInfo());
         }
         ViewModel.RestoreFromTray();
@@ -183,7 +185,10 @@ public sealed partial class MainWindow : Window
     {
         [typeof(HomePage).FullName!] = typeof(HomePage),
         [typeof(LibraryPage).FullName!] = typeof(LibraryPage),
+        [typeof(TVPage).FullName!] = typeof(TVPage),
     };
+
+    public static Type PageForSource(SourceKind kind) => kind == SourceKind.TV ? typeof(TVPage) : typeof(HomePage);
 
     private void NavigationBar_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
@@ -307,6 +312,7 @@ public sealed partial class MainWindow : Window
         {
             _searchCts?.Cancel();
             AddSearchResult(item, playNow: true);
+            NavView_Navigate(PageForSource(item.Kind), new EntranceNavigationTransitionInfo());
 
             sender.Text = string.Empty;
             sender.ItemsSource = Array.Empty<MediaItem>();

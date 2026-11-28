@@ -71,7 +71,7 @@ public sealed partial class LibraryPage : Page
         if (url is null)
             return;
 
-        var loading = DialogService.ShowLoading(Strings.Get("Dialog_ImportingPlaylist"));
+        var loading = await DialogService.ShowLoadingAsync(Strings.Get("Dialog_ImportingPlaylist"));
 
         try
         {
@@ -137,7 +137,7 @@ public sealed partial class LibraryPage : Page
             return;
 
         _isRefreshingPlaylist = true;
-        var loading = DialogService.ShowLoading(Strings.Get("Dialog_RefreshingPlaylist"));
+        var loading = await DialogService.ShowLoadingAsync(Strings.Get("Dialog_RefreshingPlaylist"));
 
         try
         {
@@ -183,7 +183,7 @@ public sealed partial class LibraryPage : Page
         try
         {
             await Vm.PlayEntryAsync(entry);
-            this.Frame.Navigate(typeof(HomePage));
+            this.Frame.Navigate(MainWindow.PageForSource(entry.Kind));
         }
         catch (Exception ex)
         {
@@ -204,8 +204,24 @@ public sealed partial class LibraryPage : Page
             await Vm.AddFavoriteAsync(entry);
     }
 
-    public static Visibility BoolToVisibility(bool value) =>
-        value ? Visibility.Visible : Visibility.Collapsed;
+    private async void RemoveHistory_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: LibraryEntry entry })
+            await Vm.RemoveFromRecentAsync(entry);
+    }
+
+    private async void ClearRecent_Click(object sender, RoutedEventArgs e)
+    {
+        bool confirmed = await DialogService.ShowConfirmAsync(
+            Strings.Get("Dialog_ClearRecentTitle"),
+            Strings.Get("Dialog_ClearRecentConfirm"),
+            Strings.Get("Dialog_ClearRecent"),
+            Strings.Get("Dialog_Cancel"));
+        if (!confirmed)
+            return;
+
+        await Vm.ClearRecentAsync();
+    }
 
     public static Visibility InvertedBoolToVisibility(bool value) =>
         value ? Visibility.Collapsed : Visibility.Visible;

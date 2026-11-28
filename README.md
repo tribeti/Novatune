@@ -21,7 +21,7 @@
 
 ## ✨ Features
 
-- **Local Media Playback**: Play audio (`.mp3`, `.flac`) and video (`.mp4`, `.wmv`, `.mkv`) files, automatically extract ID3/music metadata and album art thumbnails, and manage your current playback queue.
+- **Local Media Playback**: Play audio (`.mp3`, `.flac`) files, automatically extract ID3/music metadata and album art thumbnails, and manage your current playback queue.
 - **YouTube Streaming & Playlists**: Search songs and videos with instant query suggestions, stream high-bitrate audio in the background, and import YouTube playlists with persistent local storage and auto-sync.
 - **Online Radio Stations**: Discover and tune into thousands of worldwide live radio stations powered by the Radio Browser API.
 - **IPTV & Live TV Broadcasting**: Stream live television channels directly with support for HLS adaptive streams.

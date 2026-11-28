@@ -8,16 +8,15 @@ namespace Novatune.App.Models;
 
 public enum SourceKind
 {
-    Local,
-    Radio,
-    Youtube,
-    HLS,
-    TV
+    Local = 0,
+    Radio = 1,
+    Youtube = 2,
+    TV = 4
 }
 
 public partial class MediaItem : ObservableObject
 {
-    private static readonly BitmapImage FallbackArt = new(new Uri("ms-appx:///Assets/LockScreenLogo.png"));
+    private static readonly BitmapImage FallbackArt = new(new Uri("ms-appx:///Assets/icon.ico"));
 
     internal static BitmapImage? CreateRemoteArt(string? url)
     {

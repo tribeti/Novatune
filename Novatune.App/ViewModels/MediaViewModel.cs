@@ -8,6 +8,7 @@ using Novatune.App.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -36,6 +37,8 @@ public partial class MediaViewModel : BaseViewModel
     public MediaPlayer MediaPlayer { get; } = new();
     private readonly MediaPlaybackList _mediaPlaybackList = new();
     public ObservableCollection<MediaItem> Playlist { get; } = [];
+    public ObservableCollection<MediaItem> TvQueue { get; } = [];
+    public ObservableCollection<MediaItem> HomeQueue { get; } = [];
     private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherTimer _positionTimer = new()
     {
@@ -56,6 +59,32 @@ public partial class MediaViewModel : BaseViewModel
         _settingsService = settingsService;
         _libraryService = libraryService;
         _ = _libraryService.InitializeAsync();
+
+        // queue sync and filter
+        Playlist.CollectionChanged += (_, e) =>
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (MediaItem i in e.NewItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Add(i);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (MediaItem i in e.OldItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Remove(i);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (MediaItem i in e.OldItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Remove(i);
+                    foreach (MediaItem i in e.NewItems!)
+                        (i.Kind == SourceKind.TV ? TvQueue : HomeQueue).Add(i);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    TvQueue.Clear();
+                    HomeQueue.Clear();
+                    break;
+            }
+        };
         MediaPlayer.PlaybackSession.PlaybackStateChanged += (s, _) =>
         {
             var playing = s.PlaybackState == MediaPlaybackState.Playing;
@@ -98,6 +127,7 @@ public partial class MediaViewModel : BaseViewModel
             }
         };
 
+        MediaPlayer.RealTimePlayback = true;
         _mediaPlaybackList.MaxPlayedItemsToKeepOpen = 3;
         _mediaPlaybackList.CurrentItemChanged += MediaPlaybackList_CurrentItemChanged;
         _mediaPlaybackList.ItemFailed += MediaPlaybackList_ItemFailed;
@@ -159,11 +189,7 @@ public partial class MediaViewModel : BaseViewModel
     public partial bool IsUserInteracting { get; set; } = false;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(QueueVisibility))]
-    [NotifyPropertyChangedFor(nameof(QueueColumnWidth))]
     public partial bool IsQueueVisible { get; set; } = true;
-    public Visibility QueueVisibility => IsQueueVisible ? Visibility.Visible : Visibility.Collapsed;
-    public GridLength QueueColumnWidth => IsQueueVisible ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
 
     public void ToggleQueue() => IsQueueVisible = !IsQueueVisible;
 
@@ -247,8 +273,6 @@ public partial class MediaViewModel : BaseViewModel
     public async Task AddLocalMedia()
     {
         var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary, ViewMode = PickerViewMode.List };
-        picker.FileTypeFilter.Add(".wmv");
-        picker.FileTypeFilter.Add(".mp4");
         picker.FileTypeFilter.Add(".mp3");
         picker.FileTypeFilter.Add(".flac");
         var hwnd = WindowNative.GetWindowHandle((App.Current as App)!.MainWindow);
@@ -264,33 +288,20 @@ public partial class MediaViewModel : BaseViewModel
             try
             {
                 var source = MediaSource.CreateFromStorageFile(file);
-
-                bool isVideo = file.FileType.Equals(".mp4", StringComparison.OrdinalIgnoreCase) ||
-                               file.FileType.Equals(".mkv", StringComparison.OrdinalIgnoreCase) ||
-                               file.FileType.Equals(".wmv", StringComparison.OrdinalIgnoreCase);
-
                 source.CustomProperties["Kind"] = SourceKind.Local.ToString();
-
                 var musicProps = await file.Properties.GetMusicPropertiesAsync();
                 thumbnail = await file.GetThumbnailAsync(ThumbnailMode.MusicView, 100);
 
                 var playbackItem = new MediaPlaybackItem(source);
 
                 var props = playbackItem.GetDisplayProperties();
-                props.Type = isVideo ? MediaPlaybackType.Video : MediaPlaybackType.Music;
+                props.Type = MediaPlaybackType.Music;
 
                 string title = string.IsNullOrWhiteSpace(musicProps.Title) ? file.DisplayName : musicProps.Title;
                 string artist = musicProps.Artist;
 
-                if (isVideo)
-                {
-                    props.VideoProperties.Title = file.DisplayName;
-                }
-                else
-                {
-                    props.MusicProperties.Title = title;
-                    props.MusicProperties.Artist = artist;
-                }
+                props.MusicProperties.Title = title;
+                props.MusicProperties.Artist = artist;
                 playbackItem.ApplyDisplayProperties(props);
 
                 return new
@@ -403,14 +414,13 @@ public partial class MediaViewModel : BaseViewModel
         }
     }
 
-    public void ClearPlaylist()
+    public void ClearQueue(Func<MediaItem, bool> where)
     {
-        _mediaPlaybackList.Items.Clear();
-        Playlist.Clear();
-        MediaDuration = 0;
-        PlaybackPosition = 0;
-        TimelinePosition = 0;
-        _discordRpc.ClearPresence();
+        foreach (var item in Playlist.Where(where).ToList())
+            RemoveMedia(item);
+
+        if (Playlist.Count == 0)
+            _discordRpc.ClearPresence();
     }
 
     public void AddRadio(RadioItem station) => AddRadio(station, playNow: true);
@@ -553,6 +563,7 @@ public partial class MediaViewModel : BaseViewModel
     {
         var deferral = args.GetDeferral();
         var url = sender.Token;
+        _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
 
         try
         {
@@ -562,29 +573,39 @@ public partial class MediaViewModel : BaseViewModel
 
             if (isYoutube)
             {
-                _dispatcherQueue.TryEnqueue(() => IsMediaLoading = true);
-                try
-                {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-                    var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
-                    var streamInfo = manifest.GetAudioStreams().GetWithHighestBitrate();
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                var manifest = await _youtube.Videos.Streams.GetManifestAsync(url, cts.Token);
+                var streamInfo = manifest.GetAudioStreams().GetWithHighestBitrate();
 
-                    if (streamInfo is not null)
-                    {
-                        args.SetUri(new Uri(streamInfo.Url));
-                    }
-                }
-                finally
+                if (streamInfo is not null)
                 {
-                    _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+                    args.SetUri(new Uri(streamInfo.Url));
                 }
             }
             else if (isHls)
             {
-                var amsResult = await AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient);
-                if (amsResult.Status == AdaptiveMediaSourceCreationStatus.Success)
+                var amsTask = AdaptiveMediaSource.CreateFromUriAsync(new Uri(url), _winHttpClient).AsTask();
+                var amsResult = await Task.WhenAny(amsTask, Task.Delay(TimeSpan.FromSeconds(10))) == amsTask
+                    ? await amsTask
+                    : null;
+
+                if (amsResult?.Status == AdaptiveMediaSourceCreationStatus.Success)
                 {
-                    args.SetAdaptiveMediaSource(amsResult.MediaSource);
+                    var ams = amsResult.MediaSource;
+                    if (ams.AudioOnlyPlayback)
+                    {
+                        args.SetUri(new Uri(url));
+                    }
+                    else
+                    {
+                        if (ams.AvailableBitrates.Count > 0)
+                            ams.InitialBitrate = ams.AvailableBitrates.Max();
+                        ams.DesiredLiveOffset = TimeSpan.FromSeconds(Math.Max(12, (ams.MinLiveOffset ?? TimeSpan.Zero).TotalSeconds));
+                        ams.AdvancedSettings.AllSegmentsIndependent = true;
+                        ams.DownloadFailed += Ams_DownloadFailed;
+                        ams.Diagnostics.DiagnosticAvailable += Ams_DiagnosticAvailable;
+                        args.SetAdaptiveMediaSource(ams);
+                    }
                 }
                 else
                 {
@@ -599,10 +620,21 @@ public partial class MediaViewModel : BaseViewModel
         catch (Exception ex)
         {
             Debug.WriteLine($"Binding failed: {ex.Message}");
+            if (Uri.TryCreate(url, UriKind.Absolute, out var fallbackUri))
+                args.SetUri(fallbackUri);
         }
-
-        deferral.Complete();
+        finally
+        {
+            _dispatcherQueue.TryEnqueue(() => IsMediaLoading = false);
+            deferral.Complete();
+        }
     }
+
+    private void Ams_DownloadFailed(AdaptiveMediaSource sender, AdaptiveMediaSourceDownloadFailedEventArgs args) =>
+        Debug.WriteLine($"[AMS] download failed: {args.ResourceType} {args.ResourceUri} HResult=0x{args.ExtendedError?.HResult:X8} bytes={args.Statistics?.ContentBytesReceivedCount}");
+
+    private void Ams_DiagnosticAvailable(AdaptiveMediaSourceDiagnostics sender, AdaptiveMediaSourceDiagnosticAvailableEventArgs args) =>
+        Debug.WriteLine($"[AMS] diagnostic: {args.DiagnosticType} {args.ResourceUri} HResult=0x{args.ExtendedError?.HResult:X8}");
 
     public void PlayTrack(MediaItem track)
     {
@@ -679,6 +711,9 @@ public partial class MediaViewModel : BaseViewModel
 
                 if (failedTrack is not null)
                     RemoveMedia(failedTrack);
+
+                if (args?.Error is { } itemError)
+                    _ = ShowPlaybackFailureDialogAsync(failedTrack, itemError);
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
@@ -689,6 +724,31 @@ public partial class MediaViewModel : BaseViewModel
                 Debug.WriteLine($"ItemFailed cleanup unexpected exception: {ex}");
             }
         });
+    }
+
+    private static async Task ShowPlaybackFailureDialogAsync(MediaItem? failedTrack, MediaPlaybackItemError error)
+    {
+        try
+        {
+            var hResult = error.ExtendedError is null
+                ? "-"
+                : $"0x{error.ExtendedError.HResult:X8}";
+            var message = Strings.Format(
+                "Dialog_PlaybackFailedDetails",
+                failedTrack?.Title ?? Strings.Get("Dialog_UnknownTrack"),
+                failedTrack?.Kind.ToString() ?? "-",
+                error.ErrorCode.ToString(),
+                string.IsNullOrWhiteSpace(error.ExtendedError?.Message) ? "-" : error.ExtendedError.Message,
+                hResult,
+                string.IsNullOrWhiteSpace(failedTrack?.SourcePathOrUrl) ? "-" : failedTrack.SourcePathOrUrl,
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+            await DialogService.ShowErrorAsync(message, Strings.Get("Dialog_PlaybackFailedTitle"));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Playback failure dialog failed: {ex.Message}");
+        }
     }
 
     #endregion

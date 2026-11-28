@@ -35,6 +35,7 @@ public partial class App : Application
         var language = settingsService.Settings.Language;
         Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language is AppSettings.DefaultLanguage or "vi-VN" ? language : AppSettings.DefaultLanguage;
 
+        _ = Services.GetRequiredService<LibraryViewModel>();
         MainWindow = new MainWindow();
         MainWindow.Activate();
     }

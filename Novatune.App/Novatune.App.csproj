@@ -28,6 +28,7 @@
 		<None Remove="Views\HomePage.xaml" />
 		<None Remove="Views\LibraryPage.xaml" />
 		<None Remove="Views\SettingPage.xaml" />
+		<None Remove="Views\TVPage.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -50,6 +51,10 @@
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="11.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="11.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinUIAnalyzer" Version="0.8.0">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.7.0" />
 		<PackageReference Include="WinUIEx" Version="2.9.3" />
 		<PackageReference Include="YoutubeExplode" Version="6.6.3" />
@@ -89,6 +94,11 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="Views\HomePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="Views\TVPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
